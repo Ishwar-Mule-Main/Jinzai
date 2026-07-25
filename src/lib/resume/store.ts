@@ -63,6 +63,9 @@ interface ResumeState {
   updateCustomSection: (id: string, patch: Partial<ResumeData["customSections"][0]>) => void;
   removeCustomSection: (id: string) => void;
 
+  // Generic reordering via drag-and-drop
+  reorderSection: (section: keyof ResumeData, oldIndex: number, newIndex: number) => void;
+
   undo: () => void;
   redo: () => void;
 }
@@ -293,6 +296,16 @@ export const useResumeStore = create<ResumeState>()(
       removeCustomSection: (id) => {
         const next = structuredClone(get().data);
         next.customSections = next.customSections.filter((s) => s.id !== id);
+        pushHistory(set, get, next);
+      },
+
+      reorderSection: (section, oldIndex, newIndex) => {
+        const next = structuredClone(get().data);
+        const arr = next[section];
+        if (!Array.isArray(arr)) return;
+        if (oldIndex < 0 || oldIndex >= arr.length || newIndex < 0 || newIndex >= arr.length) return;
+        const [moved] = arr.splice(oldIndex, 1);
+        arr.splice(newIndex, 0, moved);
         pushHistory(set, get, next);
       },
 

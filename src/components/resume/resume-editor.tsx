@@ -25,9 +25,18 @@ import {
   Sparkles,
   Loader2,
   ImageIcon,
+  User,
+  AlignLeft,
+  Briefcase,
+  GraduationCap,
+  FolderGit2,
+  Award,
+  Languages,
+  Layers,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { SortableList, SortableItem } from "./sortable";
 
 function PhotoUploader() {
   const data = useResumeStore((s) => s.data);
@@ -329,31 +338,29 @@ function ExperienceEditor() {
   const add = useResumeStore((s) => s.addExperience);
   const update = useResumeStore((s) => s.updateExperience);
   const remove = useResumeStore((s) => s.removeExperience);
-  const move = useResumeStore((s) => s.moveExperience);
+  const reorderSection = useResumeStore((s) => s.reorderSection);
 
   return (
     <div className="space-y-3">
       {experience.length === 0 && (
         <p className="text-xs text-muted-foreground italic">No experience yet. Click below to add your first role.</p>
       )}
-      <Accordion type="multiple" className="space-y-2">
-        {experience.map((e, i) => (
-          <AccordionItem key={e.id} value={e.id} className="border rounded-lg px-3">
-            <div className="flex items-center">
-              <AccordionTrigger className="hover:no-underline flex-1 text-left py-3">
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{e.position || "New role"}{e.company ? ` · ${e.company}` : ""}</p>
-                  <p className="text-xs text-muted-foreground">{e.startDate || "Start date"} → {e.current ? "Present" : e.endDate || "End date"}</p>
+      <SortableList
+        items={experience}
+        onReorder={(oldIndex, newIndex) => reorderSection("experience", oldIndex, newIndex)}
+        renderItem={(e) => (
+          <SortableItem id={e.id}>
+            <Accordion type="multiple" className="space-y-2">
+              <AccordionItem value={e.id} className="border rounded-lg px-3">
+                <div className="flex items-center">
+                  <AccordionTrigger className="hover:no-underline flex-1 text-left py-3">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{e.position || "New role"}{e.company ? ` · ${e.company}` : ""}</p>
+                      <p className="text-xs text-muted-foreground">{e.startDate || "Start date"} → {e.current ? "Present" : e.endDate || "End date"}</p>
+                    </div>
+                  </AccordionTrigger>
+                  <ItemActions onRemove={() => remove(e.id)} />
                 </div>
-              </AccordionTrigger>
-              <ItemActions
-                onRemove={() => remove(e.id)}
-                onUp={() => move(e.id, -1)}
-                onDown={() => move(e.id, 1)}
-                upDisabled={i === 0}
-                downDisabled={i === experience.length - 1}
-              />
-            </div>
             <AccordionContent className="space-y-3 pt-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -396,8 +403,10 @@ function ExperienceEditor() {
               </div>
             </AccordionContent>
           </AccordionItem>
-        ))}
-      </Accordion>
+            </Accordion>
+          </SortableItem>
+        )}
+      />
       <Button type="button" variant="outline" size="sm" onClick={add}>
         <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Experience
       </Button>
@@ -412,56 +421,63 @@ function EducationEditor() {
   const add = useResumeStore((s) => s.addEducation);
   const update = useResumeStore((s) => s.updateEducation);
   const remove = useResumeStore((s) => s.removeEducation);
+  const reorderSection = useResumeStore((s) => s.reorderSection);
   return (
     <div className="space-y-3">
       {items.length === 0 && <p className="text-xs text-muted-foreground italic">No education added yet.</p>}
-      <Accordion type="multiple" className="space-y-2">
-        {items.map((ed) => (
-          <AccordionItem key={ed.id} value={ed.id} className="border rounded-lg px-3">
-            <div className="flex items-center">
-              <AccordionTrigger className="hover:no-underline flex-1 text-left py-3">
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{ed.degree || "New degree"}{ed.field ? `, ${ed.field}` : ""}</p>
-                  <p className="text-xs text-muted-foreground">{ed.institution || "Institution"}</p>
+      <SortableList
+        items={items}
+        onReorder={(oldIndex, newIndex) => reorderSection("education", oldIndex, newIndex)}
+        renderItem={(ed) => (
+          <SortableItem id={ed.id}>
+            <Accordion type="multiple" className="space-y-2">
+              <AccordionItem value={ed.id} className="border rounded-lg px-3">
+                <div className="flex items-center">
+                  <AccordionTrigger className="hover:no-underline flex-1 text-left py-3">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{ed.degree || "New degree"}{ed.field ? `, ${ed.field}` : ""}</p>
+                      <p className="text-xs text-muted-foreground">{ed.institution || "Institution"}</p>
+                    </div>
+                  </AccordionTrigger>
+                  <ItemActions onRemove={() => remove(ed.id)} />
                 </div>
-              </AccordionTrigger>
-              <ItemActions onRemove={() => remove(ed.id)} />
-            </div>
-            <AccordionContent className="space-y-3 pt-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs">Degree</Label>
-                  <Input value={ed.degree} onChange={(e) => update(ed.id, { degree: e.target.value })} placeholder="B.E" />
-                </div>
-                <div>
-                  <Label className="text-xs">Field</Label>
-                  <Input value={ed.field} onChange={(e) => update(ed.id, { field: e.target.value })} placeholder="Computer Science" />
-                </div>
-                <div>
-                  <Label className="text-xs">Institution</Label>
-                  <Input value={ed.institution} onChange={(e) => update(ed.id, { institution: e.target.value })} placeholder="Anna University" />
-                </div>
-                <div>
-                  <Label className="text-xs">GPA / Score</Label>
-                  <Input value={ed.gpa} onChange={(e) => update(ed.id, { gpa: e.target.value })} placeholder="8.9 / 10" />
-                </div>
-                <div>
-                  <Label className="text-xs">Start</Label>
-                  <Input type="month" value={ed.startDate} onChange={(e) => update(ed.id, { startDate: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-xs">End</Label>
-                  <Input type="month" value={ed.endDate} onChange={(e) => update(ed.id, { endDate: e.target.value })} />
-                </div>
-              </div>
-              <div>
-                <Label className="text-xs">Notes</Label>
-                <Textarea value={ed.description} onChange={(e) => update(ed.id, { description: e.target.value })} rows={2} placeholder="Thesis, honors, relevant coursework" />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+                <AccordionContent className="space-y-3 pt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Degree</Label>
+                      <Input value={ed.degree} onChange={(e) => update(ed.id, { degree: e.target.value })} placeholder="B.E" />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Field</Label>
+                      <Input value={ed.field} onChange={(e) => update(ed.id, { field: e.target.value })} placeholder="Computer Science" />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Institution</Label>
+                      <Input value={ed.institution} onChange={(e) => update(ed.id, { institution: e.target.value })} placeholder="Anna University" />
+                    </div>
+                    <div>
+                      <Label className="text-xs">GPA / Score</Label>
+                      <Input value={ed.gpa} onChange={(e) => update(ed.id, { gpa: e.target.value })} placeholder="8.9 / 10" />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Start</Label>
+                      <Input type="month" value={ed.startDate} onChange={(e) => update(ed.id, { startDate: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label className="text-xs">End</Label>
+                      <Input type="month" value={ed.endDate} onChange={(e) => update(ed.id, { endDate: e.target.value })} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Notes</Label>
+                    <Textarea value={ed.description} onChange={(e) => update(ed.id, { description: e.target.value })} rows={2} placeholder="Thesis, honors, relevant coursework" />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </SortableItem>
+        )}
+      />
       <Button type="button" variant="outline" size="sm" onClick={add}>
         <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Education
       </Button>
@@ -476,25 +492,32 @@ function SkillsEditor() {
   const add = useResumeStore((s) => s.addSkillCategory);
   const update = useResumeStore((s) => s.updateSkillCategory);
   const remove = useResumeStore((s) => s.removeSkillCategory);
+  const reorderSection = useResumeStore((s) => s.reorderSection);
   return (
     <div className="space-y-3">
       {skills.length === 0 && <p className="text-xs text-muted-foreground italic">No skills added yet.</p>}
-      {skills.map((s) => (
-        <div key={s.id} className="border rounded-lg p-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <Input
-              value={s.category}
-              onChange={(e) => update(s.id, { category: e.target.value })}
-              className="font-medium text-sm"
-              placeholder="Category (e.g. Design Tools)"
-            />
-            <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(s.id)}>
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-          <StringListEditor items={s.items} onChange={(next) => update(s.id, { items: next })} placeholder="Add a skill and press Enter" />
-        </div>
-      ))}
+      <SortableList
+        items={skills}
+        onReorder={(oldIndex, newIndex) => reorderSection("skills", oldIndex, newIndex)}
+        renderItem={(s) => (
+          <SortableItem id={s.id}>
+            <div className="border rounded-lg p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <Input
+                  value={s.category}
+                  onChange={(e) => update(s.id, { category: e.target.value })}
+                  className="font-medium text-sm"
+                  placeholder="Category (e.g. Design Tools)"
+                />
+                <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(s.id)}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+              <StringListEditor items={s.items} onChange={(next) => update(s.id, { items: next })} placeholder="Add a skill and press Enter" />
+            </div>
+          </SortableItem>
+        )}
+      />
       <Button type="button" variant="outline" size="sm" onClick={add}>
         <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Skill Category
       </Button>
@@ -509,54 +532,61 @@ function ProjectsEditor() {
   const add = useResumeStore((s) => s.addProject);
   const update = useResumeStore((s) => s.updateProject);
   const remove = useResumeStore((s) => s.removeProject);
+  const reorderSection = useResumeStore((s) => s.reorderSection);
   return (
     <div className="space-y-3">
       {items.length === 0 && <p className="text-xs text-muted-foreground italic">No projects added yet.</p>}
-      <Accordion type="multiple" className="space-y-2">
-        {items.map((p) => (
-          <AccordionItem key={p.id} value={p.id} className="border rounded-lg px-3">
-            <div className="flex items-center">
-              <AccordionTrigger className="hover:no-underline flex-1 text-left py-3">
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{p.name || "New project"}</p>
-                  <p className="text-xs text-muted-foreground">{p.technologies.join(" · ") || "No technologies"}</p>
+      <SortableList
+        items={items}
+        onReorder={(oldIndex, newIndex) => reorderSection("projects", oldIndex, newIndex)}
+        renderItem={(p) => (
+          <SortableItem id={p.id}>
+            <Accordion type="multiple" className="space-y-2">
+              <AccordionItem value={p.id} className="border rounded-lg px-3">
+                <div className="flex items-center">
+                  <AccordionTrigger className="hover:no-underline flex-1 text-left py-3">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{p.name || "New project"}</p>
+                      <p className="text-xs text-muted-foreground">{p.technologies.join(" · ") || "No technologies"}</p>
+                    </div>
+                  </AccordionTrigger>
+                  <ItemActions onRemove={() => remove(p.id)} />
                 </div>
-              </AccordionTrigger>
-              <ItemActions onRemove={() => remove(p.id)} />
-            </div>
-            <AccordionContent className="space-y-3 pt-2">
-              <div>
-                <Label className="text-xs">Project Name</Label>
-                <Input value={p.name} onChange={(e) => update(p.id, { name: e.target.value })} placeholder="Blade Design System" />
-              </div>
-              <div>
-                <Label className="text-xs">Description</Label>
-                <Textarea value={p.description} onChange={(e) => update(p.id, { description: e.target.value })} rows={2} placeholder="What does it do and what impact did it have?" />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs">Link</Label>
-                  <Input value={p.link} onChange={(e) => update(p.id, { link: e.target.value })} placeholder="github.com/you/project" />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
+                <AccordionContent className="space-y-3 pt-2">
                   <div>
-                    <Label className="text-xs">Start</Label>
-                    <Input type="month" value={p.startDate} onChange={(e) => update(p.id, { startDate: e.target.value })} />
+                    <Label className="text-xs">Project Name</Label>
+                    <Input value={p.name} onChange={(e) => update(p.id, { name: e.target.value })} placeholder="Blade Design System" />
                   </div>
                   <div>
-                    <Label className="text-xs">End</Label>
-                    <Input type="month" value={p.endDate} onChange={(e) => update(p.id, { endDate: e.target.value })} />
+                    <Label className="text-xs">Description</Label>
+                    <Textarea value={p.description} onChange={(e) => update(p.id, { description: e.target.value })} rows={2} placeholder="What does it do and what impact did it have?" />
                   </div>
-                </div>
-              </div>
-              <div>
-                <Label className="text-xs">Technologies</Label>
-                <StringListEditor items={p.technologies} onChange={(next) => update(p.id, { technologies: next })} placeholder="React, TypeScript..." />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Link</Label>
+                      <Input value={p.link} onChange={(e) => update(p.id, { link: e.target.value })} placeholder="github.com/you/project" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Start</Label>
+                        <Input type="month" value={p.startDate} onChange={(e) => update(p.id, { startDate: e.target.value })} />
+                      </div>
+                      <div>
+                        <Label className="text-xs">End</Label>
+                        <Input type="month" value={p.endDate} onChange={(e) => update(p.id, { endDate: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Technologies</Label>
+                    <StringListEditor items={p.technologies} onChange={(next) => update(p.id, { technologies: next })} placeholder="React, TypeScript..." />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </SortableItem>
+        )}
+      />
       <Button type="button" variant="outline" size="sm" onClick={add}>
         <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Project
       </Button>
@@ -571,25 +601,32 @@ function CertificationsEditor() {
   const add = useResumeStore((s) => s.addCertification);
   const update = useResumeStore((s) => s.updateCertification);
   const remove = useResumeStore((s) => s.removeCertification);
+  const reorderSection = useResumeStore((s) => s.reorderSection);
   return (
     <div className="space-y-3">
       {items.length === 0 && <p className="text-xs text-muted-foreground italic">No certifications added yet.</p>}
-      {items.map((c) => (
-        <div key={c.id} className="border rounded-lg p-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <Input value={c.name} onChange={(e) => update(c.id, { name: e.target.value })} placeholder="Certification name" className="font-medium text-sm" />
-            <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(c.id)}>
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input value={c.issuer} onChange={(e) => update(c.id, { issuer: e.target.value })} placeholder="Issuing org" />
-            <Input value={c.credentialId} onChange={(e) => update(c.id, { credentialId: e.target.value })} placeholder="Credential ID" />
-            <Input type="month" value={c.date} onChange={(e) => update(c.id, { date: e.target.value })} />
-            <Input type="month" value={c.expiryDate} onChange={(e) => update(c.id, { expiryDate: e.target.value })} placeholder="Expiry (optional)" />
-          </div>
-        </div>
-      ))}
+      <SortableList
+        items={items}
+        onReorder={(oldIndex, newIndex) => reorderSection("certifications", oldIndex, newIndex)}
+        renderItem={(c) => (
+          <SortableItem id={c.id}>
+            <div className="border rounded-lg p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <Input value={c.name} onChange={(e) => update(c.id, { name: e.target.value })} placeholder="Certification name" className="font-medium text-sm" />
+                <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(c.id)}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Input value={c.issuer} onChange={(e) => update(c.id, { issuer: e.target.value })} placeholder="Issuing org" />
+                <Input value={c.credentialId} onChange={(e) => update(c.id, { credentialId: e.target.value })} placeholder="Credential ID" />
+                <Input type="month" value={c.date} onChange={(e) => update(c.id, { date: e.target.value })} />
+                <Input type="month" value={c.expiryDate} onChange={(e) => update(c.id, { expiryDate: e.target.value })} placeholder="Expiry (optional)" />
+              </div>
+            </div>
+          </SortableItem>
+        )}
+      />
       <Button type="button" variant="outline" size="sm" onClick={add}>
         <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Certification
       </Button>
@@ -662,13 +699,28 @@ function CustomSectionsEditor() {
   );
 }
 
+function SectionHeader({ icon: Icon, title, count }: { icon: React.ComponentType<{ className?: string }>; title: string; count?: number }) {
+  return (
+    <div className="flex items-center gap-2 flex-1">
+      <div className="w-7 h-7 rounded-md bg-teal-50 dark:bg-teal-950/40 flex items-center justify-center shrink-0">
+        <Icon className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+      </div>
+      <span className="text-sm font-semibold">{title}</span>
+      {count !== undefined && count > 0 && (
+        <Badge variant="secondary" className="ml-1 text-[10px] h-4 px-1.5 min-w-4 justify-center">{count}</Badge>
+      )}
+    </div>
+  );
+}
+
 export function ResumeEditor() {
+  const data = useResumeStore((s) => s.data);
   return (
     <div className="space-y-1">
       <Accordion type="multiple" defaultValue={["personal"]} className="space-y-2">
         <AccordionItem value="personal" className="border rounded-lg">
           <AccordionTrigger className="px-4 hover:no-underline">
-            <span className="text-sm font-semibold">Personal Info</span>
+            <SectionHeader icon={User} title="Personal Info" />
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <PersonalInfoEditor />
@@ -676,7 +728,7 @@ export function ResumeEditor() {
         </AccordionItem>
         <AccordionItem value="summary" className="border rounded-lg">
           <AccordionTrigger className="px-4 hover:no-underline">
-            <span className="text-sm font-semibold">Summary</span>
+            <SectionHeader icon={AlignLeft} title="Summary" count={data.summary.trim().length > 0 ? 1 : 0} />
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <SummaryEditor />
@@ -684,8 +736,7 @@ export function ResumeEditor() {
         </AccordionItem>
         <AccordionItem value="experience" className="border rounded-lg">
           <AccordionTrigger className="px-4 hover:no-underline">
-            <span className="text-sm font-semibold">Experience</span>
-            <Badge variant="secondary" className="ml-2 text-[10px]" />
+            <SectionHeader icon={Briefcase} title="Experience" count={data.experience.length} />
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <ExperienceEditor />
@@ -693,7 +744,7 @@ export function ResumeEditor() {
         </AccordionItem>
         <AccordionItem value="education" className="border rounded-lg">
           <AccordionTrigger className="px-4 hover:no-underline">
-            <span className="text-sm font-semibold">Education</span>
+            <SectionHeader icon={GraduationCap} title="Education" count={data.education.length} />
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <EducationEditor />
@@ -701,7 +752,7 @@ export function ResumeEditor() {
         </AccordionItem>
         <AccordionItem value="skills" className="border rounded-lg">
           <AccordionTrigger className="px-4 hover:no-underline">
-            <span className="text-sm font-semibold">Skills</span>
+            <SectionHeader icon={Sparkles} title="Skills" count={data.skills.length} />
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <SkillsEditor />
@@ -709,7 +760,7 @@ export function ResumeEditor() {
         </AccordionItem>
         <AccordionItem value="projects" className="border rounded-lg">
           <AccordionTrigger className="px-4 hover:no-underline">
-            <span className="text-sm font-semibold">Projects</span>
+            <SectionHeader icon={FolderGit2} title="Projects" count={data.projects.length} />
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <ProjectsEditor />
@@ -717,7 +768,7 @@ export function ResumeEditor() {
         </AccordionItem>
         <AccordionItem value="certifications" className="border rounded-lg">
           <AccordionTrigger className="px-4 hover:no-underline">
-            <span className="text-sm font-semibold">Certifications</span>
+            <SectionHeader icon={Award} title="Certifications" count={data.certifications.length} />
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <CertificationsEditor />
@@ -725,7 +776,7 @@ export function ResumeEditor() {
         </AccordionItem>
         <AccordionItem value="languages" className="border rounded-lg">
           <AccordionTrigger className="px-4 hover:no-underline">
-            <span className="text-sm font-semibold">Languages</span>
+            <SectionHeader icon={Languages} title="Languages" count={data.languages.length} />
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <LanguagesEditor />
@@ -733,7 +784,7 @@ export function ResumeEditor() {
         </AccordionItem>
         <AccordionItem value="custom" className="border rounded-lg">
           <AccordionTrigger className="px-4 hover:no-underline">
-            <span className="text-sm font-semibold">Custom Sections</span>
+            <SectionHeader icon={Layers} title="Custom Sections" count={data.customSections.length} />
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <CustomSectionsEditor />

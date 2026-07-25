@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Mail, Loader2, Sparkles, Copy, Download, Target, FileSearch, CheckCircle2, XCircle, TrendingUp, Gauge, Award } from "lucide-react";
+import { Mail, Loader2, Sparkles, Copy, Download, Target, FileSearch, CheckCircle2, XCircle, TrendingUp, Gauge, Award, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -71,6 +71,54 @@ export function CoverLetterDialog() {
     URL.revokeObjectURL(url);
   };
 
+  const downloadPdf = () => {
+    const name = data.personalInfo.fullName || "Cover Letter";
+    const jobTitle = data.personalInfo.jobTitle || "";
+    const contact = [
+      data.personalInfo.email,
+      data.personalInfo.phone,
+      data.personalInfo.location,
+      data.personalInfo.linkedin,
+    ].filter(Boolean).join(" · ");
+
+    // Open a new window with a print-styled cover letter and auto-trigger print
+    const win = window.open("", "_blank", "width=800,height=900");
+    if (!win) {
+      toast.error("Pop-up blocked. Allow pop-ups to download PDF.");
+      return;
+    }
+    const paragraphs = letter
+      .split(/\n\n+/)
+      .map((p) => `<p>${p.replace(/\n/g, "<br/>")}</p>`)
+      .join("");
+    win.document.write(`<!DOCTYPE html><html><head><title>${name} — Cover Letter</title>
+      <style>
+        @page { size: A4; margin: 0; }
+        * { box-sizing: border-box; }
+        body { font-family: Georgia, 'Times New Roman', serif; color: #1f2937; margin: 0; padding: 48px 64px; line-height: 1.7; font-size: 13px; }
+        .header { border-bottom: 2px solid #0f766e; padding-bottom: 16px; margin-bottom: 28px; }
+        .name { font-size: 22px; font-weight: bold; color: #0f766e; margin: 0; }
+        .title { font-size: 13px; color: #6b7280; margin: 2px 0 0; font-style: italic; }
+        .contact { font-size: 11px; color: #6b7280; margin: 6px 0 0; }
+        p { margin: 0 0 14px; text-align: justify; }
+        .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #9ca3af; text-align: center; }
+        @media print { body { padding: 0; } }
+      </style></head><body>
+      <div class="header">
+        <p class="name">${name}</p>
+        ${jobTitle ? `<p class="title">${jobTitle}</p>` : ""}
+        ${contact ? `<p class="contact">${contact}</p>` : ""}
+      </div>
+      ${paragraphs}
+      <div class="footer">Generated with ResumeForge</div>
+      </body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => {
+      win.print();
+    }, 400);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -122,7 +170,10 @@ export function CoverLetterDialog() {
                     <Copy className="w-3 h-3" /> Copy
                   </Button>
                   <Button size="sm" variant="ghost" onClick={download} className="h-7 gap-1.5 text-xs">
-                    <Download className="w-3 h-3" /> Download
+                    <Download className="w-3 h-3" /> .txt
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={downloadPdf} className="h-7 gap-1.5 text-xs">
+                    <FileText className="w-3 h-3" /> PDF
                   </Button>
                 </div>
               </div>
