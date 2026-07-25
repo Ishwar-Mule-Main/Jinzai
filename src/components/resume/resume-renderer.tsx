@@ -4,6 +4,7 @@ import type { RenderProps } from "./templates/basic-templates";
 import { ModernTemplate } from "./templates/basic-templates";
 import { MinimalTemplate } from "./templates/basic-templates";
 import { CreativeTemplate, ClassicTemplate, ExecutiveTemplate, TechTemplate } from "./templates/extended-templates";
+import { AcademicTemplate, CompactTemplate } from "./templates/extra-templates";
 import { getFontClass } from "@/lib/resume/template-helpers";
 
 export function ResumeRenderer({ data, accent, font, template }: RenderProps) {
@@ -24,6 +25,10 @@ export function ResumeRenderer({ data, accent, font, template }: RenderProps) {
         return <ExecutiveTemplate {...common} />;
       case "tech":
         return <TechTemplate {...common} />;
+      case "academic":
+        return <AcademicTemplate {...common} />;
+      case "compact":
+        return <CompactTemplate {...common} />;
       default:
         return <ModernTemplate {...common} />;
     }

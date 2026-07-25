@@ -7,7 +7,7 @@ import { ResumeRenderer } from "./resume-renderer";
 import { ResumeEditor } from "./resume-editor";
 import { sampleResume } from "@/lib/resume/sample-data";
 import { getCompletion } from "@/lib/resume/sample-data";
-import { CoverLetterDialog, AtsDialog } from "./ai-dialogs";
+import { CoverLetterDialog, AtsDialog, ResumeScoreDialog } from "./ai-dialogs";
 import { SavedResumesDialog, ImportExportJson } from "./saved-resumes";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,7 @@ import {
   Mail,
   Target,
   ImageIcon,
+  Gauge,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -166,7 +167,7 @@ function Dashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mb-12">
-          <StatCard value="6" label="Templates" />
+          <StatCard value="8" label="Templates" />
           <StatCard value="9" label="Sections" />
           <StatCard value="100%" label="Free" />
         </div>
@@ -211,19 +212,21 @@ function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { title: "AI summaries & bullets", desc: "Generate a professional summary and achievement bullets tuned to your role in one click.", icon: Sparkles, color: "teal" },
+              { title: "Resume quality score", desc: "Get an instant A–F grade across 8 dimensions — quantification, action verbs, completeness, and more.", icon: Gauge, color: "emerald" },
               { title: "ATS keyword match", desc: "Paste a job description to see your match score and the exact keywords you're missing.", icon: Target, color: "amber" },
               { title: "AI cover letters", desc: "Tailor a cover letter to any role using your resume content — confident, formal, or concise.", icon: Mail, color: "violet" },
-              { title: "6 distinct designs", desc: "Modern, Minimal, Creative, Classic, Executive, and Tech — each with its own personality.", icon: LayoutGrid, color: "sky" },
             ].map((f) => (
               <Card key={f.title} className="p-5 rounded-2xl border-border/50 hover:shadow-md transition-shadow">
                 <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 ${
                   f.color === "teal" ? "bg-teal-50 dark:bg-teal-950/40" :
+                  f.color === "emerald" ? "bg-emerald-50 dark:bg-emerald-950/40" :
                   f.color === "amber" ? "bg-amber-50 dark:bg-amber-950/40" :
                   f.color === "violet" ? "bg-violet-50 dark:bg-violet-950/40" :
                   "bg-sky-50 dark:bg-sky-950/40"
                 }`}>
                   <f.icon className={`w-5 h-5 ${
                     f.color === "teal" ? "text-teal-600 dark:text-teal-400" :
+                    f.color === "emerald" ? "text-emerald-600 dark:text-emerald-400" :
                     f.color === "amber" ? "text-amber-600 dark:text-amber-400" :
                     f.color === "violet" ? "text-violet-600 dark:text-violet-400" :
                     "text-sky-600 dark:text-sky-400"
@@ -473,6 +476,7 @@ function EditorView() {
             <SaveLoadBar />
             <div className="hidden md:block h-5 w-px bg-border mx-0.5" />
             <TemplateSwitcher />
+            <ResumeScoreDialog />
             <CoverLetterDialog />
             <AtsDialog />
             <Button size="sm" onClick={print} className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">

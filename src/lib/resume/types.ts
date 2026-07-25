@@ -91,7 +91,9 @@ export type TemplateId =
   | "creative"
   | "classic"
   | "executive"
-  | "tech";
+  | "tech"
+  | "academic"
+  | "compact";
 
 export interface TemplateMeta {
   id: TemplateId;
@@ -180,6 +182,30 @@ export const TEMPLATES: TemplateMeta[] = [
     accentDefault: "#0ea5e9",
     fontDefault: "jetbrains",
     preview: { header: "sidebar", style: "Dark sidebar, mono headings" },
+  },
+  {
+    id: "academic",
+    name: "Academic / CV",
+    description:
+      "Publications-first layout for researchers and academics. Numbered sections, serif type, ample margins. No photo.",
+    hasPhoto: false,
+    layout: "single",
+    tags: ["Academic", "CV", "Serif", "Publications"],
+    accentDefault: "#1e3a5f",
+    fontDefault: "merriweather",
+    preview: { header: "centered", style: "Numbered sections, serif, navy" },
+  },
+  {
+    id: "compact",
+    name: "Compact",
+    description:
+      "Dense single-column layout that fits more content per page. Ideal for experienced professionals who need to fit a lot.",
+    hasPhoto: false,
+    layout: "single",
+    tags: ["Dense", "Single-column", "ATS-friendly", "Space-saving"],
+    accentDefault: "#be123c",
+    fontDefault: "inter",
+    preview: { header: "left", style: "Tight spacing, rose accent" },
   },
 ];
 

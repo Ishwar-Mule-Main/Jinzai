@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Mail, Loader2, Sparkles, Copy, Download, Target, FileSearch, CheckCircle2, XCircle, TrendingUp } from "lucide-react";
+import { Mail, Loader2, Sparkles, Copy, Download, Target, FileSearch, CheckCircle2, XCircle, TrendingUp, Gauge, Award } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -279,6 +279,181 @@ export function AtsDialog() {
             </div>
           )}
         </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------- Resume Score (holistic quality analysis) ----------
+
+interface ScoreCategory {
+  name: string;
+  score: number;
+  max: number;
+  detail: string;
+}
+interface ScoreResult {
+  score: number;
+  grade: string;
+  categories: ScoreCategory[];
+  recommendations: string[];
+  stats: {
+    totalBullets: number;
+    quantifiedBullets: number;
+    actionVerbBullets: number;
+    skillCount: number;
+    experienceCount: number;
+    projectCount: number;
+  };
+}
+
+export function ResumeScoreDialog() {
+  const data = useResumeStore((s) => s.data);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<ScoreResult | null>(null);
+
+  const analyze = async () => {
+    setLoading(true);
+    setResult(null);
+    try {
+      const res = await fetch("/api/ai/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const json = await res.json();
+      setResult(json);
+    } catch {
+      toast.error("Score analysis failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Auto-analyze on open
+  const handleOpenChange = (v: boolean) => {
+    setOpen(v);
+    if (v && !result && !loading) {
+      setTimeout(analyze, 100);
+    }
+  };
+
+  const gradeColor = (g: string) =>
+    g === "A" ? "from-emerald-500 to-teal-500" :
+    g === "B" ? "from-teal-500 to-cyan-500" :
+    g === "C" ? "from-amber-500 to-yellow-500" :
+    g === "D" ? "from-orange-500 to-red-500" :
+    "from-rose-500 to-red-600";
+
+  const catColor = (ratio: number) =>
+    ratio >= 0.8 ? "bg-emerald-500" :
+    ratio >= 0.6 ? "bg-teal-500" :
+    ratio >= 0.4 ? "bg-amber-500" :
+    "bg-rose-500";
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-1.5">
+          <Gauge className="w-3.5 h-3.5" /> Resume Score
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[88vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Award className="w-5 h-5 text-teal-600" /> Resume Quality Score
+          </DialogTitle>
+          <DialogDescription>
+            A holistic analysis of your resume across 8 dimensions — quantified impact, action verbs, completeness, and more.
+          </DialogDescription>
+        </DialogHeader>
+
+        {loading && !result && (
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
+            <p className="text-sm text-muted-foreground">Analyzing your resume…</p>
+          </div>
+        )}
+
+        {result && (
+          <div className="space-y-4">
+            {/* Score hero */}
+            <div className="rounded-2xl border p-5 bg-gradient-to-br from-muted/40 to-background text-center">
+              <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br ${gradeColor(result.grade)} text-white shadow-lg mb-3`}>
+                <span className="text-3xl font-bold">{result.grade}</span>
+              </div>
+              <p className="text-4xl font-bold mb-1">
+                {result.score}<span className="text-xl text-muted-foreground">/100</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {result.score >= 85 ? "Excellent — ready to send" :
+                 result.score >= 70 ? "Good — minor improvements suggested" :
+                 result.score >= 55 ? "Fair — several areas to strengthen" :
+                 "Needs work — review recommendations below"}
+              </p>
+            </div>
+
+            {/* Category breakdown */}
+            <div className="space-y-2.5">
+              {result.categories.map((c) => {
+                const ratio = c.score / c.max;
+                return (
+                  <div key={c.name} className="rounded-lg border p-3">
+                    <div className="flex items-baseline justify-between gap-2 mb-1.5">
+                      <p className="text-sm font-semibold">{c.name}</p>
+                      <p className="text-sm font-mono">
+                        <span className={ratio >= 0.6 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>{c.score}</span>
+                        <span className="text-muted-foreground">/{c.max}</span>
+                      </p>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-muted overflow-hidden mb-1.5">
+                      <div className={`h-full rounded-full transition-all ${catColor(ratio)}`} style={{ width: `${ratio * 100}%` }} />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">{c.detail}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Stats grid */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="rounded-lg border p-2.5 text-center">
+                <p className="text-lg font-bold text-teal-600 dark:text-teal-400">{result.stats.quantifiedBullets}/{result.stats.totalBullets}</p>
+                <p className="text-[10px] text-muted-foreground">Quantified bullets</p>
+              </div>
+              <div className="rounded-lg border p-2.5 text-center">
+                <p className="text-lg font-bold text-teal-600 dark:text-teal-400">{result.stats.actionVerbBullets}/{result.stats.totalBullets}</p>
+                <p className="text-[10px] text-muted-foreground">Action verbs</p>
+              </div>
+              <div className="rounded-lg border p-2.5 text-center">
+                <p className="text-lg font-bold text-teal-600 dark:text-teal-400">{result.stats.skillCount}</p>
+                <p className="text-[10px] text-muted-foreground">Total skills</p>
+              </div>
+            </div>
+
+            {/* Recommendations */}
+            <div className="rounded-xl border p-4 bg-gradient-to-br from-amber-50 to-background dark:from-amber-950/20">
+              <p className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Recommendations
+              </p>
+              <ul className="space-y-1.5">
+                {result.recommendations.map((r, i) => (
+                  <li key={i} className="text-xs text-foreground/80 flex gap-2">
+                    <span className="text-amber-600 shrink-0">→</span>
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <Button onClick={analyze} disabled={loading} variant="outline" className="w-full gap-1.5">
+              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gauge className="w-3.5 h-3.5" />}
+              Re-analyze
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

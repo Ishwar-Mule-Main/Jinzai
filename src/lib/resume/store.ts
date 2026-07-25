@@ -97,6 +97,8 @@ export const useResumeStore = create<ResumeState>()(
           classic: { accent: "#1e3a5f", font: "merriweather" },
           executive: { accent: "#92400e", font: "playfair" },
           tech: { accent: "#0ea5e9", font: "jetbrains" },
+          academic: { accent: "#1e3a5f", font: "merriweather" },
+          compact: { accent: "#be123c", font: "inter" },
         };
         const def = tplDefaults[t];
         set({ template: t, accentColor: def.accent, fontFamily: def.font });

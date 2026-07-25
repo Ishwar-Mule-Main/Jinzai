@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FolderOpen, Trash2, FileText, Loader2, Upload, Download, Clock } from "lucide-react";
+import { FolderOpen, Trash2, FileText, Loader2, Upload, Download, Clock, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 interface SavedResume {
@@ -47,6 +47,7 @@ export function SavedResumesDialog() {
   const [items, setItems] = useState<SavedResume[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
 
   const setData = useResumeStore((s) => s.setData);
   const setTemplate = useResumeStore((s) => s.setTemplate);
@@ -76,7 +77,7 @@ export function SavedResumesDialog() {
 
   const openResume = async (r: SavedResume) => {
     try {
-      const res = await fetch("/api/resumes/single?id=" + r.id);
+      const res = await fetch("/api/resumes?id=" + r.id);
       if (!res.ok) throw new Error("Failed");
       const json = await res.json();
       const parsed: ResumeData = JSON.parse(json.content);
@@ -105,6 +106,33 @@ export function SavedResumesDialog() {
       toast.error("Delete failed");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const duplicate = async (r: SavedResume) => {
+    setDuplicatingId(r.id);
+    try {
+      const res = await fetch("/api/resumes?id=" + r.id);
+      if (!res.ok) throw new Error("Failed");
+      const json = await res.json();
+      const dupRes = await fetch("/api/resumes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `${r.title} (copy)`,
+          template: r.template,
+          accentColor: r.accentColor,
+          fontFamily: r.fontFamily,
+          content: json.content,
+        }),
+      });
+      if (!dupRes.ok) throw new Error("Failed");
+      toast.success("Resume duplicated");
+      load();
+    } catch {
+      toast.error("Duplicate failed");
+    } finally {
+      setDuplicatingId(null);
     }
   };
 
@@ -149,15 +177,28 @@ export function SavedResumesDialog() {
                       </span>
                     </div>
                   </button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-destructive hover:text-destructive opacity-0 group-hover:opacity-100"
-                    onClick={() => remove(r.id)}
-                    disabled={deletingId === r.id}
-                  >
-                    {deletingId === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                  </Button>
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      onClick={() => duplicate(r)}
+                      disabled={duplicatingId === r.id}
+                      title="Duplicate"
+                    >
+                      {duplicatingId === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Copy className="w-3.5 h-3.5" />}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={() => remove(r.id)}
+                      disabled={deletingId === r.id}
+                      title="Delete"
+                    >
+                      {deletingId === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                    </Button>
+                  </div>
                 </li>
               );
             })}
