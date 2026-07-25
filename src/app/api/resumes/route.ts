@@ -5,8 +5,15 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "resume";
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (id) {
+      const resume = await db.resume.findUnique({ where: { id } });
+      if (!resume) return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json(resume);
+    }
     const resumes = await db.resume.findMany({
       orderBy: { updatedAt: "desc" },
       select: {
