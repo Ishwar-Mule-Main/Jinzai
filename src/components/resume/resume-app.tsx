@@ -19,6 +19,8 @@ import { TemplateSidePanel } from "./template-side-panel";
 import { RoleExamplesDialog, OnboardingTour } from "./role-examples-dialog";
 import { ImportResumeDialog } from "./import-resume-dialog";
 import { SupportDialog } from "./support-dialog";
+import { NotificationBell } from "./notification-bell";
+import { ZoomControls } from "./zoom-controls";
 import { AuthDialog, LogoutButton, type AuthMode } from "./auth-dialogs";
 import { PricingDialog } from "./pricing-dialog";
 import { Footer } from "./footer";
@@ -272,6 +274,7 @@ function Dashboard() {
             )}
             {user ? (
               <>
+                <NotificationBell />
                 <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted text-xs">
                   <span className="text-muted-foreground">{user.email}</span>
                   <Badge variant="outline" className="text-[9px] py-0 px-1.5">{planConfig.name}</Badge>
@@ -825,6 +828,7 @@ function EditorView() {
   const completion = getCompletion(data);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
+  const [previewZoom, setPreviewZoom] = useState(1);
   const saveRef = useRef<(() => void) | null>(null);
   const { user, refresh } = useCurrentUser();
   const planConfig = user ? getPlanConfig(user.plan) : getPlanConfig("free");
@@ -1012,8 +1016,12 @@ function EditorView() {
         )}
 
         {/* Preview pane — hidden on mobile when in edit mode */}
-        <div className={`bg-slate-200/60 dark:bg-slate-900/60 overflow-y-auto max-h-[calc(100vh-113px)] print:max-h-none print:overflow-visible print:bg-white ${mobileView === "edit" ? "hidden lg:block" : "block"}`}>
-          <div className="p-2 sm:p-4 lg:p-8 flex justify-center print:p-0">
+        <div className={`relative bg-slate-200/60 dark:bg-slate-900/60 overflow-y-auto max-h-[calc(100vh-113px)] print:max-h-none print:overflow-visible print:bg-white ${mobileView === "edit" ? "hidden lg:block" : "block"}`}>
+          {/* Zoom controls */}
+          <div className="sticky top-2 right-2 z-10 flex justify-end print:hidden p-2">
+            <ZoomControls zoom={previewZoom} setZoom={setPreviewZoom} />
+          </div>
+          <div className="p-2 sm:p-4 lg:p-8 flex justify-center print:p-0 origin-top transition-transform" style={{ transform: `scale(${previewZoom})` }}>
             <div
               className="bg-white shadow-2xl shadow-slate-400/30 print:shadow-none print:w-auto page-break-indicator resume-protected"
               onContextMenu={(e) => {
