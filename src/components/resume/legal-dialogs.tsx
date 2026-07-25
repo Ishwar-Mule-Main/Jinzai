@@ -32,7 +32,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
         <h3 className="font-semibold text-sm mb-2 mt-4">6. Your Rights</h3>
         <p className="mb-3">You have the right to access, correct, or delete your personal data. You can export your resume data as JSON at any time from the editor.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">7. Contact Us</h3>
-        <p>For privacy concerns, email us at privacy@domainexpansion.in</p>
+        <p>For privacy concerns, email us at admin@domainexpansion.in</p>
       </>
     ),
   },
@@ -74,7 +74,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
         <h3 className="font-semibold text-sm mb-2 mt-4">2. Monthly Plans (₹499 / ₹1,999)</h3>
         <p className="mb-3">Monthly subscriptions can be cancelled at any time to prevent the next billing cycle. Refunds for the current billing period are available within 7 days of payment if the service has not been significantly used (fewer than 3 resume exports).</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">3. How to Request a Refund</h3>
-        <p className="mb-3">To request a refund, email us at refunds@domainexpansion.in with your account email and reason for the request. Refunds are processed within 5-7 business days.</p>
+        <p className="mb-3">To request a refund, email us at admin@domainexpansion.in with your account email and reason for the request. Refunds are processed within 5-7 business days.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">4. Plan Downgrade</h3>
         <p>Upon cancellation, your plan remains active until the end of the current billing period, after which it downgrades to the Free plan. Your resumes remain accessible but export is disabled.</p>
       </>
@@ -87,10 +87,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
         <h3 className="font-semibold text-sm mb-2">Get in Touch</h3>
         <p className="mb-3">We're here to help with any questions about ResumeForge. Reach out to our team at Domain Expansion.</p>
         <div className="space-y-2 text-sm">
-          <p><strong>Support:</strong> support@domainexpansion.in</p>
-          <p><strong>Refunds:</strong> refunds@domainexpansion.in</p>
-          <p><strong>Privacy:</strong> privacy@domainexpansion.in</p>
-          <p><strong>General:</strong> hello@domainexpansion.in</p>
+          <p><strong>Email:</strong> admin@domainexpansion.in</p>
           <p><strong>Hours:</strong> Monday–Friday, 9 AM – 6 PM IST</p>
         </div>
         <h3 className="font-semibold text-sm mb-2 mt-4">Company</h3>
@@ -114,7 +111,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
           <p className="text-xs text-muted-foreground">
             Domain Expansion Technologies<br />
             Bengaluru, Karnataka, India<br />
-            Email: hello@domainexpansion.in<br />
+            Email: admin@domainexpansion.in<br />
             Founded: 2025
           </p>
         </div>

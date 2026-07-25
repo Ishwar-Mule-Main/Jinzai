@@ -74,7 +74,7 @@ export function Footer() {
           </div>
           <div className="text-center sm:text-right text-[11px] text-muted-foreground">
             <p>Domain Expansion Technologies</p>
-            <p>support@domainexpansion.in · Bengaluru, India</p>
+            <p>admin@domainexpansion.in · Bengaluru, India</p>
           </div>
         </div>
 
