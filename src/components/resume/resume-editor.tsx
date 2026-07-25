@@ -37,6 +37,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { SortableList, SortableItem } from "./sortable";
+import { SkillSuggestions } from "./skill-suggestions";
 
 function PhotoUploader() {
   const data = useResumeStore((s) => s.data);
@@ -518,9 +519,12 @@ function SkillsEditor() {
           </SortableItem>
         )}
       />
-      <Button type="button" variant="outline" size="sm" onClick={add}>
-        <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Skill Category
-      </Button>
+      <div className="flex gap-2 flex-wrap">
+        <Button type="button" variant="outline" size="sm" onClick={add}>
+          <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Skill Category
+        </Button>
+        <SkillSuggestions />
+      </div>
     </div>
   );
 }

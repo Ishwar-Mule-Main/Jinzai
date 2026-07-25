@@ -7,6 +7,7 @@ import { ResumeRenderer } from "./resume-renderer";
 import { ResumeEditor } from "./resume-editor";
 import { sampleResume } from "@/lib/resume/sample-data";
 import { getCompletion } from "@/lib/resume/sample-data";
+import { downloadDocx } from "@/lib/resume/docx-export";
 import { useKeyboardShortcuts } from "@/lib/resume/use-shortcuts";
 import { CoverLetterDialog, AtsDialog, ResumeScoreDialog } from "./ai-dialogs";
 import { SavedResumesDialog, ImportExportJson } from "./saved-resumes";
@@ -503,6 +504,7 @@ function EditorView() {
   const template = useResumeStore((s) => s.template);
   const accent = useResumeStore((s) => s.accentColor);
   const font = useResumeStore((s) => s.fontFamily);
+  const title = useResumeStore((s) => s.title);
   const setView = useResumeStore((s) => s.setView);
   const undo = useResumeStore((s) => s.undo);
   const redo = useResumeStore((s) => s.redo);
@@ -510,6 +512,7 @@ function EditorView() {
   const future = useResumeStore((s) => s.future);
   const completion = getCompletion(data);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
   const saveRef = useRef<(() => void) | null>(null);
 
   const print = () => {
@@ -577,11 +580,29 @@ function EditorView() {
         </div>
       </header>
 
+      {/* Mobile view toggle */}
+      <div className="lg:hidden border-b bg-background print:hidden">
+        <div className="flex">
+          <button
+            onClick={() => setMobileView("edit")}
+            className={`flex-1 py-2 text-xs font-medium transition-colors ${mobileView === "edit" ? "text-teal-600 dark:text-teal-400 border-b-2 border-teal-600 dark:border-teal-400 bg-teal-50/50 dark:bg-teal-950/20" : "text-muted-foreground"}`}
+          >
+            <FileText className="w-3.5 h-3.5 inline mr-1.5" /> Edit
+          </button>
+          <button
+            onClick={() => setMobileView("preview")}
+            className={`flex-1 py-2 text-xs font-medium transition-colors ${mobileView === "preview" ? "text-teal-600 dark:text-teal-400 border-b-2 border-teal-600 dark:border-teal-400 bg-teal-50/50 dark:bg-teal-950/20" : "text-muted-foreground"}`}
+          >
+            <Eye className="w-3.5 h-3.5 inline mr-1.5" /> Preview
+          </button>
+        </div>
+      </div>
+
       {/* Main split */}
       <div className={`flex-1 grid print:block ${sidebarOpen ? "grid-cols-1 lg:grid-cols-[420px_1fr]" : "grid-cols-1"}`}>
-        {/* Editor pane */}
+        {/* Editor pane — hidden on mobile when in preview mode */}
         {sidebarOpen && (
-        <div className="border-r bg-muted/20 print:hidden overflow-y-auto max-h-[calc(100vh-113px)] lg:max-h-[calc(100vh-113px)]">
+        <div className={`border-r bg-muted/20 print:hidden overflow-y-auto max-h-[calc(100vh-113px)] lg:max-h-[calc(100vh-113px)] ${mobileView === "preview" ? "hidden lg:block" : "block"}`}>
           <Tabs defaultValue="content" className="w-full">
             <div className="px-4 pt-3 sticky top-0 bg-muted/20 backdrop-blur z-10 pb-2">
               <TabsList className="grid grid-cols-2 w-full">
@@ -614,8 +635,18 @@ function EditorView() {
                 <p className="text-[11px] text-muted-foreground mt-2">Fill all key sections to reach 100% and maximize your chances.</p>
               </div>
               <div className="rounded-xl border p-4 bg-card">
-                <p className="text-xs font-semibold mb-3">Backup & Restore</p>
-                <ImportExportJson />
+                <p className="text-xs font-semibold mb-3">Export & Backup</p>
+                <div className="space-y-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => downloadDocx(data, accent, title)}
+                    className="w-full gap-1.5 justify-start"
+                  >
+                    <FileText className="w-3.5 h-3.5" /> Download as Word (.doc)
+                  </Button>
+                  <ImportExportJson />
+                </div>
               </div>
             </TabsContent>
           </Tabs>
@@ -633,9 +664,9 @@ function EditorView() {
           </button>
         )}
 
-        {/* Preview pane */}
-        <div className="bg-slate-200/60 dark:bg-slate-900/60 overflow-y-auto max-h-[calc(100vh-113px)] print:max-h-none print:overflow-visible print:bg-white">
-          <div className="p-4 sm:p-8 flex justify-center print:p-0">
+        {/* Preview pane — hidden on mobile when in edit mode */}
+        <div className={`bg-slate-200/60 dark:bg-slate-900/60 overflow-y-auto max-h-[calc(100vh-113px)] print:max-h-none print:overflow-visible print:bg-white ${mobileView === "edit" ? "hidden lg:block" : "block"}`}>
+          <div className="p-2 sm:p-4 lg:p-8 flex justify-center print:p-0">
             <div
               className="bg-white shadow-2xl shadow-slate-400/30 print:shadow-none print:w-auto"
               style={{
