@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { BrandMark, DomainExpansionLogo } from "./brand-mark";
+import { BrandMark } from "./brand-mark";
+
+const DE_LOGO_URL = "https://domainexpansion.in/Domain%20Expansion%20New%20Logo.png";
 
 export function Footer() {
   return (
@@ -35,38 +37,17 @@ export function Footer() {
             </ul>
           </div>
         </div>
+      </div>
 
-        {/* Parent company banner */}
-        <div className="border-t border-b py-4 mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div>
-              <p className="text-xs font-semibold mb-1">A product of</p>
-              <DomainExpansionLogo />
-            </div>
-          </div>
-          <div className="text-center sm:text-right text-[11px] text-muted-foreground">
-            <p>Domain Expansion</p>
-            <p>admin@domainexpansion.in · Bengaluru, India</p>
-          </div>
-        </div>
-
-        {/* Pricing summary */}
-        <div className="pt-2 mb-4">
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
-            <span>Free — ₹0</span>
-            <span className="text-border">|</span>
-            <span>Trial — ₹99 / 2 days</span>
-            <span className="text-border">|</span>
-            <span>Pro — ₹499 / month</span>
-            <span className="text-border">|</span>
-            <span>Business — ₹1,999 / month</span>
-          </div>
-        </div>
-
-        {/* Copyright */}
-        <div className="text-center text-[11px] text-muted-foreground">
-          © {new Date().getFullYear()} ResumeForge by Domain Expansion. All rights reserved.
-        </div>
+      {/* Parent company bar */}
+      <div className="bg-[#0d0d0d] py-6 flex flex-col items-center justify-center gap-3">
+        <p className="text-xs text-white/60 font-medium tracking-wide">A product of</p>
+        <img
+          src={DE_LOGO_URL}
+          alt="Domain Expansion"
+          className="h-12 w-auto object-contain"
+        />
+        <p className="text-[11px] text-white/40 font-medium tracking-widest uppercase mt-1">Made in India</p>
       </div>
     </footer>
   );

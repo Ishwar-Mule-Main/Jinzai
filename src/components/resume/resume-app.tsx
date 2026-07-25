@@ -77,7 +77,7 @@ import {
 function TemplateCard({ id, index, user, onAuthRequired }: { id: (typeof TEMPLATES)[number]; index: number; user: { plan: string } | null; onAuthRequired: () => void }) {
   const setTemplate = useResumeStore((s) => s.setTemplate);
   const setView = useResumeStore((s) => s.setView);
-  const sampleProfile = getSampleProfile(index);
+  const sampleData = getSampleProfile(index);
 
   const useTemplate = () => {
     if (!user) {
@@ -90,10 +90,11 @@ function TemplateCard({ id, index, user, onAuthRequired }: { id: (typeof TEMPLAT
 
   return (
     <Card className="overflow-hidden group hover:shadow-xl hover:shadow-teal-900/5 transition-all duration-300 hover:-translate-y-1.5 border-border/50 rounded-2xl">
-      <div className="aspect-[3/4] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 overflow-hidden relative border-b border-border/40">
-        <TemplateThumbnail templateId={id.id} className="w-full h-full" />
-        {/* Always-visible subtle gradient at bottom for text legibility */}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/80 to-transparent dark:from-slate-950/80 pointer-events-none" />
+      <div className="aspect-[3/4] bg-white overflow-hidden relative border-b border-border/40">
+        {/* LIVE resume preview with sample data — scaled to fit card */}
+        <div className="origin-top-left absolute top-0 left-0 pointer-events-none" style={{ transform: "scale(0.255)", width: "392%", height: "392%" }}>
+          <ResumeRenderer data={sampleData} accent={id.accentDefault} font={id.fontDefault} template={id.id} />
+        </div>
         {/* Hover actions */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-5 gap-2">
           <Button size="sm" onClick={useTemplate} className="h-8 gap-1.5 shadow-lg">

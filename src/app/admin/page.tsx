@@ -134,7 +134,7 @@ export default function AdminPage() {
               <Shield className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-xl font-bold text-white">Admin Panel</h1>
-            <p className="text-xs text-slate-400 mt-1">Domain Expansion Technologies — Authorized access only</p>
+            <p className="text-xs text-slate-400 mt-1">Domain Expansion — Authorized access only</p>
           </div>
           <div className="space-y-3">
             <div>
@@ -149,6 +149,15 @@ export default function AdminPage() {
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
               Login
             </Button>
+            <button
+              onClick={() => {
+                setEmail(ADMIN_EMAIL);
+                setPassword(ADMIN_PASSWORD);
+              }}
+              className="w-full text-xs text-teal-400 hover:underline"
+            >
+              Use admin credentials
+            </button>
           </div>
         </Card>
       </div>
