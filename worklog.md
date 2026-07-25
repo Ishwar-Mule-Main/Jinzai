@@ -106,7 +106,7 @@ Stage Summary:
 - VLM confirms 8.5-9/10 visual quality
 
 ## Current Status: STABLE, POLISHED & FEATURE-RICH
-ResumeForge now has 52 distinct templates, 6 AI features, user authentication (password + Google sim + email code), 4-tier pricing (Free/₹99 trial/₹499 Pro/₹1999 Business), plan enforcement (resume limits + export lock + contact lock), footer with 5 legal pages (Privacy/Terms/Refund/About/Contact), multi-page resume support, template side panel, saved resumes management, JSON backup/restore, DOCX export, dark mode, public link sharing, drag-and-drop reordering, keyboard shortcuts, and premium styling. Demo login: ishwar@domainexpansion.in / Domain Expansion.
+ResumeForge now has 52 distinct templates, 7 AI features (summary, bullets, bullet rewrite, cover letter with PDF, ATS match, resume score, skill suggestions), user authentication (password + Google sim + email code), 4-tier pricing (Free/₹99 trial/₹499 Pro/₹1999 Business), plan enforcement (resume limits + export lock + contact lock), footer with 5 legal pages, multi-page resume support, template side panel, 5 role-based resume examples, onboarding tour, saved resumes management, JSON backup/restore, DOCX export, dark mode, public link sharing, drag-and-drop reordering, keyboard shortcuts, and premium styling. Demo login: ishwar@domainexpansion.in / Domain Expansion.
 
 ---
 Task ID: 3 (cron review round 2)
@@ -482,6 +482,58 @@ Stage Summary:
 - 7 major features shipped: NextAuth authentication (3 login methods), 4-tier pricing system, plan enforcement (resume limits + export lock + contact lock), footer with 5 legal pages, multi-page resume CSS, template side panel, demo user
 - All features verified working via API + UI testing
 - VLM confirms 9/10 visual quality
+
+---
+Task ID: 10 (cron review round 7)
+Agent: Main (orchestrator) — webDevReview cron
+Task: QA testing, AI bullet rewrite, role-based examples, onboarding tour
+
+Work Log:
+- Read worklog, restarted dev server, performed QA with agent-browser
+- Confirmed dashboard + editor load with 0 console errors; all features intact
+- VLM analysis of landing page: suggested sticky CTA, hero template, interactive preview cards
+- VLM analysis of editor: suggested responsive collapse, visual hierarchy, inline validation
+- Added **AI Bullet Rewrite** (7th AI capability):
+  - New API route `/api/ai/rewrite-bullets` — takes existing bullets and rewrites them with strong action verbs + quantified metrics
+  - Verified via curl: "Worked on payments" → "Led payments system optimization", "Improved things" → "Improved API response time by 40%"
+  - New `AIRewriteButton` component in experience editor, next to "AI Generate" button
+  - Disabled when no achievements exist; uses Wand2 icon
+- Added **Role-Based Resume Examples**:
+  - Created `src/lib/resume/role-examples.ts` with 5 pre-filled resumes: Software Engineer, Product Designer, Product Manager, Data Scientist, Marketing Manager
+  - Each has realistic experience (Razorpay, Flipkart, Postman, Zoho, etc.), skills, education, projects, certifications
+  - Contact details cleared on load so users add their own (respects plan enforcement)
+  - Created `RoleExamplesDialog` with emoji icons, company tags, click-to-load
+  - Added "Browse examples" button to dashboard quick actions
+- Added **Onboarding Tour**:
+  - 5-step welcome tour for first-time users (auto-shows on first visit, dismissible)
+  - Steps: Welcome → 52 Templates → AI Writing → Export/Pricing → Get Started
+  - Progress dots, Skip/Next buttons, localStorage persistence (won't show again)
+  - Created `OnboardingTour` component with `resetTour()` function
+  - Tour appears 1.5s after page load to avoid hydration conflicts
+- Updated `src/components/resume/resume-editor.tsx`:
+  - Added Wand2 import
+  - Added AIRewriteButton component
+  - Placed Rewrite button next to AI Generate in experience achievements section
+- Updated `src/components/resume/resume-app.tsx`:
+  - Added RoleExamplesDialog + OnboardingTour imports
+  - Added "Browse examples" button to dashboard quick actions
+  - Added OnboardingTour to dashboard
+
+Verification Results:
+- ESLint: 0 errors
+- Dev server: HTTP 200 on port 3000
+- Rewrite API (curl): "Worked on payments" → "Led payments system optimization" ✓
+- agent-browser: Onboarding tour appears with "Welcome to ResumeForge! 👋" ✓
+- agent-browser: "Browse examples" button visible on dashboard ✓
+- agent-browser: Examples dialog shows 5 roles (Software Engineer, Product Designer, Product Manager, Data Scientist, Marketing Manager) ✓
+- agent-browser: 0 console errors throughout
+- VLM onboarding tour rating: 8/10 ("welcoming and professional", "top-tier onboarding experience")
+- VLM examples dialog rating: 9/10 ("clean, modern, and professional", "5 role cards with distinct icons")
+
+Stage Summary:
+- 3 features shipped: AI bullet rewrite (7th AI feature), 5 role-based resume examples, 5-step onboarding tour
+- All features verified working via API + UI testing
+- VLM confirms 8-9/10 visual quality
 
 ## Unresolved Issues / Risks
 - Dev server process dies between bash sessions (environment limitation); cron job restarts as needed

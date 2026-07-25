@@ -15,6 +15,7 @@ import { SavedResumesDialog, ImportExportJson } from "./saved-resumes";
 import { ShareDialog } from "./share-dialog";
 import { CompareTemplatesDialog } from "./compare-templates";
 import { TemplateSidePanel } from "./template-side-panel";
+import { RoleExamplesDialog, OnboardingTour } from "./role-examples-dialog";
 import { AuthDialog, LogoutButton, type AuthMode } from "./auth-dialogs";
 import { PricingDialog } from "./pricing-dialog";
 import { Footer } from "./footer";
@@ -312,6 +313,11 @@ function Dashboard() {
           >
             <FileText className="w-4 h-4" /> {user ? "Start from scratch" : "Get Started"}
           </Button>
+          <RoleExamplesDialog trigger={
+            <Button variant="outline" size="lg" className="gap-2 h-12 px-6">
+              <Sparkles className="w-4 h-4" /> Browse examples
+            </Button>
+          } />
           {!user && (
             <p className="w-full text-center text-xs text-muted-foreground">
               Sign up free to create and save your resume. Upgrade to export.
@@ -443,6 +449,7 @@ function Dashboard() {
 
       {/* Auth dialog */}
       <AuthDialog mode={authMode} onClose={() => setAuthMode(null)} onSuccess={refresh} />
+      <OnboardingTour />
     </div>
   );
 }

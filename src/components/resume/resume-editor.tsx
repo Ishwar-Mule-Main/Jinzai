@@ -34,6 +34,7 @@ import {
   Languages,
   Layers,
   Lock,
+  Wand2,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -258,6 +259,48 @@ function AIExperienceButton({ experienceId }: { experienceId: string }) {
   );
 }
 
+function AIRewriteButton({ experienceId }: { experienceId: string }) {
+  const data = useResumeStore((s) => s.data);
+  const updateExperience = useResumeStore((s) => s.updateExperience);
+  const [loading, setLoading] = useState(false);
+  const exp = data.experience.find((e) => e.id === experienceId);
+
+  const rewrite = async () => {
+    if (!exp) return;
+    if (exp.achievements.length === 0) {
+      toast.error("Add some achievements first to rewrite");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/ai/rewrite-bullets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          position: exp.position,
+          company: exp.company,
+          bullets: exp.achievements,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const json = await res.json();
+      updateExperience(experienceId, { achievements: json.bullets });
+      toast.success("Bullets rewritten with impact");
+    } catch {
+      toast.error("Could not rewrite bullets");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button type="button" variant="ghost" size="sm" onClick={rewrite} disabled={loading || (exp?.achievements.length ?? 0) === 0}>
+      {loading ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5 mr-1.5" />}
+      Rewrite
+    </Button>
+  );
+}
+
 // ---------- Personal Info ----------
 
 function PersonalInfoEditor() {
@@ -406,7 +449,10 @@ function ExperienceEditor() {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <Label className="text-xs">Key Achievements</Label>
-                  <AIExperienceButton experienceId={e.id} />
+                  <div className="flex gap-1.5">
+                    <AIExperienceButton experienceId={e.id} />
+                    <AIRewriteButton experienceId={e.id} />
+                  </div>
                 </div>
                 <StringListEditor items={e.achievements} onChange={(next) => update(e.id, { achievements: next })} placeholder="Reduced onboarding time by 94%" />
               </div>
