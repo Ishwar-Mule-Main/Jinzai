@@ -47,12 +47,12 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "ResumeForge — Build a resume that gets you hired",
   description:
-    "Free AI-powered resume & CV builder. Choose from 6 professionally designed templates that auto-optimize to your content. Generate AI summaries, export to PDF, ATS-friendly.",
+    "Free AI-powered resume & CV builder. Choose from 52 professionally designed templates that auto-optimize to your content. Generate AI summaries, export to PDF, ATS-friendly.",
   keywords: ["resume builder", "CV maker", "resume templates", "ATS resume", "AI resume", "free resume builder"],
   authors: [{ name: "ResumeForge" }],
   openGraph: {
     title: "ResumeForge — Build a resume that gets you hired",
-    description: "AI-powered resume builder with 6 auto-optimizing templates.",
+    description: "AI-powered resume builder with 52 auto-optimizing templates.",
     type: "website",
   },
 };

@@ -1,5 +1,7 @@
 // Core resume data types shared across editor and templates
 
+import { NEW_TEMPLATE_SPECS, type TemplateSpec } from "./template-specs";
+
 export interface PersonalInfo {
   fullName: string;
   jobTitle: string;
@@ -93,7 +95,52 @@ export type TemplateId =
   | "executive"
   | "tech"
   | "academic"
-  | "compact";
+  | "compact"
+  // 44 parameterized templates
+  | "azure-sidebar"
+  | "crimson-edge"
+  | "forest-left"
+  | "slate-pro"
+  | "rose-narrow"
+  | "indigo-night"
+  | "amber-bar"
+  | "ocean-side"
+  | "plum-deep"
+  | "steel-gray"
+  | "berry-side"
+  | "sage-soft"
+  | "sunset-banner"
+  | "ocean-banner"
+  | "midnight-banner"
+  | "coral-split"
+  | "mint-header"
+  | "maroon-banner"
+  | "gold-split"
+  | "forest-banner"
+  | "fuchsia-banner"
+  | "charcoal-split"
+  | "pure-white"
+  | "editorial"
+  | "typewriter"
+  | "newsletter"
+  | "resume-card"
+  | "elegant-gray"
+  | "classic-pro"
+  | "warm-sand"
+  | "cool-ice"
+  | "bold-black"
+  | "chronos"
+  | "steps"
+  | "dotted-timeline"
+  | "vertebra"
+  | "marker-pro"
+  | "path"
+  | "ribbon"
+  | "stamp"
+  | "bold-stripes"
+  | "color-blocks"
+  | "hex-accent"
+  | "postcard";
 
 export interface TemplateMeta {
   id: TemplateId;
@@ -207,6 +254,18 @@ export const TEMPLATES: TemplateMeta[] = [
     fontDefault: "inter",
     preview: { header: "left", style: "Tight spacing, rose accent" },
   },
+  // 44 parameterized templates (metadata derived from specs)
+  ...NEW_TEMPLATE_SPECS.map((s: TemplateSpec) => ({
+    id: s.id as TemplateId,
+    name: s.name,
+    description: s.description,
+    hasPhoto: s.hasPhoto,
+    layout: (s.layout === "sidebar-left" || s.layout === "sidebar-right" ? "sidebar" : "single") as "single" | "two-column" | "sidebar",
+    tags: s.tags,
+    accentDefault: s.accent,
+    fontDefault: s.font,
+    preview: { header: "left" as const, style: s.headingStyle },
+  })),
 ];
 
 export const FONT_OPTIONS = [

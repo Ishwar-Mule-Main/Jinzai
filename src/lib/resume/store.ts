@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ResumeData, TemplateId } from "./types";
 import { emptyResume, sampleResume, uid } from "./sample-data";
+import { SPEC_MAP } from "./template-specs";
 
 interface ResumeState {
   // current editing data
@@ -93,7 +94,7 @@ export const useResumeStore = create<ResumeState>()(
 
       setView: (v) => set({ view: v }),
       setTemplate: (t) => {
-        const tplDefaults: Record<TemplateId, { accent: string; font: string }> = {
+        const tplDefaults: Record<string, { accent: string; font: string }> = {
           modern: { accent: "#0f766e", font: "inter" },
           minimal: { accent: "#1f2937", font: "inter" },
           creative: { accent: "#7c3aed", font: "poppins" },
@@ -103,7 +104,9 @@ export const useResumeStore = create<ResumeState>()(
           academic: { accent: "#1e3a5f", font: "merriweather" },
           compact: { accent: "#be123c", font: "inter" },
         };
-        const def = tplDefaults[t];
+        // For parameterized templates, derive defaults from the spec
+        const spec = SPEC_MAP[t as string];
+        const def = tplDefaults[t] || (spec ? { accent: spec.accent, font: spec.font } : { accent: "#0f766e", font: "inter" });
         set({ template: t, accentColor: def.accent, fontFamily: def.font });
       },
       setAccentColor: (c) => set({ accentColor: c }),

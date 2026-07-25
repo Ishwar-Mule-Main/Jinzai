@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useResumeStore } from "@/lib/resume/store";
 import { TEMPLATES } from "@/lib/resume/types";
-import { ResumeRenderer } from "./resume-renderer";
+import { TemplateThumbnail } from "./template-thumbnail";
 import {
   Dialog,
   DialogContent,
@@ -18,14 +18,9 @@ import { Columns3, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
 export function CompareTemplatesDialog() {
-  const data = useResumeStore((s) => s.data);
-  const accent = useResumeStore((s) => s.accentColor);
-  const font = useResumeStore((s) => s.fontFamily);
   const template = useResumeStore((s) => s.template);
   const setTemplate = useResumeStore((s) => s.setTemplate);
   const [open, setOpen] = useState(false);
-
-  const hasContent = data.personalInfo.fullName || data.summary || data.experience.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -40,12 +35,11 @@ export function CompareTemplatesDialog() {
             <Columns3 className="w-5 h-5 text-teal-600" /> Compare Templates
           </DialogTitle>
           <DialogDescription>
-            See how your resume looks across all 8 templates. Click any template to switch to it.
-            {!hasContent && " Add some content first to see meaningful previews."}
+            See all {TEMPLATES.length} templates. Click any to switch to it. Open the editor for a full live preview.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {TEMPLATES.map((t) => {
             const isActive = template === t.id;
             return (
@@ -61,17 +55,10 @@ export function CompareTemplatesDialog() {
                 }`}
               >
                 <div className="aspect-[3/4] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 overflow-hidden relative">
-                  <div className="origin-top-left scale-[0.18] w-[800px] absolute top-0 left-0 pointer-events-none">
-                    <ResumeRenderer data={data} accent={accent} font={font} template={t.id} />
-                  </div>
+                  <TemplateThumbnail templateId={t.id} className="w-full h-full" />
                   {isActive && (
                     <div className="absolute top-1.5 right-1.5 bg-teal-500 text-white rounded-full w-5 h-5 flex items-center justify-center shadow">
                       <Check className="w-3 h-3" />
-                    </div>
-                  )}
-                  {!hasContent && (
-                    <div className="absolute inset-0 bg-white/60 dark:bg-slate-950/60 flex items-center justify-center">
-                      <span className="text-[10px] text-muted-foreground">Empty preview</span>
                     </div>
                   )}
                 </div>

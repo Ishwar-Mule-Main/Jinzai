@@ -4,8 +4,8 @@ import { useState, useRef } from "react";
 import { useResumeStore } from "@/lib/resume/store";
 import { TEMPLATES, ACCENT_PRESETS, FONT_OPTIONS } from "@/lib/resume/types";
 import { ResumeRenderer } from "./resume-renderer";
+import { TemplateThumbnail } from "./template-thumbnail";
 import { ResumeEditor } from "./resume-editor";
-import { sampleResume } from "@/lib/resume/sample-data";
 import { getCompletion } from "@/lib/resume/sample-data";
 import { downloadDocx } from "@/lib/resume/docx-export";
 import { useKeyboardShortcuts } from "@/lib/resume/use-shortcuts";
@@ -34,6 +34,7 @@ import {
   ShieldCheck,
   Zap,
   LayoutGrid,
+  Search,
   FolderOpen,
   Mail,
   Target,
@@ -87,11 +88,9 @@ function TemplateCard({ id }: { id: (typeof TEMPLATES)[number] }) {
   return (
     <Card className="overflow-hidden group hover:shadow-xl hover:shadow-teal-900/5 transition-all duration-300 hover:-translate-y-1.5 border-border/50 rounded-2xl">
       <div className="aspect-[3/4] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 overflow-hidden relative border-b border-border/40">
-        <div className="origin-top-left scale-[0.42] sm:scale-[0.5] w-[800px] absolute top-0 left-0 pointer-events-none">
-          <ResumeRenderer data={sampleResume} accent={id.accentDefault} font={id.fontDefault} template={id.id} />
-        </div>
+        <TemplateThumbnail templateId={id.id} className="w-full h-full" />
         {/* Always-visible subtle gradient at bottom for text legibility */}
-        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white/80 to-transparent dark:from-slate-950/80 pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/80 to-transparent dark:from-slate-950/80 pointer-events-none" />
         {/* Hover actions */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-5 gap-2">
           <Button size="sm" onClick={useTemplate} className="h-8 gap-1.5 shadow-lg">
@@ -134,6 +133,73 @@ function StatCard({ value, label }: { value: string; label: string }) {
   );
 }
 
+const TEMPLATE_CATEGORIES = ["All", "Sidebar", "Banner", "Single", "Serif", "Minimal", "ATS", "Photo", "Numbered", "Creative"] as const;
+
+function TemplateGallery() {
+  const [filter, setFilter] = useState<string>("All");
+  const [query, setQuery] = useState("");
+
+  const filtered = TEMPLATES.filter((t) => {
+    const matchesFilter = filter === "All" || t.tags.some((tag) => tag.toLowerCase().includes(filter.toLowerCase())) || t.name.toLowerCase().includes(filter.toLowerCase());
+    const matchesQuery = !query || t.name.toLowerCase().includes(query.toLowerCase()) || t.description.toLowerCase().includes(query.toLowerCase());
+    return matchesFilter && matchesQuery;
+  });
+
+  return (
+    <>
+      <div className="mb-6 flex items-end justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight mb-1">Choose a template</h2>
+          <p className="text-sm text-muted-foreground">{TEMPLATES.length} distinct designs — each auto-adapts to hide empty sections and rebalance to your content.</p>
+        </div>
+        <Badge variant="outline" className="gap-1.5 py-1.5 px-3">
+          <LayoutGrid className="w-3.5 h-3.5" /> {filtered.length} shown
+        </Badge>
+      </div>
+
+      {/* Search + filters */}
+      <div className="mb-6 space-y-3 sticky top-14 z-10 bg-background/80 backdrop-blur py-2 -mx-1 px-1">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search templates by name or description…"
+            className="pl-9 h-9 text-sm"
+          />
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {TEMPLATE_CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                filter === cat
+                  ? "bg-teal-600 text-white border-teal-600"
+                  : "bg-background text-muted-foreground border-border hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filtered.map((t) => (
+          <TemplateCard key={t.id} id={t} />
+        ))}
+      </div>
+      {filtered.length === 0 && (
+        <div className="text-center py-16 text-muted-foreground">
+          <Search className="w-8 h-8 mx-auto mb-3 opacity-40" />
+          <p className="text-sm">No templates match your search. Try a different filter.</p>
+        </div>
+      )}
+    </>
+  );
+}
+
 function Dashboard() {
   const loadSample = useResumeStore((s) => s.loadSample);
   const clearAll = useResumeStore((s) => s.clearAll);
@@ -167,14 +233,14 @@ function Dashboard() {
             </span>
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-            Pick from six professionally designed templates, fill in your details, and watch your resume adapt
+            Pick from {TEMPLATES.length} professionally designed templates, fill in your details, and watch your resume adapt
             in real time. AI summaries, ATS keyword matching, cover letters, and one-click PDF export.
           </p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mb-12">
-          <StatCard value="8" label="Templates" />
+          <StatCard value={String(TEMPLATES.length)} label="Templates" />
           <StatCard value="9" label="Sections" />
           <StatCard value="100%" label="Free" />
         </div>
@@ -195,20 +261,8 @@ function Dashboard() {
         </div>
 
         {/* Template gallery */}
-        <div className="mb-6 flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight mb-1">Choose a template</h2>
-            <p className="text-sm text-muted-foreground">Each template auto-adapts — empty sections hide automatically, layouts rebalance to your content.</p>
-          </div>
-          <Badge variant="outline" className="gap-1.5 py-1.5 px-3">
-            <LayoutGrid className="w-3.5 h-3.5" /> {TEMPLATES.length} designs
-          </Badge>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {TEMPLATES.map((t) => (
-            <TemplateCard key={t.id} id={t} />
-          ))}
-        </div>
+        <TemplateGallery />
+
 
         {/* Features strip */}
         <div className="mt-20">
@@ -297,12 +351,12 @@ function TemplateSwitcher() {
           <LayoutGrid className="w-3.5 h-3.5" /> Template
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Switch Template</DialogTitle>
-          <DialogDescription>Pick a design — your content stays the same, only the layout changes.</DialogDescription>
+          <DialogDescription>Pick a design — your content stays the same, only the layout changes. {TEMPLATES.length} templates available.</DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {TEMPLATES.map((t) => (
             <button
               key={t.id}
@@ -312,9 +366,7 @@ function TemplateSwitcher() {
               }`}
             >
               <div className="aspect-[3/4] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 overflow-hidden relative">
-                <div className="origin-top-left scale-[0.32] w-[800px] absolute top-0 left-0 pointer-events-none">
-                  <ResumeRenderer data={sampleResume} accent={t.accentDefault} font={t.fontDefault} template={t.id} />
-                </div>
+                <TemplateThumbnail templateId={t.id} className="w-full h-full" />
                 {template === t.id && (
                   <div className="absolute top-1.5 right-1.5 bg-teal-500 text-white rounded-full w-5 h-5 flex items-center justify-center shadow">
                     <Check className="w-3 h-3" />
@@ -322,7 +374,7 @@ function TemplateSwitcher() {
                 )}
               </div>
               <div className="p-2.5">
-                <p className="text-xs font-semibold">{t.name}</p>
+                <p className="text-xs font-semibold truncate">{t.name}</p>
                 <p className="text-[10px] text-muted-foreground line-clamp-1">{t.description}</p>
               </div>
             </button>
