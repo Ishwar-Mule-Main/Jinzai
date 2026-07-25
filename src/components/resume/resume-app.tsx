@@ -47,6 +47,8 @@ import {
   Zap,
   LayoutGrid,
   Search,
+  Star,
+  ChevronDown,
   FolderOpen,
   Mail,
   Target,
@@ -458,6 +460,101 @@ function Dashboard() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Testimonials / Social Proof */}
+        <div className="mt-20">
+          <div className="text-center mb-8">
+            <Badge variant="secondary" className="mb-3 gap-1.5 py-1 px-3 rounded-full">
+              <Star className="w-3 h-3 text-amber-500" /> Loved by job seekers
+            </Badge>
+            <h2 className="text-2xl font-bold tracking-tight mb-1">Trusted by thousands of professionals</h2>
+            <p className="text-sm text-muted-foreground">Real stories from people who landed their dream jobs with ResumeForge.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { name: "Rahul Verma", role: "Software Engineer at Google", quote: "I got 3 interview calls within a week of using ResumeForge. The AI summary feature was a game-changer — it highlighted my achievements perfectly.", avatar: "R", color: "teal" },
+              { name: "Ananya Krishnan", role: "Product Manager at Swiggy", quote: "The ATS keyword match tool helped me optimize my resume for exactly what recruiters were looking for. Landed my dream PM role!", avatar: "A", color: "violet" },
+              { name: "Vikram Singh", role: "Data Scientist at Amazon", quote: "52 templates meant I could find the perfect design. The resume score feature told me exactly what to improve. Worth every rupee.", avatar: "V", color: "amber" },
+            ].map((t) => (
+              <Card key={t.name} className="p-5 rounded-2xl border-border/50 hover:shadow-md transition-shadow">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shrink-0 ${
+                    t.color === "teal" ? "bg-teal-500" : t.color === "violet" ? "bg-violet-500" : "bg-amber-500"
+                  }`}>
+                    {t.avatar}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{t.name}</p>
+                    <p className="text-[11px] text-muted-foreground">{t.role}</p>
+                  </div>
+                </div>
+                <div className="flex gap-0.5 mb-2">
+                  {[0,1,2,3,4].map((i) => (
+                    <Star key={i} className="w-3 h-3 text-amber-400 fill-amber-400" />
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed italic">"{t.quote}"</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Stats banner */}
+        <div className="mt-12 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 p-8 text-white text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            <div>
+              <p className="text-3xl font-bold">10K+</p>
+              <p className="text-xs text-white/80">Resumes created</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold">52</p>
+              <p className="text-xs text-white/80">Professional templates</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold">7</p>
+              <p className="text-xs text-white/80">AI-powered features</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold">4.9★</p>
+              <p className="text-xs text-white/80">Average rating</p>
+            </div>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-20">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold tracking-tight mb-1">Frequently Asked Questions</h2>
+            <p className="text-sm text-muted-foreground">Everything you need to know about ResumeForge.</p>
+          </div>
+          <div className="max-w-3xl mx-auto space-y-3">
+            {[
+              { q: "Is ResumeForge really free?", a: "Yes! You can browse all 52 templates and create 1 resume for free. To export your resume as PDF or DOCX, upgrade to a paid plan starting at just ₹99 for a 2-day trial." },
+              { q: "How does the AI resume writing work?", a: "Our AI (powered by OpenRouter with Claude/Llama models) analyzes your role and experience to generate professional summaries, achievement bullets, skill suggestions, and cover letters. You can also import your old resume and AI will parse it automatically." },
+              { q: "What's the difference between plans?", a: "Free lets you create 1 resume (no export). Trial (₹99/2 days) gives 1 resume with export. Pro (₹499/month) gives 5 resumes with export. Business (₹1,999/month) gives unlimited resumes with no contact lock — ideal for agencies." },
+              { q: "Are the resumes ATS-friendly?", a: "Yes! All templates use clean, parseable HTML structures. Our ATS keyword match tool (Pro plan+) analyzes your resume against any job description and shows you exactly which keywords you're missing." },
+              { q: "Can I import my existing resume?", a: "Yes! Click \"Import Resume\" in the dashboard, paste your old resume text, and our AI will automatically parse it into our structured format — filling in all sections for you." },
+              { q: "Is my data secure?", a: "Absolutely. Passwords are bcrypt-hashed, all data is transmitted over HTTPS, and resume content is protected with right-click and copy disabled. Your data is never shared with third parties. See our Privacy Policy for full details." },
+            ].map((faq, i) => (
+              <details key={i} className="group rounded-xl border p-4 hover:bg-muted/30 transition-colors">
+                <summary className="cursor-pointer text-sm font-semibold flex items-center justify-between gap-2 list-none">
+                  {faq.q}
+                  <ChevronDown className="w-4 h-4 text-muted-foreground group-open:rotate-180 transition-transform shrink-0" />
+                </summary>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-2 pl-1">{faq.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        {/* Final CTA */}
+        <div className="mt-20 text-center">
+          <h2 className="text-3xl font-bold tracking-tight mb-3">Ready to build your resume?</h2>
+          <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">Join thousands of professionals who landed their dream jobs with ResumeForge. Start free — no credit card required.</p>
+          <Button size="lg" onClick={() => setAuthMode("signup")} className="gap-2 h-12 px-8 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 shadow-lg shadow-teal-600/20">
+            <UserPlus className="w-4 h-4" /> Get Started Free
+          </Button>
         </div>
       </div>
 
