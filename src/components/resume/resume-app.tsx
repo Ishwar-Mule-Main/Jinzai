@@ -100,14 +100,19 @@ function TemplateCard({ id }: { id: (typeof TEMPLATES)[number] }) {
             <Eye className="w-3.5 h-3.5" /> Sample
           </Button>
         </div>
-        {/* Photo badge */}
-        {id.hasPhoto && (
-          <div className="absolute top-2.5 right-2.5">
+        {/* Badges */}
+        <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end">
+          {id.premium && (
+            <Badge className="bg-amber-500 text-white border-0 gap-0.5 text-[8px] shadow-sm">
+              <Crown className="w-2.5 h-2.5" /> PRO
+            </Badge>
+          )}
+          {id.hasPhoto && (
             <Badge className="bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-200 border-0 gap-1 text-[9px] shadow-sm">
               <ImageIcon className="w-2.5 h-2.5" /> Photo
             </Badge>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div className="p-5">
         <h3 className="font-semibold text-base mb-1.5">{id.name}</h3>
@@ -704,6 +709,7 @@ function EditorView() {
   const template = useResumeStore((s) => s.template);
   const accent = useResumeStore((s) => s.accentColor);
   const font = useResumeStore((s) => s.fontFamily);
+  const fontSize = useResumeStore((s) => s.fontSize);
   const title = useResumeStore((s) => s.title);
   const contactLocked = useResumeStore((s) => s.contactLocked);
   const setView = useResumeStore((s) => s.setView);
@@ -919,7 +925,7 @@ function EditorView() {
                 minHeight: "297mm",
               }}
             >
-              <ResumeRenderer data={data} accent={accent} font={font} template={template} />
+              <ResumeRenderer data={data} accent={accent} font={font} fontSize={fontSize} template={template} />
             </div>
           </div>
         </div>

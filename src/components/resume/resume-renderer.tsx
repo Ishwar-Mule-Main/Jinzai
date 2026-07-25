@@ -7,13 +7,18 @@ import { CreativeTemplate, ClassicTemplate, ExecutiveTemplate, TechTemplate } fr
 import { AcademicTemplate, CompactTemplate } from "./templates/extra-templates";
 import { ParameterizedTemplate } from "./templates/parameterized";
 import { SPEC_MAP } from "@/lib/resume/template-specs";
+import { FONT_SIZE_OPTIONS } from "@/lib/resume/types";
 import { getFontClass } from "@/lib/resume/template-helpers";
 
 const ORIGINAL_IDS = new Set(["modern", "minimal", "creative", "classic", "executive", "tech", "academic", "compact"]);
 
-export function ResumeRenderer({ data, accent, font, template }: RenderProps) {
+export function ResumeRenderer({ data, accent, font, fontSize, template }: RenderProps) {
   const fontClass = getFontClass(font);
   const common = { data, accent };
+
+  // Get font size scale
+  const sizeConfig = FONT_SIZE_OPTIONS.find((s) => s.id === (fontSize || "m")) || FONT_SIZE_OPTIONS[2];
+  const scale = sizeConfig.scale;
 
   const render = () => {
     switch (template) {
@@ -43,7 +48,14 @@ export function ResumeRenderer({ data, accent, font, template }: RenderProps) {
   };
 
   return (
-    <div className={`resume-page ${fontClass}`} style={{ minHeight: "100%" }}>
+    <div
+      className={`resume-page ${fontClass}`}
+      style={{
+        minHeight: "100%",
+        fontSize: `${14 * scale}px`,
+        lineHeight: 1.5,
+      }}
+    >
       {render()}
     </div>
   );

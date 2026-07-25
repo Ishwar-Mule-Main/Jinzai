@@ -41,6 +41,16 @@ export const fontClassMap: Record<string, string> = {
   merriweather: "font-[Merriweather]",
   playfair: "font-[Playfair_Display]",
   jetbrains: "font-mono",
+  "plus-jakarta": "font-[Plus_Jakarta_Sans]",
+  "dm-sans": "font-[DM_Sans]",
+  lora: "font-[Lora]",
+  "source-sans": "font-[Source_Sans_3]",
+  roboto: "font-[Roboto]",
+  montserrat: "font-[Montserrat]",
+  "crimson-text": "font-[Crimson_Text]",
+  "space-grotesk": "font-[Space_Grotesk]",
+  "work-sans": "font-[Work_Sans]",
+  manrope: "font-[Manrope]",
 };
 
 export function getFontClass(id: string) {
@@ -49,12 +59,21 @@ export function getFontClass(id: string) {
 
 export function contactItems(data: ResumeData) {
   const p = data.personalInfo;
-  const items: { label: string; value: string; icon?: string }[] = [];
-  if (p.email) items.push({ label: "Email", value: p.email, icon: "mail" });
-  if (p.phone) items.push({ label: "Phone", value: p.phone, icon: "phone" });
+  const items: { label: string; value: string; icon?: string; href?: string }[] = [];
+  if (p.email) items.push({ label: "Email", value: p.email, icon: "mail", href: `mailto:${p.email}` });
+  if (p.phone) items.push({ label: "Phone", value: p.phone, icon: "phone", href: `tel:${p.phone.replace(/\s+/g, "")}` });
   if (p.location) items.push({ label: "Location", value: p.location, icon: "map" });
-  if (p.website) items.push({ label: "Website", value: p.website, icon: "globe" });
-  if (p.linkedin) items.push({ label: "LinkedIn", value: p.linkedin, icon: "linkedin" });
-  if (p.github) items.push({ label: "GitHub", value: p.github, icon: "github" });
+  if (p.website) {
+    const url = p.website.startsWith("http") ? p.website : `https://${p.website}`;
+    items.push({ label: "Website", value: p.website, icon: "globe", href: url });
+  }
+  if (p.linkedin) {
+    const url = p.linkedin.startsWith("http") ? p.linkedin : `https://${p.linkedin}`;
+    items.push({ label: "LinkedIn", value: p.linkedin, icon: "linkedin", href: url });
+  }
+  if (p.github) {
+    const url = p.github.startsWith("http") ? p.github : `https://${p.github}`;
+    items.push({ label: "GitHub", value: p.github, icon: "github", href: url });
+  }
   return items;
 }

@@ -151,6 +151,7 @@ export interface TemplateMeta {
   tags: string[];
   accentDefault: string;
   fontDefault: string;
+  premium?: boolean; // true = paid plan required
   preview: {
     header: "centered" | "left" | "sidebar" | "banner";
     style: string;
@@ -168,6 +169,7 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ["ATS-friendly", "Two-column", "Photo"],
     accentDefault: "#0f766e",
     fontDefault: "inter",
+    premium: true,
     preview: { header: "sidebar", style: "Teal sidebar with rounded photo" },
   },
   {
@@ -192,6 +194,7 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ["Creative", "Two-column", "Photo", "Bold"],
     accentDefault: "#7c3aed",
     fontDefault: "poppins",
+    premium: true,
     preview: { header: "banner", style: "Purple banner, big initials" },
   },
   {
@@ -216,6 +219,7 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ["Executive", "Serif", "Photo", "Elegant"],
     accentDefault: "#92400e",
     fontDefault: "playfair",
+    premium: true,
     preview: { header: "left", style: "Playfair serif, amber accent" },
   },
   {
@@ -228,6 +232,7 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ["Tech", "Sidebar", "Photo", "Developer"],
     accentDefault: "#0ea5e9",
     fontDefault: "jetbrains",
+    premium: true,
     preview: { header: "sidebar", style: "Dark sidebar, mono headings" },
   },
   {
@@ -240,6 +245,7 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ["Academic", "CV", "Serif", "Publications"],
     accentDefault: "#1e3a5f",
     fontDefault: "merriweather",
+    premium: true,
     preview: { header: "centered", style: "Numbered sections, serif, navy" },
   },
   {
@@ -252,9 +258,10 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ["Dense", "Single-column", "ATS-friendly", "Space-saving"],
     accentDefault: "#be123c",
     fontDefault: "inter",
+    premium: true,
     preview: { header: "left", style: "Tight spacing, rose accent" },
   },
-  // 44 parameterized templates (metadata derived from specs)
+  // 44 parameterized templates (metadata derived from specs) — all premium
   ...NEW_TEMPLATE_SPECS.map((s: TemplateSpec) => ({
     id: s.id as TemplateId,
     name: s.name,
@@ -264,6 +271,7 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: s.tags,
     accentDefault: s.accent,
     fontDefault: s.font,
+    premium: true,
     preview: { header: "left" as const, style: s.headingStyle },
   })),
 ];

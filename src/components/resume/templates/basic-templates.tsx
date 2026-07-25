@@ -7,6 +7,7 @@ export interface RenderProps {
   data: ResumeData;
   accent: string;
   font: string;
+  fontSize?: string; // xs, s, m, l, xl
   template: TemplateId;
 }
 
