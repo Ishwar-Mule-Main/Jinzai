@@ -2,6 +2,8 @@
 
 import { FileText } from "lucide-react";
 
+const DE_LOGO_URL = "https://domainexpansion.in/Domain%20Expansion%20New%20Logo.png";
+
 export function BrandMark({ className = "", showParent = false }: { className?: string; showParent?: boolean }) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
@@ -25,9 +27,11 @@ export function BrandMark({ className = "", showParent = false }: { className?: 
 export function DomainExpansionLogo({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className="w-7 h-7 rounded-md bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center shadow-sm shrink-0">
-        <span className="text-white font-bold text-xs">DE</span>
-      </div>
+      <img
+        src={DE_LOGO_URL}
+        alt="Domain Expansion"
+        className="w-8 h-8 object-contain shrink-0"
+      />
       <div className="flex flex-col leading-tight">
         <span className="font-bold text-sm tracking-tight">Domain Expansion</span>
         <span className="text-[8px] text-muted-foreground">Parent Company</span>

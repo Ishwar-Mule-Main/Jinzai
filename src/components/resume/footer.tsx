@@ -1,21 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { LegalDialog, type LegalPage } from "./legal-dialogs";
+import Link from "next/link";
 import { BrandMark, DomainExpansionLogo } from "./brand-mark";
-import { FileText, Shield, RotateCcw, Mail, Info, Building2 } from "lucide-react";
 
 export function Footer() {
-  const [legalPage, setLegalPage] = useState<LegalPage>(null);
-
-  const links: { label: string; page: LegalPage; icon: typeof Shield }[] = [
-    { label: "Privacy Policy", page: "privacy", icon: Shield },
-    { label: "Terms of Service", page: "terms", icon: FileText },
-    { label: "Refund Policy", page: "refund", icon: RotateCcw },
-    { label: "About Us", page: "about", icon: Info },
-    { label: "Contact", page: "contact", icon: Mail },
-  ];
-
   return (
     <footer className="border-t bg-muted/20 mt-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -32,16 +20,9 @@ export function Footer() {
           <div>
             <p className="text-xs font-semibold mb-2 text-foreground">Legal</p>
             <ul className="space-y-1.5">
-              {links.slice(0, 3).map((link) => (
-                <li key={link.label}>
-                  <button
-                    onClick={() => setLegalPage(link.page)}
-                    className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-                  >
-                    <link.icon className="w-3 h-3" /> {link.label}
-                  </button>
-                </li>
-              ))}
+              <li><Link href="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link></li>
+              <li><Link href="/refund" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Refund Policy</Link></li>
             </ul>
           </div>
 
@@ -49,16 +30,8 @@ export function Footer() {
           <div>
             <p className="text-xs font-semibold mb-2 text-foreground">Company</p>
             <ul className="space-y-1.5">
-              {links.slice(3).map((link) => (
-                <li key={link.label}>
-                  <button
-                    onClick={() => setLegalPage(link.page)}
-                    className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-                  >
-                    <link.icon className="w-3 h-3" /> {link.label}
-                  </button>
-                </li>
-              ))}
+              <li><Link href="/about" className="text-xs text-muted-foreground hover:text-foreground transition-colors">About Us</Link></li>
+              <li><Link href="/contact" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Contact</Link></li>
             </ul>
           </div>
         </div>
@@ -66,14 +39,13 @@ export function Footer() {
         {/* Parent company banner */}
         <div className="border-t border-b py-4 mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <Building2 className="w-4 h-4 text-muted-foreground" />
             <div>
-              <p className="text-xs font-semibold">A product of</p>
+              <p className="text-xs font-semibold mb-1">A product of</p>
               <DomainExpansionLogo />
             </div>
           </div>
           <div className="text-center sm:text-right text-[11px] text-muted-foreground">
-            <p>Domain Expansion Technologies</p>
+            <p>Domain Expansion</p>
             <p>admin@domainexpansion.in · Bengaluru, India</p>
           </div>
         </div>
@@ -96,8 +68,6 @@ export function Footer() {
           © {new Date().getFullYear()} ResumeForge by Domain Expansion. All rights reserved.
         </div>
       </div>
-
-      <LegalDialog page={legalPage} onClose={() => setLegalPage(null)} />
     </footer>
   );
 }

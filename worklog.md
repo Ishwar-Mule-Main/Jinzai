@@ -113,6 +113,72 @@ ResumeForge now has 52 templates, 7 AI features (via OpenRouter API — default 
 - Advanced resumes with cover photos (₹299 per download even for paid users)
 
 ---
+Task ID: 14 (user request — auth gating, branding, legal pages)
+Agent: Main (orchestrator)
+Task: Gate all landing page actions behind login, remove Sample button, update branding to Domain Expansion with real logo, convert legal pages to proper routes
+
+Work Log:
+- **Gated ALL landing page actions behind login/signup**:
+  - "Use Template" button on every template card now redirects to signup dialog if user is not logged in
+  - "Try with sample data" button redirects to signup if not logged in
+  - "Get Started" / "Start from scratch" redirects to signup if not logged in
+  - "Import Resume" button only visible when logged in (removed from nav for non-authenticated users)
+  - "Templates" side panel button only visible when logged in
+  - "Saved Resumes" only visible when logged in
+  - No one can access the dashboard/editor without logging in first
+- **Removed "Sample" button from all template cards**:
+  - Template cards now only have "Use Template" button (no "Sample" button)
+  - Hover actions simplified to single CTA
+- **Added sample profile data for template thumbnails**:
+  - Created `src/lib/resume/sample-profiles.ts` with 5 different profiles:
+    - John Anderson — Software Engineer (Stripe, Airbnb)
+    - Sarah Chen — Product Designer (Figma, Asana)
+    - Michael Rodriguez — Product Manager (Notion, Slack)
+    - Priya Patel — Data Scientist (Amazon, Netflix)
+    - Emily Johnson — Marketing Manager (HubSpot, Shopify)
+  - Each profile has realistic experience, skills, education, projects, certifications
+  - Template cards cycle through profiles so different templates show different sample data
+- **Updated branding to "Domain Expansion" (not "Technologies")**:
+  - All references to "Domain Expansion Technologies" changed to just "Domain Expansion"
+  - Updated `BrandMark` component with `showParent` prop showing "by Domain Expansion"
+  - Updated `DomainExpansionLogo` to use real logo from URL: https://domainexpansion.in/Domain%20Expansion%20New%20Logo.png
+  - Footer: "A product of Domain Expansion", "Domain Expansion", "admin@domainexpansion.in"
+  - Copyright: "© 2025 ResumeForge by Domain Expansion. All rights reserved."
+  - All legal pages reference "Domain Expansion" (not "Technologies")
+- **Converted legal pages from popups to proper routed pages**:
+  - Created `src/app/legal-layout/legal-page-layout.tsx` — shared layout with header, footer, company info
+  - Created 5 proper Next.js pages at:
+    - `/privacy` — Privacy Policy with GDPR, CCPA, IT Act 2000, DPDP Act 2023 compliance
+    - `/terms` — Terms of Service with plan tiers, contact lock, IP, governing law (India)
+    - `/refund` — Refund Policy with trial, monthly, non-refundable cases, consumer rights
+    - `/about` — About page with company details, mission, technology stack
+    - `/contact` — Contact page with email, hours, grievance officer info
+  - Each page has proper SEO metadata (title, description)
+  - Business-standard legal content with country compliance (India IT Act, EU GDPR, US CCPA)
+  - Proper URL format (not popups) — accessible directly and SEO-indexable
+  - Footer now links to these routes using Next.js `<Link>` instead of opening popup dialogs
+  - Removed LegalDialog dependency from footer
+
+Verification Results:
+- ESLint: 0 errors
+- Dev server: HTTP 200 on port 3000
+- All legal pages return HTTP 200: /privacy, /terms, /refund, /about, /contact ✓
+- agent-browser: Nav only shows Support, Log In, Sign Up for non-authenticated users ✓
+- agent-browser: "Use Template" opens signup dialog ("Create your account") ✓
+- agent-browser: "Try with sample data" opens signup dialog ✓
+- agent-browser: "Technologies" text is REMOVED from the page ✓
+- agent-browser: "Domain Expansion" text is FOUND ✓
+- agent-browser: Legal links are proper `<a>` tags pointing to /privacy route ✓
+- agent-browser: 0 console errors
+
+Stage Summary:
+- All landing page actions now require authentication (no dashboard access without login)
+- "Sample" button removed from template cards
+- Sample profile data added for 5 different roles
+- Branding updated to "Domain Expansion" with real logo from URL
+- 5 legal pages converted from popups to proper SEO-friendly routed pages with business-standard compliance content
+
+---
 Task ID: 13 (cron review round 8)
 Agent: Main (orchestrator) — webDevReview cron
 Task: Font size application, clickable contact links, free vs paid template classification

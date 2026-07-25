@@ -8,6 +8,7 @@ import { ResumeRenderer } from "./resume-renderer";
 import { TemplateThumbnail } from "./template-thumbnail";
 import { ResumeEditor } from "./resume-editor";
 import { getCompletion } from "@/lib/resume/sample-data";
+import { getSampleProfile } from "@/lib/resume/sample-profiles";
 import { downloadDocx } from "@/lib/resume/docx-export";
 import { useKeyboardShortcuts } from "@/lib/resume/use-shortcuts";
 import { CoverLetterDialog, AtsDialog, ResumeScoreDialog } from "./ai-dialogs";
@@ -69,19 +70,17 @@ import {
 
 // ---------- Dashboard ----------
 
-function TemplateCard({ id }: { id: (typeof TEMPLATES)[number] }) {
+function TemplateCard({ id, index, user, onAuthRequired }: { id: (typeof TEMPLATES)[number]; index: number; user: { plan: string } | null; onAuthRequired: () => void }) {
   const setTemplate = useResumeStore((s) => s.setTemplate);
-  const loadSample = useResumeStore((s) => s.loadSample);
   const setView = useResumeStore((s) => s.setView);
+  const sampleProfile = getSampleProfile(index);
 
   const useTemplate = () => {
+    if (!user) {
+      onAuthRequired();
+      return;
+    }
     setTemplate(id.id);
-    setView("editor");
-  };
-
-  const previewWithSample = () => {
-    setTemplate(id.id);
-    loadSample();
     setView("editor");
   };
 
@@ -95,9 +94,6 @@ function TemplateCard({ id }: { id: (typeof TEMPLATES)[number] }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-5 gap-2">
           <Button size="sm" onClick={useTemplate} className="h-8 gap-1.5 shadow-lg">
             <FileText className="w-3.5 h-3.5" /> Use Template
-          </Button>
-          <Button size="sm" variant="secondary" onClick={previewWithSample} className="h-8 gap-1.5 shadow-lg">
-            <Eye className="w-3.5 h-3.5" /> Sample
           </Button>
         </div>
         {/* Badges */}
@@ -140,11 +136,11 @@ function StatCard({ value, label }: { value: string; label: string }) {
 
 const TEMPLATE_CATEGORIES = ["All", "Sidebar", "Banner", "Single", "Serif", "Minimal", "ATS", "Photo", "Numbered", "Creative"] as const;
 
-function TemplateGallery() {
+function TemplateGallery({ user, onAuthRequired }: { user: { plan: string } | null; onAuthRequired: () => void }) {
   const [filter, setFilter] = useState<string>("All");
   const [query, setQuery] = useState("");
 
-  const filtered = TEMPLATES.filter((t) => {
+  const filtered = TEMPLATES.map((t, originalIndex) => ({ t, originalIndex })).filter(({ t }) => {
     const matchesFilter = filter === "All" || t.tags.some((tag) => tag.toLowerCase().includes(filter.toLowerCase())) || t.name.toLowerCase().includes(filter.toLowerCase());
     const matchesQuery = !query || t.name.toLowerCase().includes(query.toLowerCase()) || t.description.toLowerCase().includes(query.toLowerCase());
     return matchesFilter && matchesQuery;
@@ -191,8 +187,8 @@ function TemplateGallery() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((t) => (
-          <TemplateCard key={t.id} id={t} />
+        {filtered.map(({ t, originalIndex }) => (
+          <TemplateCard key={t.id} id={t} index={originalIndex} user={user} onAuthRequired={onAuthRequired} />
         ))}
       </div>
       {filtered.length === 0 && (
@@ -233,13 +229,21 @@ function Dashboard() {
   };
 
   const handleTrySample = () => {
+    if (!user) {
+      setAuthMode("signup");
+      return;
+    }
     loadSample();
     setContactLocked(false);
+    setView("editor");
+  };
+
+  const handleImport = () => {
     if (!user) {
-      setView("editor");
-    } else {
-      setView("editor");
+      setAuthMode("signup");
+      return;
     }
+    // If logged in, the ImportResumeDialog will open normally
   };
 
   return (
@@ -249,9 +253,13 @@ function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <BrandMark />
           <div className="flex items-center gap-2">
-            <TemplateSidePanel />
-            <ImportResumeDialog />
-            {user && <SavedResumesDialog />}
+            {user ? (
+              <>
+                <TemplateSidePanel />
+                <ImportResumeDialog />
+                <SavedResumesDialog />
+              </>
+            ) : null}
             <SupportDialog />
             {user && (
               <PricingDialog currentPlan={user.plan} onSubscribed={refresh} trigger={
@@ -347,7 +355,7 @@ function Dashboard() {
         </div>
 
         {/* Template gallery */}
-        <TemplateGallery />
+        <TemplateGallery user={user} onAuthRequired={() => setAuthMode("signup")} />
 
         {/* Features strip */}
         <div className="mt-20">
