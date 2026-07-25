@@ -134,7 +134,7 @@ export default function AdminPage() {
               <Shield className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-xl font-bold text-white">Admin Panel</h1>
-            <p className="text-xs text-slate-400 mt-1">ResumeForge Administration — Authorized access only</p>
+            <p className="text-xs text-slate-400 mt-1">Domain Expansion Technologies — Authorized access only</p>
           </div>
           <div className="space-y-3">
             <div>
@@ -163,6 +163,7 @@ export default function AdminPage() {
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-teal-400" />
             <span className="font-bold">ResumeForge Admin</span>
+            <span className="text-xs text-slate-400 ml-1">· Domain Expansion</span>
           </div>
           <Button variant="ghost" size="sm" onClick={logout} className="gap-1.5 text-slate-400">
             <LogOut className="w-3.5 h-3.5" /> Logout

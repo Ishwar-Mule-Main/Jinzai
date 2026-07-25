@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { LegalDialog, type LegalPage } from "./legal-dialogs";
-import { BrandMark } from "./brand-mark";
-import { FileText, Shield, RotateCcw, Mail, Info } from "lucide-react";
+import { BrandMark, DomainExpansionLogo } from "./brand-mark";
+import { FileText, Shield, RotateCcw, Mail, Info, Building2 } from "lucide-react";
 
 export function Footer() {
   const [legalPage, setLegalPage] = useState<LegalPage>(null);
@@ -22,7 +22,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
           {/* Brand */}
           <div className="md:col-span-2">
-            <BrandMark className="scale-90 mb-2" />
+            <BrandMark showParent className="mb-2" />
             <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
               Build a resume that gets you hired. 52 templates, AI-powered writing, ATS optimization, and one-click export.
             </p>
@@ -63,8 +63,23 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Parent company banner */}
+        <div className="border-t border-b py-4 mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Building2 className="w-4 h-4 text-muted-foreground" />
+            <div>
+              <p className="text-xs font-semibold">A product of</p>
+              <DomainExpansionLogo />
+            </div>
+          </div>
+          <div className="text-center sm:text-right text-[11px] text-muted-foreground">
+            <p>Domain Expansion Technologies</p>
+            <p>support@domainexpansion.in · Bengaluru, India</p>
+          </div>
+        </div>
+
         {/* Pricing summary */}
-        <div className="border-t pt-4 mb-4">
+        <div className="pt-2 mb-4">
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
             <span>Free — ₹0</span>
             <span className="text-border">|</span>
@@ -78,7 +93,7 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="text-center text-[11px] text-muted-foreground">
-          © {new Date().getFullYear()} ResumeForge. All rights reserved. Built with Next.js, Tailwind & z-ai-web-dev-sdk.
+          © {new Date().getFullYear()} ResumeForge by Domain Expansion. All rights reserved.
         </div>
       </div>
 

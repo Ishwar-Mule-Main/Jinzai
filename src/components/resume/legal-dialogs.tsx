@@ -18,6 +18,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
     body: (
       <>
         <p className="mb-3">Last updated: {new Date().toLocaleDateString("en-IN")}</p>
+        <p className="mb-3 text-xs text-muted-foreground">This privacy policy is governed by Domain Expansion Technologies, the parent company of ResumeForge.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">1. Information We Collect</h3>
         <p className="mb-3">We collect information you provide when you create an account, including your name, email address, and resume content. We also collect usage data such as templates used and features accessed.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">2. How We Use Your Information</h3>
@@ -31,7 +32,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
         <h3 className="font-semibold text-sm mb-2 mt-4">6. Your Rights</h3>
         <p className="mb-3">You have the right to access, correct, or delete your personal data. You can export your resume data as JSON at any time from the editor.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">7. Contact Us</h3>
-        <p>For privacy concerns, email us at privacy@resumeforge.app</p>
+        <p>For privacy concerns, email us at privacy@domainexpansion.in</p>
       </>
     ),
   },
@@ -40,8 +41,9 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
     body: (
       <>
         <p className="mb-3">Last updated: {new Date().toLocaleDateString("en-IN")}</p>
+        <p className="mb-3 text-xs text-muted-foreground">These terms are governed by Domain Expansion Technologies, the parent company of ResumeForge.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">1. Acceptance of Terms</h3>
-        <p className="mb-3">By using ResumeForge, you agree to these terms. If you do not agree, please do not use our services.</p>
+        <p className="mb-3">By using ResumeForge, a product of Domain Expansion Technologies, you agree to these terms. If you do not agree, please do not use our services.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">2. Plan Tiers & Limits</h3>
         <ul className="list-disc pl-5 space-y-1 mb-3 text-sm">
           <li><strong>Free:</strong> Browse templates, create 1 resume, no export.</li>
@@ -54,11 +56,11 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
         <h3 className="font-semibold text-sm mb-2 mt-4">4. Acceptable Use</h3>
         <p className="mb-3">You agree not to misuse the service, including but not limited to: creating fake resumes, sharing account credentials, or using the service for fraudulent purposes.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">5. Intellectual Property</h3>
-        <p className="mb-3">All templates, designs, and code are property of ResumeForge. You own the content you create using our tools.</p>
+        <p className="mb-3">All templates, designs, and code are property of Domain Expansion Technologies. You own the content you create using our tools.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">6. Plan Changes & Cancellation</h3>
         <p className="mb-3">You can change or cancel your plan at any time. The Trial plan expires after 2 days. Monthly plans can be cancelled to prevent renewal.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">7. Limitation of Liability</h3>
-        <p>ResumeForge is not liable for any job application outcomes. Our tools are provided "as is" without guarantees of employment.</p>
+        <p>Domain Expansion Technologies and ResumeForge are not liable for any job application outcomes. Our tools are provided "as is" without guarantees of employment.</p>
       </>
     ),
   },
@@ -72,7 +74,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
         <h3 className="font-semibold text-sm mb-2 mt-4">2. Monthly Plans (₹499 / ₹1,999)</h3>
         <p className="mb-3">Monthly subscriptions can be cancelled at any time to prevent the next billing cycle. Refunds for the current billing period are available within 7 days of payment if the service has not been significantly used (fewer than 3 resume exports).</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">3. How to Request a Refund</h3>
-        <p className="mb-3">To request a refund, email us at refunds@resumeforge.app with your account email and reason for the request. Refunds are processed within 5-7 business days.</p>
+        <p className="mb-3">To request a refund, email us at refunds@domainexpansion.in with your account email and reason for the request. Refunds are processed within 5-7 business days.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">4. Plan Downgrade</h3>
         <p>Upon cancellation, your plan remains active until the end of the current billing period, after which it downgrades to the Free plan. Your resumes remain accessible but export is disabled.</p>
       </>
@@ -83,13 +85,16 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
     body: (
       <>
         <h3 className="font-semibold text-sm mb-2">Get in Touch</h3>
-        <p className="mb-3">We're here to help with any questions about ResumeForge.</p>
+        <p className="mb-3">We're here to help with any questions about ResumeForge. Reach out to our team at Domain Expansion.</p>
         <div className="space-y-2 text-sm">
-          <p><strong>Email:</strong> support@resumeforge.app</p>
-          <p><strong>Refunds:</strong> refunds@resumeforge.app</p>
-          <p><strong>Privacy:</strong> privacy@resumeforge.app</p>
+          <p><strong>Support:</strong> support@domainexpansion.in</p>
+          <p><strong>Refunds:</strong> refunds@domainexpansion.in</p>
+          <p><strong>Privacy:</strong> privacy@domainexpansion.in</p>
+          <p><strong>General:</strong> hello@domainexpansion.in</p>
           <p><strong>Hours:</strong> Monday–Friday, 9 AM – 6 PM IST</p>
         </div>
+        <h3 className="font-semibold text-sm mb-2 mt-4">Company</h3>
+        <p className="text-sm">Domain Expansion Technologies<br />Bengaluru, Karnataka, India</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">Demo Account</h3>
         <p className="text-sm">Try our demo account: <strong>ishwar@domainexpansion.in</strong> / <strong>Domain Expansion</strong></p>
       </>
@@ -99,11 +104,22 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
     title: "About ResumeForge",
     body: (
       <>
-        <p className="mb-3">ResumeForge is a free-to-start resume builder platform offering 52 professionally designed templates that auto-adapt to your content. Our AI-powered tools help you write better summaries, generate achievement bullets, match ATS keywords, and create tailored cover letters.</p>
+        <p className="mb-3">ResumeForge is a product of <strong>Domain Expansion Technologies</strong>, a technology company based in Bengaluru, India. We build tools that empower individuals to present their professional best.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">Our Mission</h3>
-        <p className="mb-3">We believe everyone deserves a professional resume. Our platform makes it easy to create beautiful, ATS-friendly resumes that get you noticed by recruiters.</p>
+        <p className="mb-3">We believe everyone deserves a professional resume. Our platform makes it easy to create beautiful, ATS-friendly resumes that get you noticed by recruiters. With 52 templates, AI-powered writing tools, and one-click export, ResumeForge is the complete resume building solution.</p>
+        <h3 className="font-semibold text-sm mb-2 mt-4">Domain Expansion</h3>
+        <p className="text-sm mb-2">Domain Expansion Technologies is the parent company of ResumeForge. We are committed to building innovative products that solve real problems for job seekers and professionals.</p>
+        <div className="rounded-lg border p-3 bg-muted/30 mt-2">
+          <p className="text-xs font-semibold mb-1">Company Details</p>
+          <p className="text-xs text-muted-foreground">
+            Domain Expansion Technologies<br />
+            Bengaluru, Karnataka, India<br />
+            Email: hello@domainexpansion.in<br />
+            Founded: 2025
+          </p>
+        </div>
         <h3 className="font-semibold text-sm mb-2 mt-4">Built With</h3>
-        <p className="text-sm">Next.js 16, TypeScript, Tailwind CSS, Prisma, and z-ai-web-dev-sdk for AI features.</p>
+        <p className="text-sm">Next.js 16, TypeScript, Tailwind CSS, Prisma, OpenRouter API (Claude 3.7 Sonnet), and z-ai-web-dev-sdk for AI features.</p>
       </>
     ),
   },

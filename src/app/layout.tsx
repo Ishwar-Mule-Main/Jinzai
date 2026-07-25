@@ -25,14 +25,14 @@ const workSans = Work_Sans({ variable: "--font-work-sans", subsets: ["latin"], w
 const manrope = Manrope({ variable: "--font-manrope", subsets: ["latin"], weight: ["300", "400", "500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
-  title: "ResumeForge — Build a resume that gets you hired",
+  title: "ResumeForge — Build a resume that gets you hired | Domain Expansion",
   description:
-    "Free AI-powered resume & CV builder. Choose from 52 professionally designed templates that auto-optimize to your content. Generate AI summaries, export to PDF, ATS-friendly.",
-  keywords: ["resume builder", "CV maker", "resume templates", "ATS resume", "AI resume", "free resume builder"],
-  authors: [{ name: "ResumeForge" }],
+    "Free AI-powered resume & CV builder by Domain Expansion. Choose from 52 professionally designed templates that auto-optimize to your content. Generate AI summaries, export to PDF, ATS-friendly.",
+  keywords: ["resume builder", "CV maker", "resume templates", "ATS resume", "AI resume", "Domain Expansion", "free resume builder"],
+  authors: [{ name: "Domain Expansion Technologies" }],
   openGraph: {
     title: "ResumeForge — Build a resume that gets you hired",
-    description: "AI-powered resume builder with 52 auto-optimizing templates.",
+    description: "AI-powered resume builder by Domain Expansion with 52 auto-optimizing templates.",
     type: "website",
   },
 };

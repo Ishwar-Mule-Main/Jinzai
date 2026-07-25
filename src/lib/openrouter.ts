@@ -1,9 +1,10 @@
 // OpenRouter API integration — configurable AI client
-// Default model: anthropic/claude-3.7-sonnet (can be changed via OPENROUTER_MODEL env var)
+// Default model: meta-llama/llama-3.3-70b-instruct (works in all regions)
+// Change via OPENROUTER_MODEL env var — see https://openrouter.ai/models for available models
 // Get your API key from https://openrouter.ai/keys
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
-const DEFAULT_MODEL = process.env.OPENROUTER_MODEL || "anthropic/claude-3.7-sonnet";
+const DEFAULT_MODEL = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.3-70b-instruct";
 const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
 export interface ChatMessage {
@@ -62,7 +63,10 @@ export async function openRouterChat(
   }
 
   const data = await response.json();
-  return data.choices[0]?.message?.content?.trim() || "";
+  // Some models (e.g. deepseek) return content in "reasoning" instead of "content"
+  const content = data.choices[0]?.message?.content?.trim();
+  const reasoning = data.choices[0]?.message?.reasoning?.trim();
+  return content || reasoning || "";
 }
 
 /**
@@ -71,12 +75,10 @@ export async function openRouterChat(
 export async function getAvailableModels(): Promise<{ id: string; name: string }[]> {
   if (!OPENROUTER_API_KEY) {
     return [
-      { id: "anthropic/claude-3.7-sonnet", name: "Claude 3.7 Sonnet (default)" },
-      { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
-      { id: "openai/gpt-4o", name: "GPT-4o" },
-      { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
-      { id: "google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash" },
-      { id: "meta-llama/llama-3.3-70b-instruct", name: "Llama 3.3 70B" },
+      { id: "meta-llama/llama-3.3-70b-instruct", name: "Llama 3.3 70B (default, works globally)" },
+      { id: "anthropic/claude-sonnet-5", name: "Claude Sonnet 5 (may be region-restricted)" },
+      { id: "openai/gpt-oss-20b:free", name: "GPT-OSS 20B (free)" },
+      { id: "deepseek/deepseek-v4-pro", name: "DeepSeek V4 Pro" },
     ];
   }
 

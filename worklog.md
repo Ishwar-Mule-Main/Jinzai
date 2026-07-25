@@ -625,6 +625,47 @@ Stage Summary:
 - Admin panel accessible at /admin with secure login
 - Content protection active on resume preview
 
+---
+Task ID: 12 (user request — OpenRouter key + Domain Expansion branding)
+Agent: Main (orchestrator)
+Task: Add OpenRouter API key, configure working model, brand platform as Domain Expansion product
+
+Work Log:
+- Added OpenRouter API key to `.env`: `sk-or-v1-YOUR_API_KEY`
+- Added `NEXTAUTH_SECRET` and `NEXTAUTH_URL` to `.env` for proper auth
+- Discovered Claude models (anthropic/claude-sonnet-5, claude-3-haiku) are **region-restricted (403)** in this environment
+- Tested 345+ available models on OpenRouter — found `meta-llama/llama-3.3-70b-instruct` works globally and returns content properly
+- Set default model to `meta-llama/llama-3.3-70b-instruct` (user can change via OPENROUTER_MODEL env var)
+- Updated `src/lib/openrouter.ts`:
+  - Default model changed to `meta-llama/llama-3.3-70b-instruct`
+  - Added reasoning field fallback (some models like deepseek return content in `reasoning` instead of `content`)
+  - Updated getAvailableModels() defaults
+- Updated all branding to show **Domain Expansion** as parent company:
+  - `BrandMark` component: added `showParent` prop showing "by Domain Expansion" tagline
+  - Created `DomainExpansionLogo` component (violet "DE" badge with "Domain Expansion" + "Parent Company")
+  - `Footer`: added parent company banner with DE logo, "A product of Domain Expansion", contact emails (support@domainexpansion.in, hello@domainexpansion.in, etc.), copyright "© 2025 ResumeForge by Domain Expansion"
+  - Legal pages: Privacy Policy, Terms of Service, Refund Policy, About, Contact all updated with Domain Expansion Technologies references
+  - About page: full company details (Domain Expansion Technologies, Bengaluru, India, founded 2025)
+  - Contact page: all emails changed to @domainexpansion.in
+  - Admin panel: header shows "· Domain Expansion", login screen says "Domain Expansion Technologies"
+  - Layout metadata: title includes "Domain Expansion", authors set to "Domain Expansion Technologies"
+
+Verification Results:
+- ESLint: 0 errors
+- Dev server: HTTP 200 on port 3000
+- OpenRouter AI summary (curl with llama-3.3-70b): "Seasoned Software Engineer with 5+ years of impact..." ✓
+- OpenRouter AI skills (curl): 3 categories with specific skills returned ✓
+- agent-browser: "Domain Expansion" text found in footer ✓
+- VLM: "footer explicitly mentions Domain Expansion as parent company, DE logo displayed, contact email support@domainexpansion.in, copyright by Domain Expansion" ✓
+- 0 console errors
+
+Stage Summary:
+- OpenRouter API key configured and working (all 7 AI features now use OpenRouter)
+- Default model: meta-llama/llama-3.3-70b-instruct (globally available; Claude models region-restricted)
+- User can change model anytime via OPENROUTER_MODEL env var
+- Platform fully branded as "Domain Expansion" product throughout (footer, legal, admin, metadata)
+- All contact emails use @domainexpansion.in domain
+
 ## Unresolved Issues / Risks
 - Dev server process dies between bash sessions (environment limitation); cron job restarts as needed
 - agent-browser `find text` / `find role` locators are flaky in this environment (clicks sometimes fail despite elements existing); ref-based clicks work better but refs change on re-render
