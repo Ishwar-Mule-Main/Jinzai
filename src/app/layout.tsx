@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter, Poppins, Merriweather, Playfair_Display, JetB
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -66,7 +67,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${poppins.variable} ${merriweather.variable} ${playfair.variable} ${jetbrains.variable} antialiased bg-background text-foreground`}
       >
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
         <Toaster />
         <SonnerToaster richColors position="bottom-right" />
       </body>

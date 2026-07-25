@@ -106,7 +106,7 @@ Stage Summary:
 - VLM confirms 8.5-9/10 visual quality
 
 ## Current Status: STABLE, POLISHED & FEATURE-RICH
-ResumeForge now has 8 templates, 5 AI features (summary, bullets, cover letter, ATS match, resume score), saved resumes management with duplicate, JSON backup/restore, and premium styling.
+ResumeForge now has 8 templates, 5 AI features (summary, bullets, cover letter, ATS match, resume score), saved resumes management with duplicate, JSON backup/restore, dark mode toggle, public link sharing, collapsible editor sidebar, and premium styling.
 
 ---
 Task ID: 3 (cron review round 2)
@@ -152,6 +152,55 @@ Stage Summary:
 - All new features verified working via API + UI testing
 - VLM confirms 9/10 visual quality
 
+---
+Task ID: 4 (cron review round 3)
+Agent: Main (orchestrator) — webDevReview cron
+Task: QA testing, dark mode, public link sharing, collapsible sidebar
+
+Work Log:
+- Read worklog, restarted dev server, performed QA with agent-browser
+- Confirmed dashboard + editor load with 0 console errors; all 8 templates render
+- VLM analysis of editor identified UX improvements (collapsible sidebar, floating toolbar, section anchors)
+- Added **Dark Mode Toggle** with next-themes:
+  - Created `src/components/theme-provider.tsx` wrapping NextThemesProvider (attribute="class", defaultTheme="light")
+  - Created `src/components/theme-toggle.tsx` with Sun/Moon icons, mounted guard to avoid hydration mismatch
+  - Added ThemeToggle to dashboard nav (next to My Resumes) and editor toolbar (next to undo/redo)
+  - Theme persists via next-themes localStorage; verified `document.documentElement.className` returns "dark" after toggle
+- Added **Public Link Sharing** (shareable read-only resume URLs):
+  - Updated Prisma schema: added `isShared Boolean` + `shareToken String? @unique` to Resume model; pushed to DB
+  - Created `src/app/api/resumes/share/route.ts` — POST toggles sharing on/off (generates 16-char token), GET returns share status
+  - Created `src/app/api/share/[token]/route.ts` — public GET fetches shared resume by token (returns 404 if not shared)
+  - Created `src/app/share/[token]/page.tsx` — server component that fetches resume by token, generates dynamic metadata (title = candidate name), renders SharedResumeClient
+  - Created `src/app/share/[token]/page-client.tsx` — client component with header bar (brand + Download PDF button), centered A4 resume preview, footer
+  - Created `src/components/resume/share-dialog.tsx` — ShareDialog with: save-first warning, status badge (active/off), share URL input with copy button, open-in-new-tab link, toggle button (gradient when enabling)
+  - Added ShareDialog button to editor toolbar (between ATS Check and Export PDF)
+- Added **Collapsible Editor Sidebar**:
+  - Added `sidebarOpen` state to EditorView + PanelLeftClose icon button in toolbar (hidden on mobile, lg+ only)
+  - Main split grid conditionally renders editor pane based on `sidebarOpen`
+  - Floating reopen button (circular, left-center) appears when sidebar hidden
+  - Icon rotates 180° when closed for visual feedback
+- Updated dashboard nav and editor toolbar imports
+
+Verification Results:
+- ESLint: 0 errors
+- Dev server: HTTP 200 on port 3000
+- Share API flow (curl end-to-end):
+  - POST /api/resumes → created resume (id: cms0bghvl...)
+  - POST /api/resumes/share?id=... → { shared: true, shareToken: "udeyxt8aj5om9ojb", url: "/share/udeyxt8aj5om9ojb" }
+  - GET /api/resumes/share?id=... → returns correct status
+  - GET /api/share/[token] → returns resume data (title, template, content)
+  - GET /share/[token] (page) → HTTP 200, renders resume with header + Download PDF
+- agent-browser: dashboard shows "Toggle theme" button; editor toolbar shows Template/Resume Score/Cover Letter/ATS Check/Share/Export PDF
+- agent-browser eval: `document.documentElement.className` = "dark" after toggle ✓
+- VLM share page rating: 8/10 ("very professional", "clean modern minimalist", "perfectly centered and highly readable")
+- VLM dark mode rating: 9/10 ("exceptionally well-executed", "sophisticated", "top-tier implementation of dark mode UI")
+
+Stage Summary:
+- 2 major features shipped: Dark Mode Toggle + Public Link Sharing
+- Collapsible editor sidebar added for better preview focus
+- All features verified working via API + UI testing
+- VLM confirms 8-9/10 visual quality on new features
+
 ## Unresolved Issues / Risks
 - Dev server process dies between bash sessions (environment limitation); cron job restarts as needed
 - agent-browser `find text` / `find role` locators are flaky in this environment (clicks sometimes fail despite elements existing); ref-based clicks work better but refs change on re-render
@@ -160,10 +209,10 @@ Stage Summary:
 
 ## Priority Recommendations for Next Phase
 1. Add drag-and-drop section reordering (currently only experience has up/down buttons)
-2. Add dark mode toggle with theme persistence (next-themes is already installed)
-3. Add more templates (e.g. Creative Portfolio, Infographic, Two-page Executive)
-4. Add real-time spelling/grammar check in summary and experience fields
-5. Add resume sharing via public link (generate a shareable read-only URL)
-6. Add cover letter PDF export (currently only .txt)
-7. Mobile-responsive editor improvements (currently optimized for desktop split-pane)
-8. Add section count badges + sticky section nav in the editor sidebar
+2. Add more templates (e.g. Creative Portfolio, Infographic, Two-page Executive)
+3. Add real-time spelling/grammar check in summary and experience fields
+4. Add cover letter PDF export (currently only .txt)
+5. Mobile-responsive editor improvements (currently optimized for desktop split-pane)
+6. Add section count badges + sticky section nav in the editor sidebar
+7. Add share link expiry / view count analytics
+8. Add resume versioning (track edit history of saved resumes)

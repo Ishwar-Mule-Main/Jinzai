@@ -9,6 +9,8 @@ import { sampleResume } from "@/lib/resume/sample-data";
 import { getCompletion } from "@/lib/resume/sample-data";
 import { CoverLetterDialog, AtsDialog, ResumeScoreDialog } from "./ai-dialogs";
 import { SavedResumesDialog, ImportExportJson } from "./saved-resumes";
+import { ShareDialog } from "./share-dialog";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +36,7 @@ import {
   Target,
   ImageIcon,
   Gauge,
+  PanelLeftClose,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -142,6 +145,7 @@ function Dashboard() {
           <BrandMark />
           <div className="flex items-center gap-2">
             <SavedResumesDialog />
+            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -449,6 +453,7 @@ function EditorView() {
   const past = useResumeStore((s) => s.past);
   const future = useResumeStore((s) => s.future);
   const completion = getCompletion(data);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const print = () => {
     window.print();
@@ -470,6 +475,18 @@ function EditorView() {
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={redo} disabled={future.length === 0} title="Redo">
                 <Redo2 className="w-3.5 h-3.5" />
               </Button>
+              <div className="h-5 w-px bg-border mx-0.5" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 hidden lg:flex"
+                onClick={() => setSidebarOpen((v) => !v)}
+                title={sidebarOpen ? "Hide editor (maximize preview)" : "Show editor"}
+              >
+                <PanelLeftClose className={`w-3.5 h-3.5 transition-transform ${sidebarOpen ? "" : "rotate-180"}`} />
+              </Button>
+              <div className="h-5 w-px bg-border mx-0.5" />
+              <ThemeToggle className="h-8 w-8" />
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -479,6 +496,7 @@ function EditorView() {
             <ResumeScoreDialog />
             <CoverLetterDialog />
             <AtsDialog />
+            <ShareDialog />
             <Button size="sm" onClick={print} className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
               <Download className="w-3.5 h-3.5" /> Export PDF
             </Button>
@@ -494,8 +512,9 @@ function EditorView() {
       </header>
 
       {/* Main split */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[420px_1fr] print:block">
+      <div className={`flex-1 grid print:block ${sidebarOpen ? "grid-cols-1 lg:grid-cols-[420px_1fr]" : "grid-cols-1"}`}>
         {/* Editor pane */}
+        {sidebarOpen && (
         <div className="border-r bg-muted/20 print:hidden overflow-y-auto max-h-[calc(100vh-113px)] lg:max-h-[calc(100vh-113px)]">
           <Tabs defaultValue="content" className="w-full">
             <div className="px-4 pt-3 sticky top-0 bg-muted/20 backdrop-blur z-10 pb-2">
@@ -535,6 +554,18 @@ function EditorView() {
             </TabsContent>
           </Tabs>
         </div>
+        )}
+
+        {/* Floating reopen button when sidebar hidden */}
+        {!sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="fixed left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-background border shadow-lg flex items-center justify-center hover:bg-muted transition-colors print:hidden"
+            title="Show editor"
+          >
+            <PanelLeftClose className="w-4 h-4 rotate-180" />
+          </button>
+        )}
 
         {/* Preview pane */}
         <div className="bg-slate-200/60 dark:bg-slate-900/60 overflow-y-auto max-h-[calc(100vh-113px)] print:max-h-none print:overflow-visible print:bg-white">
