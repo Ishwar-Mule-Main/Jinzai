@@ -11,33 +11,30 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  password      String?  // hashed, for credentials login
+  plan          String   @default("free") // free | trial_99 | pro_499 | business_1999
+  planExpiresAt DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  resumes       Resume[]
 }
 
 model Resume {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  template    String   @default("modern")
-  accentColor String   @default("#0f766e")
-  fontFamily  String   @default("inter")
-  content     String   // JSON string of ResumeData
-  isShared    Boolean  @default(false)
-  shareToken  String?  @unique
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  template      String   @default("modern")
+  accentColor   String   @default("#0f766e")
+  fontFamily    String   @default("inter")
+  content       String   // JSON string of ResumeData
+  isShared      Boolean  @default(false)
+  shareToken    String?  @unique
+  contactLocked Boolean  @default(false) // once contact details added on paid plan, locked
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

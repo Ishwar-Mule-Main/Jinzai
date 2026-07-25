@@ -14,6 +14,7 @@ interface ResumeState {
   fontFamily: string;
   title: string;
   savedId: string | null;
+  contactLocked: boolean; // once contact details added on paid plan, locked
   // view
   view: "dashboard" | "editor";
   // history for undo/redo
@@ -26,6 +27,7 @@ interface ResumeState {
   setFontFamily: (f: string) => void;
   setTitle: (t: string) => void;
   setSavedId: (id: string | null) => void;
+  setContactLocked: (v: boolean) => void;
 
   loadSample: () => void;
   clearAll: () => void;
@@ -88,6 +90,7 @@ export const useResumeStore = create<ResumeState>()(
       fontFamily: "inter",
       title: "Untitled Resume",
       savedId: null,
+      contactLocked: false,
       view: "dashboard",
       past: [],
       future: [],
@@ -113,6 +116,7 @@ export const useResumeStore = create<ResumeState>()(
       setFontFamily: (f) => set({ fontFamily: f }),
       setTitle: (t) => set({ title: t }),
       setSavedId: (id) => set({ savedId: id }),
+      setContactLocked: (v) => set({ contactLocked: v }),
 
       loadSample: () => {
         const cloned: ResumeData = JSON.parse(JSON.stringify(sampleResume));
@@ -342,6 +346,7 @@ export const useResumeStore = create<ResumeState>()(
         fontFamily: s.fontFamily,
         title: s.title,
         savedId: s.savedId,
+        contactLocked: s.contactLocked,
         view: s.view,
       }),
     }

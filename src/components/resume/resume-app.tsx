@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { useResumeStore } from "@/lib/resume/store";
 import { TEMPLATES, ACCENT_PRESETS, FONT_OPTIONS } from "@/lib/resume/types";
 import { ResumeRenderer } from "./resume-renderer";
@@ -13,6 +14,13 @@ import { CoverLetterDialog, AtsDialog, ResumeScoreDialog } from "./ai-dialogs";
 import { SavedResumesDialog, ImportExportJson } from "./saved-resumes";
 import { ShareDialog } from "./share-dialog";
 import { CompareTemplatesDialog } from "./compare-templates";
+import { TemplateSidePanel } from "./template-side-panel";
+import { AuthDialog, LogoutButton, type AuthMode } from "./auth-dialogs";
+import { PricingDialog } from "./pricing-dialog";
+import { Footer } from "./footer";
+import { BrandMark } from "./brand-mark";
+import { useCurrentUser } from "@/lib/resume/use-current-user";
+import { getPlanConfig, isPaidPlan, canCreateResume, remainingResumes } from "@/lib/resume/plans";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +49,10 @@ import {
   ImageIcon,
   Gauge,
   PanelLeftClose,
+  Crown,
+  Lock,
+  LogIn,
+  UserPlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -51,21 +63,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-// ---------- Brand logo ----------
-
-function BrandMark({ className = "" }: { className?: string }) {
-  return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center shadow-sm">
-        <FileText className="w-4 h-4 text-white" strokeWidth={2.5} />
-      </div>
-      <span className="font-bold text-lg tracking-tight">
-        Resume<span className="text-teal-600 dark:text-teal-400">Forge</span>
-      </span>
-    </div>
-  );
-}
 
 // ---------- Dashboard ----------
 
@@ -205,6 +202,37 @@ function Dashboard() {
   const clearAll = useResumeStore((s) => s.clearAll);
   const setView = useResumeStore((s) => s.setView);
   const setTemplate = useResumeStore((s) => s.setTemplate);
+  const setContactLocked = useResumeStore((s) => s.setContactLocked);
+  const { user, refresh } = useCurrentUser();
+  const [authMode, setAuthMode] = useState<AuthMode>(null);
+
+  const planConfig = user ? getPlanConfig(user.plan) : getPlanConfig("free");
+  const canCreate = user ? canCreateResume(user.plan, user.resumeCount) : true; // not logged in = can try
+
+  const handleStartBuilding = () => {
+    if (!user) {
+      setAuthMode("signup");
+      return;
+    }
+    if (!canCreate) {
+      toast.error(`You've reached the resume limit for your ${planConfig.name} plan. Upgrade to create more.`);
+      return;
+    }
+    clearAll();
+    setContactLocked(false);
+    setTemplate("modern");
+    setView("editor");
+  };
+
+  const handleTrySample = () => {
+    loadSample();
+    setContactLocked(false);
+    if (!user) {
+      setView("editor");
+    } else {
+      setView("editor");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -213,7 +241,33 @@ function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <BrandMark />
           <div className="flex items-center gap-2">
-            <SavedResumesDialog />
+            <TemplateSidePanel />
+            {user && <SavedResumesDialog />}
+            {user && (
+              <PricingDialog currentPlan={user.plan} onSubscribed={refresh} trigger={
+                <Button size="sm" className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
+                  <Crown className="w-3.5 h-3.5" /> {user.plan === "free" ? "Upgrade" : planConfig.name}
+                </Button>
+              } />
+            )}
+            {user ? (
+              <>
+                <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted text-xs">
+                  <span className="text-muted-foreground">{user.email}</span>
+                  <Badge variant="outline" className="text-[9px] py-0 px-1.5">{planConfig.name}</Badge>
+                </div>
+                <LogoutButton onLogout={refresh} />
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => setAuthMode("login")} className="gap-1.5">
+                  <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Log In</span>
+                </Button>
+                <Button size="sm" onClick={() => setAuthMode("signup")} className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
+                  <UserPlus className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Sign Up</span>
+                </Button>
+              </>
+            )}
             <ThemeToggle />
           </div>
         </div>
@@ -247,22 +301,38 @@ function Dashboard() {
 
         {/* Quick actions */}
         <div className="flex flex-wrap justify-center gap-3 mb-16">
-          <Button onClick={() => { loadSample(); }} size="lg" className="gap-2 h-12 px-6 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 shadow-lg shadow-teal-600/20">
+          <Button onClick={handleTrySample} size="lg" className="gap-2 h-12 px-6 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 shadow-lg shadow-teal-600/20">
             <Wand2 className="w-4 h-4" /> Try with sample data
           </Button>
           <Button
             variant="outline"
             size="lg"
             className="gap-2 h-12 px-6"
-            onClick={() => { clearAll(); setTemplate("modern"); setView("editor"); }}
+            onClick={handleStartBuilding}
           >
-            <FileText className="w-4 h-4" /> Start from scratch
+            <FileText className="w-4 h-4" /> {user ? "Start from scratch" : "Get Started"}
           </Button>
+          {!user && (
+            <p className="w-full text-center text-xs text-muted-foreground">
+              Sign up free to create and save your resume. Upgrade to export.
+            </p>
+          )}
+          {user && user.plan === "free" && (
+            <p className="w-full text-center text-xs text-muted-foreground">
+              You're on the Free plan. <PricingDialog currentPlan={user.plan} onSubscribed={refresh} trigger={<button className="text-teal-600 underline">Upgrade</button>} /> to export your resume.
+            </p>
+          )}
+          {user && isPaidPlan(user.plan) && (
+            <p className="w-full text-center text-xs text-muted-foreground">
+              {remainingResumes(user.plan, user.resumeCount) === Infinity
+                ? "Unlimited resumes available."
+                : `${remainingResumes(user.plan, user.resumeCount)} resume${remainingResumes(user.plan, user.resumeCount) === 1 ? "" : "s"} remaining on your ${planConfig.name} plan.`}
+            </p>
+          )}
         </div>
 
         {/* Template gallery */}
         <TemplateGallery />
-
 
         {/* Features strip */}
         <div className="mt-20">
@@ -300,6 +370,46 @@ function Dashboard() {
           </div>
         </div>
 
+        {/* Pricing preview */}
+        <div className="mt-20">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold tracking-tight mb-1">Simple, transparent pricing</h2>
+            <p className="text-sm text-muted-foreground">Start free. Upgrade when you're ready to export.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+            {[
+              { name: "Trial", price: "₹99", period: "2 days", features: ["1 resume", "Export to PDF & DOCX", "All 52 templates"], highlight: false },
+              { name: "Pro", price: "₹499", period: "/month", features: ["Up to 5 resumes", "Export to PDF & DOCX", "All AI features", "Public share links"], highlight: true },
+              { name: "Business", price: "₹1,999", period: "/month", features: ["Unlimited resumes", "Full features", "No contact lock", "Multi-page support"], highlight: false },
+            ].map((plan) => (
+              <div key={plan.name} className={`rounded-2xl border-2 p-5 ${plan.highlight ? "border-teal-500 ring-2 ring-teal-500/20" : "border-border"}`}>
+                <p className="font-bold text-sm mb-1">{plan.name}</p>
+                <p className="text-2xl font-bold mb-1">{plan.price}<span className="text-sm font-normal text-muted-foreground">{plan.period}</span></p>
+                <ul className="space-y-1 mt-3">
+                  {plan.features.map((f) => (
+                    <li key={f} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <Check className="w-3 h-3 text-teal-600" /> {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-4">
+            {user ? (
+              <PricingDialog currentPlan={user.plan} onSubscribed={refresh} trigger={
+                <Button className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
+                  <Crown className="w-4 h-4" /> View full pricing
+                </Button>
+              } />
+            ) : (
+              <Button onClick={() => setAuthMode("signup")} className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
+                <UserPlus className="w-4 h-4" /> Sign up to get started
+              </Button>
+            )}
+          </div>
+        </div>
+
         {/* Trust banner */}
         <div className="mt-16 rounded-2xl border bg-gradient-to-br from-muted/40 to-background p-6 sm:p-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
@@ -320,8 +430,8 @@ function Dashboard() {
             <div className="flex items-center gap-3 justify-center sm:justify-start">
               <Download className="w-5 h-5 text-violet-600 shrink-0" />
               <div>
-                <p className="text-sm font-semibold">PDF & JSON export</p>
-                <p className="text-xs text-muted-foreground">Print to PDF or back up your data as JSON.</p>
+                <p className="text-sm font-semibold">PDF & DOCX export</p>
+                <p className="text-xs text-muted-foreground">Export in your chosen design with content.</p>
               </div>
             </div>
           </div>
@@ -329,12 +439,10 @@ function Dashboard() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between flex-wrap gap-2">
-          <BrandMark className="scale-90" />
-          <p className="text-xs text-muted-foreground">Built with Next.js, Tailwind & z-ai-web-dev-sdk.</p>
-        </div>
-      </footer>
+      <Footer />
+
+      {/* Auth dialog */}
+      <AuthDialog mode={authMode} onClose={() => setAuthMode(null)} onSuccess={refresh} />
     </div>
   );
 }
@@ -557,6 +665,7 @@ function EditorView() {
   const accent = useResumeStore((s) => s.accentColor);
   const font = useResumeStore((s) => s.fontFamily);
   const title = useResumeStore((s) => s.title);
+  const contactLocked = useResumeStore((s) => s.contactLocked);
   const setView = useResumeStore((s) => s.setView);
   const undo = useResumeStore((s) => s.undo);
   const redo = useResumeStore((s) => s.redo);
@@ -566,9 +675,25 @@ function EditorView() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
   const saveRef = useRef<(() => void) | null>(null);
+  const { user, refresh } = useCurrentUser();
+  const planConfig = user ? getPlanConfig(user.plan) : getPlanConfig("free");
+  const canExport = user ? planConfig.canExport : false;
 
   const print = () => {
+    if (!canExport) {
+      toast.error("Export is available on paid plans. Upgrade to export your resume.");
+      return;
+    }
     window.print();
+  };
+
+  const handleDocxExport = () => {
+    if (!canExport) {
+      toast.error("Export is available on paid plans. Upgrade to export your resume.");
+      return;
+    }
+    downloadDocx(data, accent, title);
+    toast.success("Word document downloaded");
   };
 
   useKeyboardShortcuts({
@@ -618,8 +743,15 @@ function EditorView() {
             <CoverLetterDialog />
             <AtsDialog />
             <ShareDialog />
-            <Button size="sm" onClick={print} className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
-              <Download className="w-3.5 h-3.5" /> Export PDF
+            {user && !canExport && (
+              <PricingDialog currentPlan={user.plan} onSubscribed={refresh} trigger={
+                <Button size="sm" variant="outline" className="gap-1.5 border-amber-400 text-amber-700 dark:text-amber-400">
+                  <Lock className="w-3.5 h-3.5" /> Unlock Export
+                </Button>
+              } />
+            )}
+            <Button size="sm" onClick={print} disabled={!canExport} className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 disabled:opacity-50">
+              {canExport ? <Download className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />} Export PDF
             </Button>
           </div>
         </div>
@@ -692,10 +824,11 @@ function EditorView() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => downloadDocx(data, accent, title)}
-                    className="w-full gap-1.5 justify-start"
+                    onClick={handleDocxExport}
+                    disabled={!canExport}
+                    className="w-full gap-1.5 justify-start disabled:opacity-50"
                   >
-                    <FileText className="w-3.5 h-3.5" /> Download as Word (.doc)
+                    {canExport ? <FileText className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />} Download as Word (.doc)
                   </Button>
                   <ImportExportJson />
                 </div>
@@ -720,7 +853,7 @@ function EditorView() {
         <div className={`bg-slate-200/60 dark:bg-slate-900/60 overflow-y-auto max-h-[calc(100vh-113px)] print:max-h-none print:overflow-visible print:bg-white ${mobileView === "edit" ? "hidden lg:block" : "block"}`}>
           <div className="p-2 sm:p-4 lg:p-8 flex justify-center print:p-0">
             <div
-              className="bg-white shadow-2xl shadow-slate-400/30 print:shadow-none print:w-auto"
+              className="bg-white shadow-2xl shadow-slate-400/30 print:shadow-none print:w-auto page-break-indicator"
               style={{
                 width: "210mm",
                 minHeight: "297mm",

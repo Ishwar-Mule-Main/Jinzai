@@ -33,6 +33,7 @@ import {
   Award,
   Languages,
   Layers,
+  Lock,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -262,12 +263,19 @@ function AIExperienceButton({ experienceId }: { experienceId: string }) {
 function PersonalInfoEditor() {
   const data = useResumeStore((s) => s.data);
   const updatePersonal = useResumeStore((s) => s.updatePersonal);
+  const contactLocked = useResumeStore((s) => s.contactLocked);
   const template = useResumeStore((s) => s.template);
   const tpl = TEMPLATES.find((t) => t.id === template);
   const p = data.personalInfo;
   return (
     <div className="space-y-4">
       {tpl?.hasPhoto && <PhotoUploader />}
+      {contactLocked && (
+        <div className="flex items-center gap-2 p-2.5 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 text-xs text-amber-800 dark:text-amber-200">
+          <Lock className="w-3.5 h-3.5 shrink-0" />
+          <span>Contact details are locked on your plan. They cannot be changed once saved.</span>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label className="text-xs">Full Name *</Label>
@@ -278,12 +286,12 @@ function PersonalInfoEditor() {
           <Input value={p.jobTitle} onChange={(e) => updatePersonal({ jobTitle: e.target.value })} placeholder="Senior Product Designer" />
         </div>
         <div>
-          <Label className="text-xs">Email</Label>
-          <Input value={p.email} onChange={(e) => updatePersonal({ email: e.target.value })} placeholder="you@email.com" />
+          <Label className="text-xs flex items-center gap-1">Email {contactLocked && <Lock className="w-2.5 h-2.5 text-amber-500" />}</Label>
+          <Input value={p.email} disabled={contactLocked} onChange={(e) => updatePersonal({ email: e.target.value })} placeholder="you@email.com" className={contactLocked ? "opacity-60 cursor-not-allowed" : ""} />
         </div>
         <div>
-          <Label className="text-xs">Phone</Label>
-          <Input value={p.phone} onChange={(e) => updatePersonal({ phone: e.target.value })} placeholder="+91 98765 43210" />
+          <Label className="text-xs flex items-center gap-1">Phone {contactLocked && <Lock className="w-2.5 h-2.5 text-amber-500" />}</Label>
+          <Input value={p.phone} disabled={contactLocked} onChange={(e) => updatePersonal({ phone: e.target.value })} placeholder="+91 98765 43210" className={contactLocked ? "opacity-60 cursor-not-allowed" : ""} />
         </div>
         <div>
           <Label className="text-xs">Location</Label>

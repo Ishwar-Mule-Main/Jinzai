@@ -198,4 +198,47 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+  /* Multi-page: avoid breaking inside sections and list items */
+  .resume-page section,
+  .resume-page .sortable-item,
+  .resume-page ul,
+  .resume-page li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .resume-page h2,
+  .resume-page h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
+
+/* ---------- Multi-page preview indicator ---------- */
+/* Shows a dashed line at the A4 page boundary (297mm) in the editor preview */
+.page-break-indicator {
+  position: relative;
+}
+.page-break-indicator::after {
+  content: "Page 2";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 297mm;
+  height: 0;
+  border-top: 2px dashed #cbd5e1;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #94a3b8;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 0 0 4px 4px;
+  width: fit-content;
+  margin: 0 auto;
+  border: 1px solid #cbd5e1;
+  border-top: none;
+  transform: translateY(-50%);
 }
