@@ -269,11 +269,31 @@ export const TEMPLATES: TemplateMeta[] = [
 ];
 
 export const FONT_OPTIONS = [
-  { id: "inter", label: "Inter (Sans)", className: "font-sans" },
-  { id: "poppins", label: "Poppins (Sans)", className: "font-[Poppins]" },
-  { id: "merriweather", label: "Merriweather (Serif)", className: "font-[Merriweather]" },
-  { id: "playfair", label: "Playfair Display (Serif)", className: "font-[Playfair_Display]" },
-  { id: "jetbrains", label: "JetBrains Mono (Mono)", className: "font-mono" },
+  // Free fonts
+  { id: "inter", label: "Inter (Sans)", className: "font-sans", premium: false },
+  { id: "poppins", label: "Poppins (Sans)", className: "font-[Poppins]", premium: false },
+  { id: "merriweather", label: "Merriweather (Serif)", className: "font-[Merriweather]", premium: false },
+  { id: "playfair", label: "Playfair Display (Serif)", className: "font-[Playfair_Display]", premium: false },
+  { id: "jetbrains", label: "JetBrains Mono (Mono)", className: "font-mono", premium: false },
+  // Premium fonts (paid plan required)
+  { id: "plus-jakarta", label: "Plus Jakarta Sans ⭐", className: "font-[Plus_Jakarta_Sans]", premium: true },
+  { id: "dm-sans", label: "DM Sans ⭐", className: "font-[DM_Sans]", premium: true },
+  { id: "lora", label: "Lora (Serif) ⭐", className: "font-[Lora]", premium: true },
+  { id: "source-sans", label: "Source Sans 3 ⭐", className: "font-[Source_Sans_3]", premium: true },
+  { id: "roboto", label: "Roboto ⭐", className: "font-[Roboto]", premium: true },
+  { id: "montserrat", label: "Montserrat ⭐", className: "font-[Montserrat]", premium: true },
+  { id: "crimson-text", label: "Crimson Text (Serif) ⭐", className: "font-[Crimson_Text]", premium: true },
+  { id: "space-grotesk", label: "Space Grotesk ⭐", className: "font-[Space_Grotesk]", premium: true },
+  { id: "work-sans", label: "Work Sans ⭐", className: "font-[Work_Sans]", premium: true },
+  { id: "manrope", label: "Manrope ⭐", className: "font-[Manrope]", premium: true },
+];
+
+export const FONT_SIZE_OPTIONS = [
+  { id: "xs", label: "XS", scale: 0.85 },
+  { id: "s", label: "S", scale: 0.92 },
+  { id: "m", label: "M", scale: 1.0 },
+  { id: "l", label: "L", scale: 1.1 },
+  { id: "xl", label: "XL", scale: 1.2 },
 ];
 
 export const ACCENT_PRESETS = [
@@ -287,4 +307,10 @@ export const ACCENT_PRESETS = [
   "#db2777", // pink
   "#059669", // emerald
   "#475569", // gray
+  "#b45309", // gold
+  "#7c2d12", // brown
+  "#4338ca", // indigo
+  "#0d9488", // teal-dark
+  "#9333ea", // purple
+  "#e11d48", // rose
 ];

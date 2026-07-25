@@ -30,21 +30,15 @@ Rules:
 - Be specific (e.g. "Figma" not "Design tools", "TypeScript" not "Programming").
 - Return ONLY the JSON array, no markdown, no code fences, no commentary.`;
 
-    const ZAI = (await import("z-ai-web-dev-sdk")).default;
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a career advisor who suggests relevant, specific skills for job seekers. Return ONLY a valid JSON array, no markdown or commentary.",
-        },
-        { role: "user", content: prompt },
-      ],
-      thinking: { type: "disabled" },
-    });
-
-    const raw = completion.choices[0]?.message?.content?.trim() || "";
+    const { openRouterChat } = await import("@/lib/openrouter");
+    const raw = await openRouterChat([
+      {
+        role: "system",
+        content:
+          "You are a career advisor who suggests relevant, specific skills for job seekers. Return ONLY a valid JSON array, no markdown or commentary.",
+      },
+      { role: "user", content: prompt },
+    ]);
     const cleaned = raw.replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
 
     let categories: { category: string; items: string[] }[] = [];

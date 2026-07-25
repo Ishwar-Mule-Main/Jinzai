@@ -47,21 +47,15 @@ Requirements:
 - End with a confident call to action.
 - Output only the cover letter text, no preamble, no signature line beyond "Sincerely,\\n${personalInfo.fullName}".`;
 
-    const ZAI = (await import("z-ai-web-dev-sdk")).default;
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an expert career writer who crafts personalized, non-generic cover letters. Output only the letter text.",
-        },
-        { role: "user", content: prompt },
-      ],
-      thinking: { type: "disabled" },
-    });
-
-    const letter = completion.choices[0]?.message?.content?.trim() || "";
+    const { openRouterChat } = await import("@/lib/openrouter");
+    const letter = await openRouterChat([
+      {
+        role: "system",
+        content:
+          "You are an expert career writer who crafts personalized, non-generic cover letters. Output only the letter text.",
+      },
+      { role: "user", content: prompt },
+    ]);
     if (!letter) {
       return NextResponse.json({ error: "Empty response" }, { status: 500 });
     }

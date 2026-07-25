@@ -12,6 +12,7 @@ interface ResumeState {
   template: TemplateId;
   accentColor: string;
   fontFamily: string;
+  fontSize: string; // xs, s, m, l, xl
   title: string;
   savedId: string | null;
   contactLocked: boolean; // once contact details added on paid plan, locked
@@ -25,6 +26,7 @@ interface ResumeState {
   setTemplate: (t: TemplateId) => void;
   setAccentColor: (c: string) => void;
   setFontFamily: (f: string) => void;
+  setFontSize: (s: string) => void;
   setTitle: (t: string) => void;
   setSavedId: (id: string | null) => void;
   setContactLocked: (v: boolean) => void;
@@ -88,6 +90,7 @@ export const useResumeStore = create<ResumeState>()(
       template: "modern",
       accentColor: "#0f766e",
       fontFamily: "inter",
+      fontSize: "m",
       title: "Untitled Resume",
       savedId: null,
       contactLocked: false,
@@ -114,6 +117,7 @@ export const useResumeStore = create<ResumeState>()(
       },
       setAccentColor: (c) => set({ accentColor: c }),
       setFontFamily: (f) => set({ fontFamily: f }),
+      setFontSize: (s) => set({ fontSize: s }),
       setTitle: (t) => set({ title: t }),
       setSavedId: (id) => set({ savedId: id }),
       setContactLocked: (v) => set({ contactLocked: v }),
@@ -344,6 +348,7 @@ export const useResumeStore = create<ResumeState>()(
         template: s.template,
         accentColor: s.accentColor,
         fontFamily: s.fontFamily,
+        fontSize: s.fontSize,
         title: s.title,
         savedId: s.savedId,
         contactLocked: s.contactLocked,

@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useResumeStore } from "@/lib/resume/store";
-import { TEMPLATES, ACCENT_PRESETS, FONT_OPTIONS } from "@/lib/resume/types";
+import { TEMPLATES, ACCENT_PRESETS, FONT_OPTIONS, FONT_SIZE_OPTIONS } from "@/lib/resume/types";
 import { ResumeRenderer } from "./resume-renderer";
 import { TemplateThumbnail } from "./template-thumbnail";
 import { ResumeEditor } from "./resume-editor";
@@ -16,6 +16,8 @@ import { ShareDialog } from "./share-dialog";
 import { CompareTemplatesDialog } from "./compare-templates";
 import { TemplateSidePanel } from "./template-side-panel";
 import { RoleExamplesDialog, OnboardingTour } from "./role-examples-dialog";
+import { ImportResumeDialog } from "./import-resume-dialog";
+import { SupportDialog } from "./support-dialog";
 import { AuthDialog, LogoutButton, type AuthMode } from "./auth-dialogs";
 import { PricingDialog } from "./pricing-dialog";
 import { Footer } from "./footer";
@@ -243,7 +245,9 @@ function Dashboard() {
           <BrandMark />
           <div className="flex items-center gap-2">
             <TemplateSidePanel />
+            <ImportResumeDialog />
             {user && <SavedResumesDialog />}
+            <SupportDialog />
             {user && (
               <PricingDialog currentPlan={user.plan} onSubscribed={refresh} trigger={
                 <Button size="sm" className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
@@ -505,8 +509,12 @@ function CustomizePanel() {
   const setAccent = useResumeStore((s) => s.setAccentColor);
   const font = useResumeStore((s) => s.fontFamily);
   const setFont = useResumeStore((s) => s.setFontFamily);
+  const fontSize = useResumeStore((s) => s.fontSize);
+  const setFontSize = useResumeStore((s) => s.setFontSize);
   const template = useResumeStore((s) => s.template);
   const tpl = TEMPLATES.find((t) => t.id === template);
+  const { user } = useCurrentUser();
+  const isPaid = user ? isPaidPlan(user.plan) : false;
 
   return (
     <div className="space-y-4">
@@ -535,19 +543,44 @@ function CustomizePanel() {
         </div>
       </div>
       <div>
-        <p className="text-xs font-medium mb-2">Font family</p>
-        <div className="grid grid-cols-1 gap-1.5">
-          {FONT_OPTIONS.map((f) => (
+        <p className="text-xs font-medium mb-2">Font size</p>
+        <div className="flex gap-1.5">
+          {FONT_SIZE_OPTIONS.map((s) => (
             <button
-              key={f.id}
-              onClick={() => setFont(f.id)}
-              className={`text-left px-3 py-2 rounded-md border text-sm transition-all ${
-                font === f.id ? "border-teal-500 bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300" : "border-border hover:bg-muted/50"
-              } ${f.className}`}
+              key={s.id}
+              onClick={() => setFontSize(s.id)}
+              className={`flex-1 py-1.5 rounded-md border text-xs font-medium transition-all ${
+                fontSize === s.id ? "border-teal-500 bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300" : "border-border hover:bg-muted/50"
+              }`}
             >
-              {f.label}
+              {s.label}
             </button>
           ))}
+        </div>
+      </div>
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-medium">Font family</p>
+          {!isPaid && <span className="text-[9px] text-amber-600 dark:text-amber-400 flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> Premium = paid plan</span>}
+        </div>
+        <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto">
+          {FONT_OPTIONS.map((f) => {
+            const isPremium = "premium" in f && f.premium;
+            const locked = isPremium && !isPaid;
+            return (
+              <button
+                key={f.id}
+                onClick={() => !locked && setFont(f.id)}
+                disabled={locked}
+                className={`text-left px-3 py-2 rounded-md border text-sm transition-all flex items-center justify-between ${
+                  font === f.id ? "border-teal-500 bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300" : "border-border hover:bg-muted/50"
+                } ${locked ? "opacity-50 cursor-not-allowed" : ""} ${f.className}`}
+              >
+                <span>{f.label}</span>
+                {locked && <Lock className="w-3 h-3 text-amber-500" />}
+              </button>
+            );
+          })}
         </div>
       </div>
       {tpl && !tpl.hasPhoto && (
@@ -746,9 +779,20 @@ function EditorView() {
             <div className="hidden md:block h-5 w-px bg-border mx-0.5" />
             <TemplateSwitcher />
             <CompareTemplatesDialog />
-            <ResumeScoreDialog />
+            {/* Resume Score + ATS gated behind Pro (₹499+) plan */}
+            {(user?.plan === "pro_499" || user?.plan === "business_1999") ? (
+              <>
+                <ResumeScoreDialog />
+                <AtsDialog />
+              </>
+            ) : (
+              <PricingDialog currentPlan={user?.plan || "free"} onSubscribed={refresh} trigger={
+                <Button size="sm" variant="outline" className="gap-1.5 border-amber-400 text-amber-700 dark:text-amber-400">
+                  <Lock className="w-3.5 h-3.5" /> Score & ATS
+                </Button>
+              } />
+            )}
             <CoverLetterDialog />
-            <AtsDialog />
             <ShareDialog />
             {user && !canExport && (
               <PricingDialog currentPlan={user.plan} onSubscribed={refresh} trigger={
@@ -860,7 +904,16 @@ function EditorView() {
         <div className={`bg-slate-200/60 dark:bg-slate-900/60 overflow-y-auto max-h-[calc(100vh-113px)] print:max-h-none print:overflow-visible print:bg-white ${mobileView === "edit" ? "hidden lg:block" : "block"}`}>
           <div className="p-2 sm:p-4 lg:p-8 flex justify-center print:p-0">
             <div
-              className="bg-white shadow-2xl shadow-slate-400/30 print:shadow-none print:w-auto page-break-indicator"
+              className="bg-white shadow-2xl shadow-slate-400/30 print:shadow-none print:w-auto page-break-indicator resume-protected"
+              onContextMenu={(e) => {
+                e.preventDefault();
+                toast.error("Content is protected — right-click is disabled on the resume preview");
+              }}
+              onCopy={(e) => {
+                e.preventDefault();
+                toast.error("Content is protected — copying is disabled");
+              }}
+              onDragStart={(e) => e.preventDefault()}
               style={{
                 width: "210mm",
                 minHeight: "297mm",

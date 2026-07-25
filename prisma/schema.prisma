@@ -32,9 +32,22 @@ model Resume {
   content       String   // JSON string of ResumeData
   isShared      Boolean  @default(false)
   shareToken    String?  @unique
-  contactLocked Boolean  @default(false) // once contact details added on paid plan, locked
+  contactLocked Boolean  @default(false)
   userId        String?
   user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model SupportTicket {
+  id        String   @id @default(cuid())
+  userId    String?
+  email     String
+  name      String?
+  subject   String
+  message   String
+  status    String   @default("open") // open | replied | resolved
+  reply     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

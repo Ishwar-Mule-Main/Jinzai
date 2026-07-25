@@ -38,21 +38,15 @@ Requirements:
 - Avoid buzzword stuffing; be specific and concrete.
 - Return only the summary paragraph, no preamble.`;
 
-    const ZAI = (await import("z-ai-web-dev-sdk")).default;
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an expert resume writer who crafts concise, impactful professional summaries. Output only the summary text, no quotes or headings.",
-        },
-        { role: "user", content: prompt },
-      ],
-      thinking: { type: "disabled" },
-    });
-
-    const summary = completion.choices[0]?.message?.content?.trim() || "";
+    const { openRouterChat } = await import("@/lib/openrouter");
+    const summary = await openRouterChat([
+      {
+        role: "system",
+        content:
+          "You are an expert resume writer who crafts concise, impactful professional summaries. Output only the summary text, no quotes or headings.",
+      },
+      { role: "user", content: prompt },
+    ]);
     if (!summary) {
       return NextResponse.json({ error: "Empty response" }, { status: 500 });
     }

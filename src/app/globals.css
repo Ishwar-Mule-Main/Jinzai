@@ -137,6 +137,36 @@
 .font-\[Playfair_Display\] {
   font-family: var(--font-playfair-display), Georgia, serif;
 }
+.font-\[Plus_Jakarta_Sans\] {
+  font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+}
+.font-\[DM_Sans\] {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+.font-\[Lora\] {
+  font-family: var(--font-lora), Georgia, serif;
+}
+.font-\[Source_Sans_3\] {
+  font-family: var(--font-source-sans), system-ui, sans-serif;
+}
+.font-\[Roboto\] {
+  font-family: var(--font-roboto), system-ui, sans-serif;
+}
+.font-\[Montserrat\] {
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+}
+.font-\[Crimson_Text\] {
+  font-family: var(--font-crimson-text), Georgia, serif;
+}
+.font-\[Space_Grotesk\] {
+  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+}
+.font-\[Work_Sans\] {
+  font-family: var(--font-work-sans), system-ui, sans-serif;
+}
+.font-\[Manrope\] {
+  font-family: var(--font-manrope), system-ui, sans-serif;
+}
 
 /* ---------- Custom scrollbars ---------- */
 .scroll-thin::-webkit-scrollbar,
@@ -164,6 +194,19 @@
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Content protection: disable selection + right-click on resume preview ---------- */
+.resume-protected {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.resume-protected img {
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 /* ---------- Print: only the resume ---------- */

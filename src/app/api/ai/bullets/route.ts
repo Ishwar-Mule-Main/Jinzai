@@ -23,21 +23,15 @@ Requirements:
 - No first person, no fluff.
 - Return as a JSON array of strings, e.g. ["Led...", "Built...", "Shipped..."]`;
 
-    const ZAI = (await import("z-ai-web-dev-sdk")).default;
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an expert resume writer. Return ONLY a valid JSON array of strings, no markdown, no code fences, no commentary.",
-        },
-        { role: "user", content: prompt },
-      ],
-      thinking: { type: "disabled" },
-    });
-
-    const raw = completion.choices[0]?.message?.content?.trim() || "";
+    const { openRouterChat } = await import("@/lib/openrouter");
+    const raw = await openRouterChat([
+      {
+        role: "system",
+        content:
+          "You are an expert resume writer. Return ONLY a valid JSON array of strings, no markdown, no code fences, no commentary.",
+      },
+      { role: "user", content: prompt },
+    ]);
     let bullets: string[] = [];
     // Try to parse JSON; tolerate code fences
     const cleaned = raw.replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
