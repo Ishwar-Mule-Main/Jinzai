@@ -42,17 +42,20 @@ export function SortableItem({ id, children, renderHandle, dragHandleOnly = true
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.6 : 1,
     zIndex: isDragging ? 50 : "auto",
+    boxShadow: isDragging ? "0 8px 24px -4px rgba(0,0,0,0.15)" : "none",
+    borderRadius: isDragging ? "0.5rem" : undefined,
   };
 
   const handle = (
     <button
       type="button"
-      className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors touch-none flex items-center"
+      className="cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-foreground hover:bg-muted rounded p-0.5 transition-colors touch-none flex items-center"
       {...attributes}
       {...listeners}
       aria-label="Drag to reorder"
+      title="Drag to reorder"
     >
       <GripVertical className="w-4 h-4" />
     </button>

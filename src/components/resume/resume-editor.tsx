@@ -641,29 +641,34 @@ function LanguagesEditor() {
   const add = useResumeStore((s) => s.addLanguage);
   const update = useResumeStore((s) => s.updateLanguage);
   const remove = useResumeStore((s) => s.removeLanguage);
+  const reorderSection = useResumeStore((s) => s.reorderSection);
   const levels = ["Basic", "Conversational", "Fluent", "Professional", "Native"];
   return (
     <div className="space-y-3">
       {items.length === 0 && <p className="text-xs text-muted-foreground italic">No languages added yet.</p>}
-      <div className="space-y-2">
-        {items.map((l) => (
-          <div key={l.id} className="flex items-center gap-2">
-            <Input value={l.name} onChange={(e) => update(l.id, { name: e.target.value })} placeholder="Language" className="flex-1" />
-            <select
-              value={l.proficiency}
-              onChange={(e) => update(l.id, { proficiency: e.target.value })}
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-            >
-              {levels.map((lv) => (
-                <option key={lv} value={lv}>{lv}</option>
-              ))}
-            </select>
-            <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(l.id)}>
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-        ))}
-      </div>
+      <SortableList
+        items={items}
+        onReorder={(oldIndex, newIndex) => reorderSection("languages", oldIndex, newIndex)}
+        renderItem={(l) => (
+          <SortableItem id={l.id}>
+            <div className="flex items-center gap-2">
+              <Input value={l.name} onChange={(e) => update(l.id, { name: e.target.value })} placeholder="Language" className="flex-1" />
+              <select
+                value={l.proficiency}
+                onChange={(e) => update(l.id, { proficiency: e.target.value })}
+                className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              >
+                {levels.map((lv) => (
+                  <option key={lv} value={lv}>{lv}</option>
+                ))}
+              </select>
+              <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(l.id)}>
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </SortableItem>
+        )}
+      />
       <Button type="button" variant="outline" size="sm" onClick={add}>
         <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Language
       </Button>
@@ -678,20 +683,27 @@ function CustomSectionsEditor() {
   const add = useResumeStore((s) => s.addCustomSection);
   const update = useResumeStore((s) => s.updateCustomSection);
   const remove = useResumeStore((s) => s.removeCustomSection);
+  const reorderSection = useResumeStore((s) => s.reorderSection);
   return (
     <div className="space-y-3">
       {items.length === 0 && <p className="text-xs text-muted-foreground italic">Add custom sections like "Awards", "Volunteer", "Interests".</p>}
-      {items.map((s) => (
-        <div key={s.id} className="border rounded-lg p-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <Input value={s.title} onChange={(e) => update(s.id, { title: e.target.value })} placeholder="Section title (e.g. Awards)" className="font-medium text-sm" />
-            <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(s.id)}>
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-          <StringListEditor items={s.items} onChange={(next) => update(s.id, { items: next })} placeholder="Add an item and press Enter" />
-        </div>
-      ))}
+      <SortableList
+        items={items}
+        onReorder={(oldIndex, newIndex) => reorderSection("customSections", oldIndex, newIndex)}
+        renderItem={(s) => (
+          <SortableItem id={s.id}>
+            <div className="border rounded-lg p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <Input value={s.title} onChange={(e) => update(s.id, { title: e.target.value })} placeholder="Section title (e.g. Awards)" className="font-medium text-sm" />
+                <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(s.id)}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+              <StringListEditor items={s.items} onChange={(next) => update(s.id, { items: next })} placeholder="Add an item and press Enter" />
+            </div>
+          </SortableItem>
+        )}
+      />
       <Button type="button" variant="outline" size="sm" onClick={add}>
         <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Custom Section
       </Button>

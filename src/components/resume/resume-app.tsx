@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useResumeStore } from "@/lib/resume/store";
 import { TEMPLATES, ACCENT_PRESETS, FONT_OPTIONS } from "@/lib/resume/types";
 import { ResumeRenderer } from "./resume-renderer";
 import { ResumeEditor } from "./resume-editor";
 import { sampleResume } from "@/lib/resume/sample-data";
 import { getCompletion } from "@/lib/resume/sample-data";
+import { useKeyboardShortcuts } from "@/lib/resume/use-shortcuts";
 import { CoverLetterDialog, AtsDialog, ResumeScoreDialog } from "./ai-dialogs";
 import { SavedResumesDialog, ImportExportJson } from "./saved-resumes";
 import { ShareDialog } from "./share-dialog";
+import { CompareTemplatesDialog } from "./compare-templates";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -389,7 +391,7 @@ function CustomizePanel() {
   );
 }
 
-function SaveLoadBar() {
+function SaveLoadBar({ saveRef }: { saveRef?: React.MutableRefObject<(() => void) | null> }) {
   const data = useResumeStore((s) => s.data);
   const template = useResumeStore((s) => s.template);
   const accent = useResumeStore((s) => s.accentColor);
@@ -427,6 +429,9 @@ function SaveLoadBar() {
     }
   };
 
+  // Expose save to parent via ref for keyboard shortcuts
+  if (saveRef) saveRef.current = save;
+
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <Input
@@ -442,6 +447,57 @@ function SaveLoadBar() {
   );
 }
 
+function KeyboardShortcutsHint() {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button
+          className="hidden lg:flex items-center gap-1 h-8 px-2 rounded-md text-[10px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          title="Keyboard shortcuts"
+        >
+          <kbd className="font-sans">⌘</kbd>
+          <kbd className="font-sans">K</kbd>
+        </button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <span className="text-base">⌨️</span> Keyboard Shortcuts
+          </DialogTitle>
+          <DialogDescription>Speed up your workflow with these shortcuts.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          {[
+            { keys: ["Ctrl", "Z"], action: "Undo" },
+            { keys: ["Ctrl", "Shift", "Z"], action: "Redo" },
+            { keys: ["Ctrl", "S"], action: "Save resume" },
+            { keys: ["Ctrl", "P"], action: "Export to PDF (print)" },
+            { keys: ["Esc"], action: "Back to templates" },
+          ].map((s) => (
+            <div key={s.action} className="flex items-center justify-between gap-3 py-1.5 border-b last:border-0">
+              <span className="text-sm text-foreground/80">{s.action}</span>
+              <div className="flex gap-1">
+                {s.keys.map((k) => (
+                  <kbd
+                    key={k}
+                    className="min-w-6 h-6 px-1.5 inline-flex items-center justify-center rounded border bg-muted text-[10px] font-mono font-semibold"
+                  >
+                    {k}
+                  </kbd>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="text-[11px] text-muted-foreground text-center pt-1">
+          On Mac, use <kbd className="font-mono">⌘</kbd> instead of <kbd className="font-mono">Ctrl</kbd>.
+        </p>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function EditorView() {
   const data = useResumeStore((s) => s.data);
   const template = useResumeStore((s) => s.template);
@@ -454,10 +510,18 @@ function EditorView() {
   const future = useResumeStore((s) => s.future);
   const completion = getCompletion(data);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const saveRef = useRef<(() => void) | null>(null);
 
   const print = () => {
     window.print();
   };
+
+  useKeyboardShortcuts({
+    onSave: () => saveRef.current?.(),
+    onPrint: print,
+    onBack: () => setView("dashboard"),
+    enabled: true,
+  });
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -469,10 +533,10 @@ function EditorView() {
               <ArrowLeft className="w-4 h-4" /> <span className="hidden sm:inline">Templates</span>
             </Button>
             <div className="hidden sm:flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={undo} disabled={past.length === 0} title="Undo">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={undo} disabled={past.length === 0} title="Undo (Ctrl+Z)">
                 <Undo2 className="w-3.5 h-3.5" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={redo} disabled={future.length === 0} title="Redo">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={redo} disabled={future.length === 0} title="Redo (Ctrl+Shift+Z)">
                 <Redo2 className="w-3.5 h-3.5" />
               </Button>
               <div className="h-5 w-px bg-border mx-0.5" />
@@ -487,12 +551,14 @@ function EditorView() {
               </Button>
               <div className="h-5 w-px bg-border mx-0.5" />
               <ThemeToggle className="h-8 w-8" />
+              <KeyboardShortcutsHint />
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
-            <SaveLoadBar />
+            <SaveLoadBar saveRef={saveRef} />
             <div className="hidden md:block h-5 w-px bg-border mx-0.5" />
             <TemplateSwitcher />
+            <CompareTemplatesDialog />
             <ResumeScoreDialog />
             <CoverLetterDialog />
             <AtsDialog />
