@@ -57,18 +57,25 @@ export function AuthDialog({
       return;
     }
     setLoading(true);
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.error) {
-      toast.error("Invalid email or password");
-    } else {
-      toast.success("Logged in successfully");
-      onSuccess?.();
-      onClose();
+    try {
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      if (res?.error) {
+        toast.error("Invalid email or password");
+        setLoading(false);
+      } else {
+        // Wait a moment for session to update, then refresh
+        await new Promise((r) => setTimeout(r, 500));
+        toast.success("Logged in successfully");
+        onSuccess?.();
+        onClose();
+      }
+    } catch (e) {
+      toast.error("Login failed — please try again");
+      setLoading(false);
     }
   };
 
