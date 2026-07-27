@@ -90,9 +90,9 @@ function TemplateCard({ id, index, user, onAuthRequired }: { id: (typeof TEMPLAT
 
   return (
     <Card className="overflow-hidden group hover:shadow-xl hover:shadow-teal-900/5 transition-all duration-300 hover:-translate-y-1.5 border-border/50 rounded-2xl">
-      <div className="aspect-[3/4] bg-white overflow-hidden relative border-b border-border/40">
-        {/* LIVE resume preview with sample data — scaled to fit card */}
-        <div className="origin-top-left absolute top-0 left-0 pointer-events-none" style={{ transform: "scale(0.42)", width: "238%", height: "238%" }}>
+      <div className="bg-white overflow-hidden relative border-b border-border/40" style={{ height: "320px" }}>
+        {/* LIVE resume preview with sample data — scaled to fit card width */}
+        <div className="origin-top-left absolute top-0 left-0 pointer-events-none" style={{ transform: "scale(0.40)", width: "250%", minHeight: "800px" }}>
           <ResumeRenderer data={sampleData} accent={id.accentDefault} font={id.fontDefault} template={id.id} />
         </div>
         {/* Hover actions */}
@@ -566,7 +566,7 @@ function Dashboard() {
       <Footer />
 
       {/* Auth dialog */}
-      <AuthDialog mode={authMode} onClose={() => setAuthMode(null)} onSuccess={refresh} />
+      <AuthDialog mode={authMode} onClose={() => setAuthMode(null)} onSuccess={async () => { await refresh(); clearAll(); setTemplate("modern"); setView("editor"); }} />
       <OnboardingTour />
     </div>
   );

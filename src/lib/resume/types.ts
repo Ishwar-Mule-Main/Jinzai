@@ -140,7 +140,28 @@ export type TemplateId =
   | "bold-stripes"
   | "color-blocks"
   | "hex-accent"
-  | "postcard";
+  | "postcard"
+  // 20 advanced premium templates
+  | "aurora-pro"
+  | "midnight-exec"
+  | "corporate-elite"
+  | "sapphire-glow"
+  | "ivory-tower"
+  | "crimson-impact"
+  | "emerald-luxe"
+  | "royal-purple"
+  | "steel-magnolia"
+  | "sunset-blaze"
+  | "monaco"
+  | "tokyo-night"
+  | "parisian"
+  | "silicon-valley"
+  | "vienna"
+  | "mumbai-spice"
+  | "nordic-frost"
+  | "sahara"
+  | "cyber-pulse"
+  | "bauhaus";
 
 export interface TemplateMeta {
   id: TemplateId;

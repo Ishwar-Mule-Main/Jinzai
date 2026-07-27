@@ -205,6 +205,87 @@ export const NEW_TEMPLATE_SPECS: TemplateSpec[] = [
     id: "postcard", name: "Postcard", description: "Coral bordered card style with Playfair. Charming and formal.", hasPhoto: false,
     layout: "single", headerStyle: "centered", headingStyle: "centered", bulletStyle: "diamond", colorTreatment: "accent-rules", density: "spacious", font: "playfair", accent: "#fb7185", tags: ["Card", "Serif", "Elegant"],
   },
+  // ---------- 20 Advanced Premium Templates ----------
+  {
+    id: "aurora-pro", name: "Aurora Pro", description: "Gradient sidebar with glassmorphism effect. Ultra-modern and premium.", hasPhoto: true,
+    layout: "sidebar-left", headerStyle: "sidebar", headingStyle: "pill", bulletStyle: "arrow", colorTreatment: "gradient-header", density: "normal", font: "plus-jakarta", accent: "#6366f1", accent2: "#a855f7", tags: ["Premium", "Sidebar", "Gradient", "Photo"],
+  },
+  {
+    id: "midnight-exec", name: "Midnight Executive", description: "Dark sidebar with gold accents. Luxury executive design.", hasPhoto: true,
+    layout: "sidebar-left", headerStyle: "sidebar", headingStyle: "bar", bulletStyle: "diamond", colorTreatment: "dark-sidebar", density: "spacious", font: "playfair", accent: "#d4af37", tags: ["Premium", "Dark", "Gold", "Executive"],
+  },
+  {
+    id: "corporate-elite", name: "Corporate Elite", description: "Navy banner with boxed sections. Boardroom-ready corporate design.", hasPhoto: true,
+    layout: "header-banner", headerStyle: "banner", headingStyle: "boxed", bulletStyle: "check", colorTreatment: "gradient-header", density: "normal", font: "montserrat", accent: "#1e3a8a", accent2: "#3b82f6", tags: ["Premium", "Corporate", "Banner", "Photo"],
+  },
+  {
+    id: "sapphire-glow", name: "Sapphire Glow", description: "Sapphire-blue gradient header with glow effects. Tech-forward and bold.", hasPhoto: true,
+    layout: "header-banner", headerStyle: "banner", headingStyle: "pill", bulletStyle: "arrow", colorTreatment: "gradient-header", density: "normal", font: "space-grotesk", accent: "#2563eb", accent2: "#06b6d4", tags: ["Premium", "Gradient", "Tech", "Photo"],
+  },
+  {
+    id: "ivory-tower", name: "Ivory Tower", description: "Academic-grade with Lora serif, numbered sections, and ivory background.", hasPhoto: false,
+    layout: "single", headerStyle: "centered", headingStyle: "numbered", bulletStyle: "dash", colorTreatment: "accent-rules", density: "spacious", font: "lora", accent: "#7c3aed", tags: ["Premium", "Academic", "Serif", "Numbered"],
+  },
+  {
+    id: "crimson-impact", name: "Crimson Impact", description: "Bold crimson sidebar with white text. High-impact and assertive.", hasPhoto: true,
+    layout: "sidebar-left", headerStyle: "sidebar", headingStyle: "uppercase", bulletStyle: "arrow", colorTreatment: "solid-sidebar", density: "compact", font: "montserrat", accent: "#dc2626", tags: ["Premium", "Sidebar", "Bold", "Photo"],
+  },
+  {
+    id: "emerald-luxe", name: "Emerald Luxe", description: "Emerald green sidebar with Manrope font. Sophisticated and calm.", hasPhoto: true,
+    layout: "sidebar-left", headerStyle: "sidebar", headingStyle: "underline", bulletStyle: "dot", colorTreatment: "solid-sidebar", density: "spacious", font: "manrope", accent: "#059669", tags: ["Premium", "Sidebar", "Green", "Photo"],
+  },
+  {
+    id: "royal-purple", name: "Royal Purple", description: "Purple gradient banner with DM Sans. Creative and authoritative.", hasPhoto: true,
+    layout: "header-banner", headerStyle: "banner", headingStyle: "bar", bulletStyle: "diamond", colorTreatment: "gradient-header", density: "normal", font: "dm-sans", accent: "#7c3aed", accent2: "#c026d3", tags: ["Premium", "Gradient", "Creative", "Photo"],
+  },
+  {
+    id: "steel-magnolia", name: "Steel Magnolia", description: "Steel-gray sidebar with rose accents. Understated elegance.", hasPhoto: true,
+    layout: "sidebar-right", headerStyle: "sidebar", headingStyle: "rule", bulletStyle: "dash", colorTreatment: "solid-sidebar", density: "normal", font: "work-sans", accent: "#64748b", tags: ["Premium", "Sidebar", "Elegant", "Photo"],
+  },
+  {
+    id: "sunset-blaze", name: "Sunset Blaze", description: "Orange-to-pink gradient banner with Poppins. Warm and energetic.", hasPhoto: true,
+    layout: "header-banner", headerStyle: "banner", headingStyle: "pill", bulletStyle: "arrow", colorTreatment: "gradient-header", density: "normal", font: "poppins", accent: "#f97316", accent2: "#ec4899", tags: ["Premium", "Gradient", "Warm", "Photo"],
+  },
+  {
+    id: "monaco", name: "Monaco", description: "Minimal black-and-white with Source Sans. Swiss design inspiration.", hasPhoto: false,
+    layout: "split-header", headerStyle: "left", headingStyle: "uppercase", bulletStyle: "dash", colorTreatment: "minimal", density: "compact", font: "source-sans", accent: "#0f172a", tags: ["Premium", "Minimal", "Swiss", "ATS"],
+  },
+  {
+    id: "tokyo-night", name: "Tokyo Night", description: "Dark indigo sidebar with neon cyan accents. Cyberpunk-inspired.", hasPhoto: true,
+    layout: "sidebar-left", headerStyle: "sidebar", headingStyle: "boxed", bulletStyle: "arrow", colorTreatment: "dark-sidebar", density: "normal", font: "space-grotesk", accent: "#06b6d4", tags: ["Premium", "Dark", "Neon", "Tech"],
+  },
+  {
+    id: "parisian", name: "Parisian", description: "Crimson Text serif with centered header. French editorial elegance.", hasPhoto: false,
+    layout: "single", headerStyle: "centered", headingStyle: "centered", bulletStyle: "none", colorTreatment: "accent-rules", density: "spacious", font: "crimson-text", accent: "#be123c", tags: ["Premium", "Editorial", "Serif", "Elegant"],
+  },
+  {
+    id: "silicon-valley", name: "Silicon Valley", description: "Clean split-header with Roboto. Startup-friendly and modern.", hasPhoto: false,
+    layout: "split-header", headerStyle: "left", headingStyle: "bar", bulletStyle: "dot", colorTreatment: "accent-rules", density: "normal", font: "roboto", accent: "#2563eb", tags: ["Premium", "Startup", "Modern", "ATS"],
+  },
+  {
+    id: "vienna", name: "Vienna", description: "Classical Lora serif with gold rules. European sophistication.", hasPhoto: false,
+    layout: "single", headerStyle: "centered", headingStyle: "rule", bulletStyle: "diamond", colorTreatment: "accent-rules", density: "spacious", font: "lora", accent: "#b45309", tags: ["Premium", "Classical", "Serif", "Gold"],
+  },
+  {
+    id: "mumbai-spice", name: "Mumbai Spice", description: "Vibrant orange sidebar with Montserrat. Bold and cultural.", hasPhoto: true,
+    layout: "sidebar-left", headerStyle: "sidebar", headingStyle: "pill", bulletStyle: "check", colorTreatment: "solid-sidebar", density: "normal", font: "montserrat", accent: "#ea580c", tags: ["Premium", "Sidebar", "Vibrant", "Photo"],
+  },
+  {
+    id: "nordic-frost", name: "Nordic Frost", description: "Ice-blue gradient banner with Work Sans. Clean and cool.", hasPhoto: true,
+    layout: "header-banner", headerStyle: "banner", headingStyle: "underline", bulletStyle: "dot", colorTreatment: "gradient-header", density: "spacious", font: "work-sans", accent: "#0ea5e9", accent2: "#67e8f9", tags: ["Premium", "Gradient", "Cool", "Photo"],
+  },
+  {
+    id: "sahara", name: "Sahara", description: "Warm amber sidebar with Crimson Text. Desert-inspired warmth.", hasPhoto: true,
+    layout: "sidebar-left", headerStyle: "sidebar", headingStyle: "numbered", bulletStyle: "dash", colorTreatment: "solid-sidebar", density: "spacious", font: "crimson-text", accent: "#d97706", tags: ["Premium", "Sidebar", "Warm", "Serif"],
+  },
+  {
+    id: "cyber-pulse", name: "Cyber Pulse", description: "Dark sidebar with electric green accents. Futuristic developer design.", hasPhoto: true,
+    layout: "sidebar-left", headerStyle: "sidebar", headingStyle: "uppercase", bulletStyle: "arrow", colorTreatment: "dark-sidebar", density: "compact", font: "jetbrains", accent: "#22c55e", tags: ["Premium", "Dark", "Neon", "Developer"],
+  },
+  {
+    id: "bauhaus", name: "Bauhaus", description: "Primary color blocks with geometric headings. Design-school inspired.", hasPhoto: false,
+    layout: "split-header", headerStyle: "left", headingStyle: "boxed", bulletStyle: "dot", colorTreatment: "two-tone", density: "normal", font: "space-grotesk", accent: "#dc2626", accent2: "#2563eb", tags: ["Premium", "Geometric", "Bold", "Creative"],
+  },
 ];
 
 export const SPEC_MAP: Record<string, TemplateSpec> = Object.fromEntries(
