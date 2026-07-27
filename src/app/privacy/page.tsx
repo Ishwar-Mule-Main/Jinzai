@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { LegalPageLayout } from "../legal-layout/legal-page-layout";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — ResumeForge | Domain Expansion",
-  description: "Privacy Policy for ResumeForge by Domain Expansion. GDPR, CCPA, and IT Act 2000 compliant.",
+  title: "Privacy Policy — Jinzai | Domain Expansion",
+  description: "Privacy Policy for Jinzai by Domain Expansion. GDPR, CCPA, and IT Act 2000 compliant.",
 };
 
 export default function PrivacyPage() {
   return (
     <LegalPageLayout title="Privacy Policy" lastUpdated={new Date().toLocaleDateString("en-IN")}>
-      <p className="text-sm text-muted-foreground">This Privacy Policy is governed by Domain Expansion, the parent company of ResumeForge.</p>
+      <p className="text-sm text-muted-foreground">This Privacy Policy is governed by Domain Expansion, the parent company of Jinzai.</p>
 
       <h2 className="text-lg font-bold mt-6 mb-2">1. Information We Collect</h2>
       <p>We collect information you provide when you create an account, including your name, email address, and resume content. We also collect usage data such as templates used, features accessed, and device information.</p>
@@ -78,7 +78,7 @@ export default function PrivacyPage() {
       <p>Your data may be processed in countries other than your own (including India, USA, and EU). We ensure appropriate safeguards are in place for such transfers in compliance with applicable data protection laws.</p>
 
       <h2 className="text-lg font-bold mt-6 mb-2">12. Children's Privacy</h2>
-      <p>ResumeForge is not intended for users under 16 years of age. We do not knowingly collect personal information from children under 16.</p>
+      <p>Jinzai is not intended for users under 16 years of age. We do not knowingly collect personal information from children under 16.</p>
 
       <h2 className="text-lg font-bold mt-6 mb-2">13. Grievance Officer (India — IT Rules 2021)</h2>
       <p>For grievances related to personal data protection, contact our Grievance Officer:</p>

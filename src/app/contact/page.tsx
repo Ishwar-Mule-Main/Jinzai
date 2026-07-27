@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { LegalPageLayout } from "../legal-layout/legal-page-layout";
 
 export const metadata: Metadata = {
-  title: "Contact Us — ResumeForge | Domain Expansion",
-  description: "Contact Domain Expansion for support, questions, or feedback about ResumeForge.",
+  title: "Contact Us — Jinzai | Domain Expansion",
+  description: "Contact Domain Expansion for support, questions, or feedback about Jinzai.",
 };
 
 export default function ContactPage() {
   return (
     <LegalPageLayout title="Contact Us" lastUpdated={new Date().toLocaleDateString("en-IN")}>
-      <p>We're here to help with any questions about ResumeForge. Reach out to our team at Domain Expansion.</p>
+      <p>We're here to help with any questions about Jinzai. Reach out to our team at Domain Expansion.</p>
 
       <div className="rounded-lg border p-6 bg-muted/30 mt-4">
         <h2 className="text-lg font-bold mb-3">Get in Touch</h2>

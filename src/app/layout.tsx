@@ -25,14 +25,14 @@ const workSans = Work_Sans({ variable: "--font-work-sans", subsets: ["latin"], w
 const manrope = Manrope({ variable: "--font-manrope", subsets: ["latin"], weight: ["300", "400", "500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
-  title: "ResumeForge — Build a resume that gets you hired | Domain Expansion",
+  title: "Jinzai — 人材 Talent Hub | Build a resume that gets you hired",
   description:
-    "Free AI-powered resume & CV builder by Domain Expansion. Choose from 52 professionally designed templates that auto-optimize to your content. Generate AI summaries, export to PDF, ATS-friendly.",
-  keywords: ["resume builder", "CV maker", "resume templates", "ATS resume", "AI resume", "Domain Expansion", "free resume builder"],
-  authors: [{ name: "Domain Expansion Technologies" }],
+    "Jinzai (人材) is a premier AI-powered resume builder and job seeker hub by Domain Expansion. 72 templates, AI rewriting, ATS optimization, web profiles, and one-click export.",
+  keywords: ["resume builder", "CV maker", "resume templates", "ATS resume", "AI resume", "Jinzai", "人材", "Domain Expansion", "job seeker hub", "free resume builder"],
+  authors: [{ name: "Domain Expansion" }],
   openGraph: {
-    title: "ResumeForge — Build a resume that gets you hired",
-    description: "AI-powered resume builder by Domain Expansion with 52 auto-optimizing templates.",
+    title: "Jinzai — 人材 Talent Hub",
+    description: "AI-powered resume builder and job seeker hub by Domain Expansion.",
     type: "website",
   },
 };

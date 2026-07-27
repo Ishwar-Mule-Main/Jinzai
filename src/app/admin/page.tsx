@@ -171,7 +171,7 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-teal-400" />
-            <span className="font-bold">ResumeForge Admin</span>
+            <span className="font-bold">Jinzai Admin</span>
             <span className="text-xs text-slate-400 ml-1">· Domain Expansion</span>
           </div>
           <Button variant="ghost" size="sm" onClick={logout} className="gap-1.5 text-slate-400">

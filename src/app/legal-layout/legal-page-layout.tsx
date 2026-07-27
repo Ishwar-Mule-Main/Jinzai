@@ -16,7 +16,7 @@ export function LegalPageLayout({ title, lastUpdated, children }: { title: strin
           </Link>
           <Link href="/">
             <Button variant="ghost" size="sm" className="gap-1.5">
-              <ArrowLeft className="w-3.5 h-3.5" /> Back to ResumeForge
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Jinzai
             </Button>
           </Link>
         </div>
@@ -48,7 +48,7 @@ export function LegalPageLayout({ title, lastUpdated, children }: { title: strin
       {/* Footer */}
       <footer className="border-t py-4">
         <div className="max-w-4xl mx-auto px-4 text-center text-[11px] text-muted-foreground">
-          © {new Date().getFullYear()} ResumeForge by Domain Expansion. All rights reserved.
+          © {new Date().getFullYear()} Jinzai by Domain Expansion. All rights reserved.
         </div>
       </footer>
     </div>

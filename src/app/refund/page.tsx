@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { LegalPageLayout } from "../legal-layout/legal-page-layout";
 
 export const metadata: Metadata = {
-  title: "Refund Policy — ResumeForge | Domain Expansion",
-  description: "Refund Policy for ResumeForge by Domain Expansion.",
+  title: "Refund Policy — Jinzai | Domain Expansion",
+  description: "Refund Policy for Jinzai by Domain Expansion.",
 };
 
 export default function RefundPage() {
   return (
     <LegalPageLayout title="Refund Policy" lastUpdated={new Date().toLocaleDateString("en-IN")}>
-      <p className="text-sm text-muted-foreground">This refund policy is governed by Domain Expansion, the parent company of ResumeForge.</p>
+      <p className="text-sm text-muted-foreground">This refund policy is governed by Domain Expansion, the parent company of Jinzai.</p>
 
       <h2 className="text-lg font-bold mt-6 mb-2">1. Trial Plan (₹99)</h2>
       <p>The ₹99 trial plan is valid for 2 days. Due to the short duration and immediate access to premium features, trial payments are non-refundable once activated. The trial automatically expires after 2 days with no further charges.</p>

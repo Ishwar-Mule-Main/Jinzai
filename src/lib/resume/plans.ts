@@ -1,4 +1,4 @@
-// Plan definitions, pricing, and limits for ResumeForge
+// Plan definitions, pricing, and limits for Jinzai
 
 export type PlanId = "free" | "trial_99" | "pro_499" | "business_1999";
 

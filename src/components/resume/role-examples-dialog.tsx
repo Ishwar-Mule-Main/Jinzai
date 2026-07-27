@@ -95,7 +95,7 @@ export function RoleExamplesDialog({ trigger }: { trigger?: React.ReactNode }) {
 
 const TOUR_STEPS = [
   {
-    title: "Welcome to ResumeForge! 👋",
+    title: "Welcome to Jinzai! 👋",
     body: "Build a professional resume in minutes with 52 templates, AI writing tools, and one-click export. Let's get you started.",
     icon: "🚀",
   },

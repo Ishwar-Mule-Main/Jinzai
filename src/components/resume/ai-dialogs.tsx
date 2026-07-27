@@ -110,7 +110,7 @@ export function CoverLetterDialog() {
         ${contact ? `<p class="contact">${contact}</p>` : ""}
       </div>
       ${paragraphs}
-      <div class="footer">Generated with ResumeForge</div>
+      <div class="footer">Generated with Jinzai</div>
       </body></html>`);
     win.document.close();
     win.focus();

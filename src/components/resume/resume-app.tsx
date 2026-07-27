@@ -21,6 +21,7 @@ import { ImportResumeDialog } from "./import-resume-dialog";
 import { SupportDialog } from "./support-dialog";
 import { NotificationBell } from "./notification-bell";
 import { ZoomControls } from "./zoom-controls";
+import { BuildChoice } from "./build-choice";
 import { AuthDialog, LogoutButton, type AuthMode } from "./auth-dialogs";
 import { PricingDialog } from "./pricing-dialog";
 import { Footer } from "./footer";
@@ -214,6 +215,7 @@ function Dashboard() {
   const setContactLocked = useResumeStore((s) => s.setContactLocked);
   const { user, refresh } = useCurrentUser();
   const [authMode, setAuthMode] = useState<AuthMode>(null);
+  const [showBuildChoice, setShowBuildChoice] = useState(false);
 
   const planConfig = user ? getPlanConfig(user.plan) : getPlanConfig("free");
   const canCreate = user ? canCreateResume(user.plan, user.resumeCount) : true; // not logged in = can try
@@ -248,8 +250,28 @@ function Dashboard() {
       setAuthMode("signup");
       return;
     }
-    // If logged in, the ImportResumeDialog will open normally
+    setShowBuildChoice(true);
   };
+
+  if (showBuildChoice && user) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <header className="border-b bg-background/80 backdrop-blur sticky top-0 z-20">
+          <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+            <BrandMark showParent />
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted text-xs">
+                <span className="text-muted-foreground">{user.email}</span>
+                <Badge variant="outline" className="text-[9px] py-0 px-1.5">{planConfig.name}</Badge>
+              </div>
+              <LogoutButton onLogout={async () => { await refresh(); setShowBuildChoice(false); }} />
+            </div>
+          </div>
+        </header>
+        <BuildChoice user={user} onChooseEditor={() => { setShowBuildChoice(false); setTemplate("modern"); setView("editor"); }} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -473,11 +495,11 @@ function Dashboard() {
               <Star className="w-3 h-3 text-amber-500" /> Loved by job seekers
             </Badge>
             <h2 className="text-2xl font-bold tracking-tight mb-1">Trusted by thousands of professionals</h2>
-            <p className="text-sm text-muted-foreground">Real stories from people who landed their dream jobs with ResumeForge.</p>
+            <p className="text-sm text-muted-foreground">Real stories from people who landed their dream jobs with Jinzai.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { name: "Rahul Verma", role: "Software Engineer at Google", quote: "I got 3 interview calls within a week of using ResumeForge. The AI summary feature was a game-changer — it highlighted my achievements perfectly.", avatar: "R", color: "teal" },
+              { name: "Rahul Verma", role: "Software Engineer at Google", quote: "I got 3 interview calls within a week of using Jinzai. The AI summary feature was a game-changer — it highlighted my achievements perfectly.", avatar: "R", color: "teal" },
               { name: "Ananya Krishnan", role: "Product Manager at Swiggy", quote: "The ATS keyword match tool helped me optimize my resume for exactly what recruiters were looking for. Landed my dream PM role!", avatar: "A", color: "violet" },
               { name: "Vikram Singh", role: "Data Scientist at Amazon", quote: "52 templates meant I could find the perfect design. The resume score feature told me exactly what to improve. Worth every rupee.", avatar: "V", color: "amber" },
             ].map((t) => (
@@ -530,11 +552,11 @@ function Dashboard() {
         <div className="mt-20">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold tracking-tight mb-1">Frequently Asked Questions</h2>
-            <p className="text-sm text-muted-foreground">Everything you need to know about ResumeForge.</p>
+            <p className="text-sm text-muted-foreground">Everything you need to know about Jinzai.</p>
           </div>
           <div className="max-w-3xl mx-auto space-y-3">
             {[
-              { q: "Is ResumeForge really free?", a: "Yes! You can browse all 52 templates and create 1 resume for free. To export your resume as PDF or DOCX, upgrade to a paid plan starting at just ₹99 for a 2-day trial." },
+              { q: "Is Jinzai really free?", a: "Yes! You can browse all 52 templates and create 1 resume for free. To export your resume as PDF or DOCX, upgrade to a paid plan starting at just ₹99 for a 2-day trial." },
               { q: "How does the AI resume writing work?", a: "Our AI (powered by OpenRouter with Claude/Llama models) analyzes your role and experience to generate professional summaries, achievement bullets, skill suggestions, and cover letters. You can also import your old resume and AI will parse it automatically." },
               { q: "What's the difference between plans?", a: "Free lets you create 1 resume (no export). Trial (₹99/2 days) gives 1 resume with export. Pro (₹499/month) gives 5 resumes with export. Business (₹1,999/month) gives unlimited resumes with no contact lock — ideal for agencies." },
               { q: "Are the resumes ATS-friendly?", a: "Yes! All templates use clean, parseable HTML structures. Our ATS keyword match tool (Pro plan+) analyzes your resume against any job description and shows you exactly which keywords you're missing." },
@@ -555,7 +577,7 @@ function Dashboard() {
         {/* Final CTA */}
         <div className="mt-20 text-center">
           <h2 className="text-3xl font-bold tracking-tight mb-3">Ready to build your resume?</h2>
-          <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">Join thousands of professionals who landed their dream jobs with ResumeForge. Start free — no credit card required.</p>
+          <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">Join thousands of professionals who landed their dream jobs with Jinzai. Start free — no credit card required.</p>
           <Button size="lg" onClick={() => setAuthMode("signup")} className="gap-2 h-12 px-8 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 shadow-lg shadow-teal-600/20">
             <UserPlus className="w-4 h-4" /> Get Started Free
           </Button>
@@ -566,7 +588,7 @@ function Dashboard() {
       <Footer />
 
       {/* Auth dialog */}
-      <AuthDialog mode={authMode} onClose={() => setAuthMode(null)} onSuccess={async () => { await refresh(); clearAll(); setTemplate("modern"); setView("editor"); }} />
+      <AuthDialog mode={authMode} onClose={() => setAuthMode(null)} onSuccess={async () => { await refresh(); setShowBuildChoice(true); }} />
       <OnboardingTour />
     </div>
   );

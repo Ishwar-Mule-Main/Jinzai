@@ -25,7 +25,7 @@ export default function Home() {
   if (!hydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground text-sm">Loading ResumeForge…</div>
+        <div className="animate-pulse text-muted-foreground text-sm">Loading Jinzai…</div>
       </div>
     );
   }

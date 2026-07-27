@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   } catch {}
   return {
     title: `${name} — Resume`,
-    description: `View ${name}'s resume, created with ResumeForge.`,
+    description: `View ${name}'s resume, created with Jinzai.`,
     openGraph: { title: `${name} — Resume`, type: "profile" },
   };
 }

@@ -18,7 +18,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
     body: (
       <>
         <p className="mb-3">Last updated: {new Date().toLocaleDateString("en-IN")}</p>
-        <p className="mb-3 text-xs text-muted-foreground">This privacy policy is governed by Domain Expansion Technologies, the parent company of ResumeForge.</p>
+        <p className="mb-3 text-xs text-muted-foreground">This privacy policy is governed by Domain Expansion Technologies, the parent company of Jinzai.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">1. Information We Collect</h3>
         <p className="mb-3">We collect information you provide when you create an account, including your name, email address, and resume content. We also collect usage data such as templates used and features accessed.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">2. How We Use Your Information</h3>
@@ -41,9 +41,9 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
     body: (
       <>
         <p className="mb-3">Last updated: {new Date().toLocaleDateString("en-IN")}</p>
-        <p className="mb-3 text-xs text-muted-foreground">These terms are governed by Domain Expansion Technologies, the parent company of ResumeForge.</p>
+        <p className="mb-3 text-xs text-muted-foreground">These terms are governed by Domain Expansion Technologies, the parent company of Jinzai.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">1. Acceptance of Terms</h3>
-        <p className="mb-3">By using ResumeForge, a product of Domain Expansion Technologies, you agree to these terms. If you do not agree, please do not use our services.</p>
+        <p className="mb-3">By using Jinzai, a product of Domain Expansion Technologies, you agree to these terms. If you do not agree, please do not use our services.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">2. Plan Tiers & Limits</h3>
         <ul className="list-disc pl-5 space-y-1 mb-3 text-sm">
           <li><strong>Free:</strong> Browse templates, create 1 resume, no export.</li>
@@ -60,7 +60,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
         <h3 className="font-semibold text-sm mb-2 mt-4">6. Plan Changes & Cancellation</h3>
         <p className="mb-3">You can change or cancel your plan at any time. The Trial plan expires after 2 days. Monthly plans can be cancelled to prevent renewal.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">7. Limitation of Liability</h3>
-        <p>Domain Expansion Technologies and ResumeForge are not liable for any job application outcomes. Our tools are provided "as is" without guarantees of employment.</p>
+        <p>Domain Expansion Technologies and Jinzai are not liable for any job application outcomes. Our tools are provided "as is" without guarantees of employment.</p>
       </>
     ),
   },
@@ -85,7 +85,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
     body: (
       <>
         <h3 className="font-semibold text-sm mb-2">Get in Touch</h3>
-        <p className="mb-3">We're here to help with any questions about ResumeForge. Reach out to our team at Domain Expansion.</p>
+        <p className="mb-3">We're here to help with any questions about Jinzai. Reach out to our team at Domain Expansion.</p>
         <div className="space-y-2 text-sm">
           <p><strong>Email:</strong> admin@domainexpansion.in</p>
           <p><strong>Hours:</strong> Monday–Friday, 9 AM – 6 PM IST</p>
@@ -98,14 +98,14 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
     ),
   },
   about: {
-    title: "About ResumeForge",
+    title: "About Jinzai",
     body: (
       <>
-        <p className="mb-3">ResumeForge is a product of <strong>Domain Expansion Technologies</strong>, a technology company based in Bengaluru, India. We build tools that empower individuals to present their professional best.</p>
+        <p className="mb-3">Jinzai is a product of <strong>Domain Expansion Technologies</strong>, a technology company based in Bengaluru, India. We build tools that empower individuals to present their professional best.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">Our Mission</h3>
-        <p className="mb-3">We believe everyone deserves a professional resume. Our platform makes it easy to create beautiful, ATS-friendly resumes that get you noticed by recruiters. With 52 templates, AI-powered writing tools, and one-click export, ResumeForge is the complete resume building solution.</p>
+        <p className="mb-3">We believe everyone deserves a professional resume. Our platform makes it easy to create beautiful, ATS-friendly resumes that get you noticed by recruiters. With 52 templates, AI-powered writing tools, and one-click export, Jinzai is the complete resume building solution.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">Domain Expansion</h3>
-        <p className="text-sm mb-2">Domain Expansion Technologies is the parent company of ResumeForge. We are committed to building innovative products that solve real problems for job seekers and professionals.</p>
+        <p className="text-sm mb-2">Domain Expansion Technologies is the parent company of Jinzai. We are committed to building innovative products that solve real problems for job seekers and professionals.</p>
         <div className="rounded-lg border p-3 bg-muted/30 mt-2">
           <p className="text-xs font-semibold mb-1">Company Details</p>
           <p className="text-xs text-muted-foreground">

@@ -32,7 +32,7 @@ export default function SharedResumeClient({
             </div>
             <div>
               <p className="text-sm font-semibold leading-tight">{name}</p>
-              <p className="text-[11px] text-muted-foreground leading-tight">Shared via ResumeForge</p>
+              <p className="text-[11px] text-muted-foreground leading-tight">Shared via Jinzai</p>
             </div>
           </div>
           <Button size="sm" onClick={print} className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
@@ -54,7 +54,7 @@ export default function SharedResumeClient({
       {/* Footer */}
       <footer className="border-t py-4 print:hidden">
         <div className="max-w-5xl mx-auto px-4 text-center text-xs text-muted-foreground">
-          Built with <span className="font-semibold text-teal-600 dark:text-teal-400">ResumeForge</span> — create your own professional resume for free.
+          Built with <span className="font-semibold text-teal-600 dark:text-teal-400">Jinzai</span> — create your own professional resume for free.
         </div>
       </footer>
     </div>
