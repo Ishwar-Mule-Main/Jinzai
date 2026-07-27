@@ -92,7 +92,7 @@ function TemplateCard({ id, index, user, onAuthRequired }: { id: (typeof TEMPLAT
     <Card className="overflow-hidden group hover:shadow-xl hover:shadow-teal-900/5 transition-all duration-300 hover:-translate-y-1.5 border-border/50 rounded-2xl">
       <div className="aspect-[3/4] bg-white overflow-hidden relative border-b border-border/40">
         {/* LIVE resume preview with sample data — scaled to fit card */}
-        <div className="origin-top-left absolute top-0 left-0 pointer-events-none" style={{ transform: "scale(0.255)", width: "392%", height: "392%" }}>
+        <div className="origin-top-left absolute top-0 left-0 pointer-events-none" style={{ transform: "scale(0.38)", width: "263%", height: "263%" }}>
           <ResumeRenderer data={sampleData} accent={id.accentDefault} font={id.fontDefault} template={id.id} />
         </div>
         {/* Hover actions */}
