@@ -1,58 +1,73 @@
 import type { Metadata } from "next";
-import { LegalPageLayout } from "../legal-layout/legal-page-layout";
+import { PublicNav } from "@/components/resume/public-nav";
+import { PublicFooter } from "@/components/resume/public-footer";
 
 export const metadata: Metadata = {
   title: "About Us — Jinzai | Domain Expansion",
-  description: "About Jinzai and Domain Expansion — our mission, company, and technology.",
+  description: "About Jinzai (人材) — a premier AI-powered resume builder and job seeker hub by Domain Expansion.",
 };
 
 export default function AboutPage() {
   return (
-    <LegalPageLayout title="About Jinzai" lastUpdated={new Date().toLocaleDateString("en-IN")}>
-      <p>Jinzai is a product of <strong>Domain Expansion</strong>, a technology company based in Bengaluru, India. We build tools that empower individuals to present their professional best.</p>
+    <div className="min-h-screen bg-[#f5f1ec] flex flex-col">
+      <PublicNav />
 
-      <h2 className="text-lg font-bold mt-6 mb-2">Our Mission</h2>
-      <p>We believe everyone deserves a professional resume. Our platform makes it easy to create beautiful, ATS-friendly resumes that get you noticed by recruiters. With 52 templates, AI-powered writing tools, and one-click export, Jinzai is the complete resume building solution.</p>
+      <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 py-12 w-full">
+        <p className="text-sm font-medium text-[#626260] mb-2">人材 — Talent Hub</p>
+        <h1 className="text-4xl sm:text-5xl font-medium tracking-tight text-[#111111] mb-6" style={{ letterSpacing: "-1.4px" }}>
+          About Jinzai
+        </h1>
 
-      <h2 className="text-lg font-bold mt-6 mb-2">What We Offer</h2>
-      <ul className="list-disc pl-5 space-y-1">
-        <li><strong>52 Professional Templates</strong> — including free and premium designs for every industry</li>
-        <li><strong>7 AI-Powered Features</strong> — summary generation, achievement bullets, bullet rewriting, cover letters, ATS keyword matching, resume quality scoring, and skill suggestions</li>
-        <li><strong>15 Professional Fonts</strong> — 5 free and 10 premium Google Fonts</li>
-        <li><strong>Resume Import</strong> — paste your old resume and AI parses it automatically</li>
-        <li><strong>Multi-page Support</strong> — resumes auto-paginate for longer content</li>
-        <li><strong>Content Protection</strong> — your resume is protected from copying</li>
-        <li><strong>Flexible Pricing</strong> — Free, Trial (₹99), Pro (₹499), and Business (₹1,999) plans</li>
-      </ul>
+        <div className="space-y-6 text-base text-[#626260] leading-relaxed">
+          <p>
+            <strong className="text-[#111111]">Jinzai</strong> (人材) — meaning "Talent" or "Human Resources" in Japanese — is a premier AI-powered resume builder and job seeker hub. A product of <strong className="text-[#111111]">Domain Expansion</strong>, we build tools that empower individuals to present their professional best.
+          </p>
 
-      <h2 className="text-lg font-bold mt-6 mb-2">Domain Expansion</h2>
-      <p>Domain Expansion is the parent company of Jinzai. We are committed to building innovative products that solve real problems for job seekers and professionals worldwide.</p>
+          <p>
+            Our platform offers 72 professionally designed templates, 7 AI-powered features, and a comprehensive job seeker hub where recruiters can discover talent. We believe everyone deserves a professional resume, and our AI tools make it effortless to create one.
+          </p>
 
-      <div className="rounded-lg border p-4 bg-muted/30 mt-4">
-        <p className="text-xs font-semibold mb-1">Company Details</p>
-        <p className="text-xs text-muted-foreground">
-          Domain Expansion<br />
-          Bengaluru, Karnataka, India<br />
-          Email: admin@domainexpansion.in<br />
-          Website: domainexpansion.in<br />
-          Founded: 2025
-        </p>
-      </div>
+          <div className="bg-white rounded-xl border border-[#d3cec6]/60 p-6">
+            <h2 className="font-semibold text-lg text-[#111111] mb-3">Our Mission</h2>
+            <p>
+              To democratize access to professional resume building and job seeking tools. We combine cutting-edge AI with beautiful design to help job seekers present their best selves and connect with opportunities.
+            </p>
+          </div>
 
-      <h2 className="text-lg font-bold mt-6 mb-2">Technology</h2>
-      <p>Jinzai is built with modern technology:</p>
-      <ul className="list-disc pl-5 space-y-1">
-        <li>Next.js 16 with App Router and TypeScript</li>
-        <li>Tailwind CSS 4 with shadcn/ui component library</li>
-        <li>Prisma ORM with SQLite database</li>
-        <li>OpenRouter API for AI features (configurable model selection)</li>
-        <li>NextAuth.js for secure authentication</li>
-        <li>Zustand for state management</li>
-      </ul>
+          <div className="bg-white rounded-xl border border-[#d3cec6]/60 p-6">
+            <h2 className="font-semibold text-lg text-[#111111] mb-3">What We Offer</h2>
+            <ul className="space-y-2">
+              <li className="flex items-start gap-2"><span className="text-[#111111] font-bold">•</span> 72 resume templates (free + premium)</li>
+              <li className="flex items-start gap-2"><span className="text-[#111111] font-bold">•</span> AI resume writing (summary, bullets, rewrite, cover letters)</li>
+              <li className="flex items-start gap-2"><span className="text-[#111111] font-bold">•</span> ATS keyword matching and resume quality scoring</li>
+              <li className="flex items-start gap-2"><span className="text-[#111111] font-bold">•</span> Resume import from PDF, DOCX, MD, TXT</li>
+              <li className="flex items-start gap-2"><span className="text-[#111111] font-bold">•</span> Web profile pages for job seekers</li>
+              <li className="flex items-start gap-2"><span className="text-[#111111] font-bold">•</span> Export to PDF and DOCX</li>
+              <li className="flex items-start gap-2"><span className="text-[#111111] font-bold">•</span> 15 professional fonts and 5 font sizes</li>
+            </ul>
+          </div>
 
-      <h2 className="text-lg font-bold mt-6 mb-2">Contact</h2>
-      <p>Have questions? We'd love to hear from you.</p>
-      <p>Email: admin@domainexpansion.in</p>
-    </LegalPageLayout>
+          <div className="bg-[#ebe7e1] rounded-xl p-6">
+            <h2 className="font-semibold text-lg text-[#111111] mb-3">Domain Expansion</h2>
+            <p className="text-sm">
+              Domain Expansion is the parent company of Jinzai. Based in Bengaluru, India, we are committed to building innovative products that solve real problems for job seekers and professionals worldwide.
+            </p>
+            <div className="mt-3 text-xs text-[#7b7b78]">
+              <p>Domain Expansion</p>
+              <p>Bengaluru, Karnataka, India</p>
+              <p>Email: admin@domainexpansion.in</p>
+              <p>Website: domainexpansion.in</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-[#d3cec6]/60 p-6">
+            <h2 className="font-semibold text-lg text-[#111111] mb-3">Technology</h2>
+            <p className="text-sm">Built with Next.js 16, TypeScript, Tailwind CSS, Prisma, OpenRouter API (Claude 3.7 Sonnet), and Framer Motion.</p>
+          </div>
+        </div>
+      </main>
+
+      <PublicFooter />
+    </div>
   );
 }
