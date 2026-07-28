@@ -813,7 +813,7 @@ Agent: Main (orchestrator)
 Task: Add OpenRouter API key, configure working model, brand platform as Domain Expansion product
 
 Work Log:
-- Added OpenRouter API key to `.env`: `sk-or-v1-YOUR_API_KEY`
+- Added OpenRouter API key to `.env`: `sk-or-v1-YOUR_OPENROUTER_API_KEY`
 - Added `NEXTAUTH_SECRET` and `NEXTAUTH_URL` to `.env` for proper auth
 - Discovered Claude models (anthropic/claude-sonnet-5, claude-3-haiku) are **region-restricted (403)** in this environment
 - Tested 345+ available models on OpenRouter — found `meta-llama/llama-3.3-70b-instruct` works globally and returns content properly
