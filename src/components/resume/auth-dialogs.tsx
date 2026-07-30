@@ -153,7 +153,7 @@ export function AuthDialog({
       const json = await res.json();
       setSentCode(true);
       setDemoCode(json.demoCode || null);
-      toast.success(`Code sent! ${json.demoCode ? `Demo code: ${json.demoCode}` : "Check your email"}`);
+      toast.success(`Verification code sent to ${email}. Check your inbox (and spam folder).`);
     } catch {
       toast.error("Could not send code");
     } finally {

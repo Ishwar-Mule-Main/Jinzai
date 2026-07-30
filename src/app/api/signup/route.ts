@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -28,6 +29,11 @@ export async function POST(req: NextRequest) {
         password: hashed,
         plan: "free",
       },
+    });
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(normalizedEmail, name || undefined).catch(() => {
+      // ignore email errors
     });
 
     return NextResponse.json({
