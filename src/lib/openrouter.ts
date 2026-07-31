@@ -1,10 +1,13 @@
 // OpenRouter API integration — configurable AI client
 // Default model: meta-llama/llama-3.3-70b-instruct (works in all regions)
+// Admin can override API key + model at runtime via /admin → Settings (stored in DB)
 // Change via OPENROUTER_MODEL env var — see https://openrouter.ai/models for available models
 // Get your API key from https://openrouter.ai/keys
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
-const DEFAULT_MODEL = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.3-70b-instruct";
+import { getOpenRouterSettings } from "@/lib/settings";
+
+const ENV_OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
+const ENV_DEFAULT_MODEL = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.3-70b-instruct";
 const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
 export interface ChatMessage {
@@ -26,10 +29,13 @@ export async function openRouterChat(
   messages: ChatMessage[],
   options: ChatOptions = {}
 ): Promise<string> {
-  const model = options.model || DEFAULT_MODEL;
+  // Read settings from DB (with env fallback)
+  const settings = await getOpenRouterSettings();
+  const apiKey = settings.apiKey;
+  const model = options.model || settings.model;
 
   // If no OpenRouter key, fall back to z-ai-web-dev-sdk
-  if (!OPENROUTER_API_KEY) {
+  if (!apiKey) {
     console.log("[AI] No OPENROUTER_API_KEY set, falling back to z-ai-web-dev-sdk");
     const ZAI = (await import("z-ai-web-dev-sdk")).default;
     const zai = await ZAI.create();
@@ -43,7 +49,7 @@ export async function openRouterChat(
   const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+      "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json",
       "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
       "X-Title": "Jinzai",
@@ -71,9 +77,13 @@ export async function openRouterChat(
 
 /**
  * Get available models from OpenRouter (for admin panel model selection).
+ * Uses the current effective API key.
  */
 export async function getAvailableModels(): Promise<{ id: string; name: string }[]> {
-  if (!OPENROUTER_API_KEY) {
+  const settings = await getOpenRouterSettings();
+  const apiKey = settings.apiKey;
+
+  if (!apiKey) {
     return [
       { id: "meta-llama/llama-3.3-70b-instruct", name: "Llama 3.3 70B (default, works globally)" },
       { id: "anthropic/claude-sonnet-5", name: "Claude Sonnet 5 (may be region-restricted)" },
@@ -84,7 +94,7 @@ export async function getAvailableModels(): Promise<{ id: string; name: string }
 
   try {
     const response = await fetch(`${OPENROUTER_BASE_URL}/models`, {
-      headers: { "Authorization": `Bearer ${OPENROUTER_API_KEY}` },
+      headers: { "Authorization": `Bearer ${apiKey}` },
     });
     if (!response.ok) throw new Error("Failed to fetch models");
     const data = await response.json();
@@ -93,8 +103,8 @@ export async function getAvailableModels(): Promise<{ id: string; name: string }
       name: m.name || m.id,
     }));
   } catch {
-    return [{ id: DEFAULT_MODEL, name: `${DEFAULT_MODEL} (current)` }];
+    return [{ id: settings.model || ENV_DEFAULT_MODEL, name: `${settings.model || ENV_DEFAULT_MODEL} (current)` }];
   }
 }
 
-export { DEFAULT_MODEL, OPENROUTER_API_KEY };
+export { ENV_DEFAULT_MODEL as DEFAULT_MODEL, ENV_OPENROUTER_API_KEY as OPENROUTER_API_KEY };

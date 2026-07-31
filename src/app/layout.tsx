@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { AppProviders } from "@/components/app-providers";
 import { Analytics } from "@vercel/analytics/next";
+import { PageViewTracker } from "@/components/page-view-tracker";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -53,6 +54,7 @@ export default function RootLayout({
       >
         <AppProviders>
           {children}
+          <PageViewTracker />
         </AppProviders>
         <Toaster />
         <SonnerToaster richColors position="bottom-right" />

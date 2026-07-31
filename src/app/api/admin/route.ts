@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { adminLogin, verifyAdmin, adminUnauthorized } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
-
-const ADMIN_EMAIL = "Ishwar.mule007@gmail.com";
-const ADMIN_PASSWORD = "Ishwar@2513";
 
 // POST /api/admin — admin login
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      // Return a simple admin token (in production, use JWT or session)
-      const token = Buffer.from(`${ADMIN_EMAIL}:${Date.now()}`).toString("base64");
-      return NextResponse.json({ token, email: ADMIN_EMAIL });
+    const token = adminLogin(email, password);
+    if (!token) {
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    return NextResponse.json({ token, email });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
@@ -24,22 +21,12 @@ export async function POST(req: NextRequest) {
 // GET /api/admin — verify admin token + get dashboard stats
 export async function GET(req: NextRequest) {
   try {
-    const auth = req.headers.get("authorization");
-    if (!auth || !auth.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    // Simple token check (in production, verify JWT)
-    const token = auth.replace("Bearer ", "");
-    const decoded = Buffer.from(token, "base64").toString();
-    if (!decoded.startsWith(ADMIN_EMAIL)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (!verifyAdmin(req)) return adminUnauthorized();
 
-    // Gather stats
     const users = await db.user.findMany({
       select: {
         id: true, email: true, name: true, plan: true, planExpiresAt: true,
-        createdAt: true, updatedAt: true,
+        role: true, studentId: true, organizationId: true, createdAt: true, updatedAt: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -48,26 +35,62 @@ export async function GET(req: NextRequest) {
       select: { id: true, title: true, template: true, userId: true, createdAt: true, contactLocked: true },
     });
 
-    const tickets = await db.supportTicket?.findMany?.({
-      orderBy: { createdAt: "desc" },
-    }).catch(() => []) || [];
+    let tickets: { id: string; email: string; name: string | null; subject: string; message: string; status: string; reply: string | null; createdAt: Date }[] = [];
+    try {
+      tickets = await db.supportTicket.findMany({ orderBy: { createdAt: "desc" } });
+    } catch {
+      tickets = [];
+    }
 
-    // Calculate revenue (simulated — each paid plan's price)
-    const planPrices: Record<string, number> = {
-      trial_99: 99, pro_499: 499, business_1999: 1999,
-    };
-    let totalRevenue = 0;
+    let transactions: { amount: number; plan: string; status: string; createdAt: Date }[] = [];
+    try {
+      transactions = await db.transaction.findMany({ orderBy: { createdAt: "desc" } });
+    } catch {
+      transactions = [];
+    }
+
+    let orgsCount = 0;
+    try {
+      orgsCount = await db.organization.count();
+    } catch {
+      orgsCount = 0;
+    }
+
+    let pageViews = 0;
+    let uniqueVisitors = 0;
+    try {
+      pageViews = await db.pageView.count();
+      uniqueVisitors = await db.pageView.groupBy({ by: ["sessionId"] }).then((g) => g.length).catch(() => 0);
+    } catch {
+      pageViews = 0;
+      uniqueVisitors = 0;
+    }
+
+    // Revenue from transactions ledger (more accurate) + fallback to plan-based estimate
+    const planPrices: Record<string, number> = { trial_99: 99, pro_499: 499, business_1999: 1999 };
+    let ledgerRevenue = 0;
     const revenueByPlan: Record<string, number> = {};
-    for (const u of users) {
-      if (u.plan !== "free" && planPrices[u.plan]) {
-        totalRevenue += planPrices[u.plan];
-        revenueByPlan[u.plan] = (revenueByPlan[u.plan] || 0) + planPrices[u.plan];
+    for (const t of transactions) {
+      if (t.status === "success") {
+        ledgerRevenue += t.amount;
+        revenueByPlan[t.plan] = (revenueByPlan[t.plan] || 0) + t.amount;
+      }
+    }
+    // Fallback: if no transactions recorded, estimate from current paid plans
+    let totalRevenue = ledgerRevenue;
+    if (totalRevenue === 0) {
+      for (const u of users) {
+        if (u.plan !== "free" && planPrices[u.plan]) {
+          totalRevenue += planPrices[u.plan];
+          revenueByPlan[u.plan] = (revenueByPlan[u.plan] || 0) + planPrices[u.plan];
+        }
       }
     }
 
     const activePaid = users.filter((u) => u.plan !== "free").length;
     const expired = users.filter((u) => u.plan !== "free" && u.planExpiresAt && new Date(u.planExpiresAt) < new Date()).length;
     const freeUsers = users.filter((u) => u.plan === "free").length;
+    const studentCount = users.filter((u) => u.role === "student").length;
 
     return NextResponse.json({
       stats: {
@@ -78,7 +101,12 @@ export async function GET(req: NextRequest) {
         totalResumes: resumes.length,
         totalRevenue,
         revenueByPlan,
-        openTickets: tickets.filter((t: { status?: string }) => t.status !== "resolved").length,
+        openTickets: tickets.filter((t) => t.status !== "resolved").length,
+        organizations: orgsCount,
+        students: studentCount,
+        pageViews,
+        uniqueVisitors,
+        transactions: transactions.length,
       },
       users: users.map((u) => ({
         ...u,
@@ -86,6 +114,7 @@ export async function GET(req: NextRequest) {
       })),
       resumes: resumes.slice(0, 50),
       tickets,
+      transactions: transactions.slice(0, 100),
     });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
