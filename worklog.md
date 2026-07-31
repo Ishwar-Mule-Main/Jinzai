@@ -955,3 +955,45 @@ Stage Summary:
 5. Add real-time visitor count (WebSocket or polling) on dashboard
 6. Add admin audit log (track all admin actions: who deleted/edited what)
 7. Add organization dashboard (let college admins see their students' progress)
+
+---
+Task ID: 15 (user request — Logout redirect with success popup)
+Agent: Main (orchestrator)
+Task: When users log out, redirect to homepage with a "logged out successfully" popup
+
+Work Log:
+- Updated `src/components/resume/auth-dialogs.tsx` (`LogoutButton`):
+  - Sets `sessionStorage.setItem("jinzai-logged-out", "1")` before signOut
+  - Calls `signOut({ redirect: false })` to clear the NextAuth session
+  - Redirects to homepage via `window.location.href = "/"`
+- Created `src/components/logout-toast.tsx` (`LogoutToast`):
+  - Reads the sessionStorage flag via lazy useState initializer (no effect needed)
+  - Shows a centered modal popup with:
+    - Green gradient header with checkmark icon
+    - "Logged Out Successfully" title
+    - "You have been securely logged out of your Jinzai account"
+    - "Your data is safe. Come back anytime to continue building your resume"
+    - "Stay on Homepage" and "Log In Again" buttons
+  - Auto-dismisses after 5 seconds
+  - Clears the flag so it doesn't reappear on refresh
+- Updated `src/app/page.tsx` to render `<LogoutToast />` on the homepage
+- Updated `src/components/resume/resume-app.tsx`:
+  - Added useEffect listener for `jinzai:open-login` custom event
+  - When fired, opens the login dialog (`setAuthMode("login")`)
+  - This lets the "Log In Again" button in the popup open the login form
+
+Verification Results:
+- ESLint: 0 errors
+- Login flow: user logs in successfully (session shows email) ✓
+- Logout flow: session cleared (shows "none" after) ✓
+- Redirect: user lands on homepage after logout ✓
+- Popup appears: "Logged Out Successfully" with full message ✓
+- "Log In Again" button: dispatches event → login dialog opens ("Welcome back") ✓
+- Auto-dismiss: popup disappears after 5 seconds ✓
+- SessionStorage flag cleared after showing (no reappear on refresh) ✓
+- Committed (4bbac09) and pushed to GitHub ✓
+
+Stage Summary:
+- Logout now redirects to homepage with a professional success popup
+- Popup has two actions: stay on homepage or log in again (opens login dialog)
+- Full flow verified end-to-end via agent-browser
