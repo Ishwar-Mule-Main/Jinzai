@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import bcrypt from "bcryptjs";
-import { sendWelcomeEmail } from "@/lib/email";
+import { setSignupData, generateCode } from "@/lib/auth";
+import { sendOTPEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 
+// POST /api/signup — Step 1: Register email+name+password, send OTP
 export async function POST(req: NextRequest) {
   try {
     const { email, password, name } = await req.json();
@@ -16,31 +17,24 @@ export async function POST(req: NextRequest) {
     }
 
     const normalizedEmail = email.toLowerCase();
+
+    // Check if user already exists
     const existing = await db.user.findUnique({ where: { email: normalizedEmail } });
     if (existing) {
-      return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
+      return NextResponse.json({ error: "An account with this email already exists. Please log in." }, { status: 409 });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
-    const user = await db.user.create({
-      data: {
-        email: normalizedEmail,
-        name: name || null,
-        password: hashed,
-        plan: "free",
-      },
-    });
+    // Store signup data temporarily (until OTP verified)
+    setSignupData(normalizedEmail, name || email.split("@")[0], password);
 
-    // Send welcome email (non-blocking)
-    sendWelcomeEmail(normalizedEmail, name || undefined).catch(() => {
-      // ignore email errors
-    });
+    // Generate and send OTP
+    const code = generateCode(normalizedEmail);
+    const emailResult = await sendOTPEmail(normalizedEmail, code, name);
 
     return NextResponse.json({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      plan: user.plan,
+      success: true,
+      message: `Verification code sent to ${normalizedEmail}. Check your inbox (and spam folder).`,
+      emailSent: emailResult.success,
     });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });

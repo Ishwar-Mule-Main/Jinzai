@@ -8,15 +8,33 @@ const DEMO_EMAIL = "ishwar@domainexpansion.in";
 const DEMO_PASSWORD = "DomainEx@26";
 
 // In-memory store for email verification codes
-const codeStore = new Map<string, { code: string; expires: number }>();
+const codeStore = new Map<string, { code: string; expires: number; name?: string; password?: string }>();
 
 export function generateCode(email: string): string {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   codeStore.set(email.toLowerCase(), {
+    ...codeStore.get(email.toLowerCase()),
     code,
-    expires: Date.now() + 5 * 60 * 1000, // 5 minutes
+    expires: Date.now() + 5 * 60 * 1000,
   });
   return code;
+}
+
+export function setSignupData(email: string, name: string, password: string) {
+  codeStore.set(email.toLowerCase(), {
+    code: codeStore.get(email.toLowerCase())?.code || "",
+    expires: codeStore.get(email.toLowerCase())?.expires || 0,
+    name,
+    password,
+  });
+}
+
+export function getSignupData(email: string) {
+  return codeStore.get(email.toLowerCase());
+}
+
+export function clearSignupData(email: string) {
+  codeStore.delete(email.toLowerCase());
 }
 
 export function verifyCode(email: string, code: string): boolean {
@@ -27,11 +45,9 @@ export function verifyCode(email: string, code: string): boolean {
     return false;
   }
   if (entry.code !== code) return false;
-  codeStore.delete(email.toLowerCase());
   return true;
 }
 
-// Ensure the demo user exists with Business plan
 async function ensureDemoUser() {
   try {
     const existing = await db.user.findUnique({ where: { email: DEMO_EMAIL } });
@@ -45,16 +61,6 @@ async function ensureDemoUser() {
           plan: "business_1999",
         },
       });
-    } else {
-      // Update password to new one if different
-      const match = await bcrypt.compare(DEMO_PASSWORD, existing.password || "");
-      if (!match && existing.password) {
-        const newHashed = await bcrypt.hash(DEMO_PASSWORD, 10);
-        await db.user.update({
-          where: { id: existing.id },
-          data: { password: newHashed, plan: "business_1999" },
-        });
-      }
     }
   } catch {
     // ignore
@@ -72,13 +78,13 @@ async function findOrCreateUser(email: string, name?: string) {
   return user;
 }
 
-const googleClientId = process.env.GOOGLE_CLIENT_ID || "";
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   providers: [
-    // 1. Email + Password
+    // 1. Email + Password (login only — signup goes through OTP flow)
     CredentialsProvider({
       id: "credentials",
       name: "credentials",
@@ -105,32 +111,25 @@ export const authOptions: NextAuthOptions = {
       },
     }),
 
-    // 2. Google OAuth — real Google login
+    // 2. Google OAuth — real Google login with popup
     ...(googleClientId && googleClientSecret
       ? [
           GoogleProvider({
             clientId: googleClientId,
             clientSecret: googleClientSecret,
+            authorization: {
+              params: {
+                prompt: "select_account",
+                access_type: "offline",
+                response_type: "code",
+                scope: "openid email profile",
+              },
+            },
           }),
         ]
       : []),
 
-    // 3. Google simulation (fallback if OAuth not configured)
-    CredentialsProvider({
-      id: "google",
-      name: "google",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        name: { label: "Name", type: "text" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email) return null;
-        const user = await findOrCreateUser(credentials.email, credentials.name || undefined);
-        return { id: user.id, email: user.email, name: user.name, plan: user.plan };
-      },
-    }),
-
-    // 4. Email verification code login
+    // 3. Email OTP — for signup verification + login
     CredentialsProvider({
       id: "email-code",
       name: "email-code",
@@ -141,6 +140,27 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.code) return null;
         if (!verifyCode(credentials.email, credentials.code)) return null;
+
+        const signupData = getSignupData(credentials.email);
+
+        // If this is a signup (has name + password), create the account
+        if (signupData?.name && signupData?.password) {
+          const hashed = await bcrypt.hash(signupData.password, 10);
+          const user = await db.user.upsert({
+            where: { email: credentials.email.toLowerCase() },
+            update: { name: signupData.name, password: hashed },
+            create: {
+              email: credentials.email.toLowerCase(),
+              name: signupData.name,
+              password: hashed,
+              plan: "free",
+            },
+          });
+          clearSignupData(credentials.email);
+          return { id: user.id, email: user.email, name: user.name, plan: user.plan };
+        }
+
+        // Otherwise it's a login — find or create user
         const user = await findOrCreateUser(credentials.email);
         return { id: user.id, email: user.email, name: user.name, plan: user.plan };
       },
@@ -176,4 +196,8 @@ export const authOptions: NextAuthOptions = {
     },
   },
   secret: process.env.NEXTAUTH_SECRET || "resumeforge-domain-expansion-secret-2025",
+  pages: {
+    signIn: "/",
+    error: "/",
+  },
 };

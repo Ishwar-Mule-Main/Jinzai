@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn, signOut } from "next-auth/react";
-import { useResumeStore } from "@/lib/resume/store";
+import { signIn } from "next-auth/react";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Mail, Lock, User, Chrome, KeyRound, LogOut, ShieldCheck, Sparkles } from "lucide-react";
+import { Loader2, Mail, Lock, User, Chrome, KeyRound, LogOut, ShieldCheck, Sparkles, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 export type AuthMode = "login" | "signup" | null;
@@ -33,9 +32,10 @@ export function AuthDialog({
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"password" | "google" | "code">("password");
-  const [code, setCode] = useState("");
-  const [sentCode, setSentCode] = useState(false);
-  const [demoCode, setDemoCode] = useState<string | null>(null);
+
+  // Signup OTP state
+  const [signupStep, setSignupStep] = useState<"details" | "otp">("details");
+  const [otpCode, setOtpCode] = useState("");
 
   const open = mode !== null;
 
@@ -44,14 +44,14 @@ export function AuthDialog({
       setEmail("");
       setPassword("");
       setName("");
-      setCode("");
-      setSentCode(false);
-      setDemoCode(null);
+      setOtpCode("");
+      setSignupStep("details");
       setLoginMethod("password");
     }
   }, [open]);
 
-  const handleCredentials = async () => {
+  // ===== LOGIN: Password =====
+  const handleLogin = async () => {
     if (!email || !password) {
       toast.error("Enter email and password");
       return;
@@ -65,64 +65,30 @@ export function AuthDialog({
       });
       if (res?.error) {
         toast.error("Invalid email or password");
-        setLoading(false);
       } else {
-        // Wait a moment for session to update, then refresh
         await new Promise((r) => setTimeout(r, 500));
         toast.success("Logged in successfully");
         onSuccess?.();
         onClose();
       }
-    } catch (e) {
+    } catch {
       toast.error("Login failed — please try again");
-      setLoading(false);
-    }
-  };
-
-  const handleSignup = async () => {
-    if (!email || !password) {
-      toast.error("Enter email and password");
-      return;
-    }
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name }),
-      });
-      if (!res.ok) {
-        const json = await res.json();
-        throw new Error(json.error || "Signup failed");
-      }
-      // Auto-login after signup
-      const loginRes = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-      if (loginRes?.error) throw new Error("Auto-login failed");
-      toast.success("Account created successfully");
-      onSuccess?.();
-      onClose();
-    } catch (e) {
-      toast.error((e as Error).message);
     } finally {
       setLoading(false);
     }
   };
 
+  // ===== LOGIN/SIGNUP: Google =====
   const handleGoogle = async () => {
     setLoading(true);
-    // Use real Google OAuth (redirects to Google login page)
-    await signIn("google", { callbackUrl: "/" });
+    // This opens Google's consent screen in a popup/redirect
+    await signIn("google", { callbackUrl: "/", redirect: true });
   };
 
-  const sendCode = async () => {
+  // ===== LOGIN: Email OTP =====
+  const [loginOtpSent, setLoginOtpSent] = useState(false);
+
+  const sendLoginOtp = async () => {
     if (!email || !email.includes("@")) {
       toast.error("Enter your email first");
       return;
@@ -134,11 +100,9 @@ export function AuthDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      if (!res.ok) throw new Error("Failed to send code");
-      const json = await res.json();
-      setSentCode(true);
-      setDemoCode(json.demoCode || null);
-      toast.success(`Verification code sent to ${email}. Check your inbox (and spam folder).`);
+      if (!res.ok) throw new Error("Failed");
+      setLoginOtpSent(true);
+      toast.success(`Verification code sent to ${email}`);
     } catch {
       toast.error("Could not send code");
     } finally {
@@ -146,24 +110,87 @@ export function AuthDialog({
     }
   };
 
-  const verifyCode = async () => {
-    if (!email || !code) {
+  const verifyLoginOtp = async () => {
+    if (!email || !otpCode) {
       toast.error("Enter the code");
       return;
     }
     setLoading(true);
-    const res = await signIn("email-code", {
-      email,
-      code,
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.error) {
-      toast.error("Invalid or expired code");
-    } else {
-      toast.success("Logged in successfully");
-      onSuccess?.();
-      onClose();
+    try {
+      const res = await signIn("email-code", {
+        email,
+        code: otpCode,
+        redirect: false,
+      });
+      if (res?.error) {
+        toast.error("Invalid or expired code");
+      } else {
+        await new Promise((r) => setTimeout(r, 500));
+        toast.success("Logged in successfully");
+        onSuccess?.();
+        onClose();
+      }
+    } catch {
+      toast.error("Verification failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ===== SIGNUP: Email + Password → OTP =====
+  const handleSignupSubmit = async () => {
+    if (!email || !password) {
+      toast.error("Fill in all fields");
+      return;
+    }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name: name || email.split("@")[0] }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Signup failed");
+      }
+      setSignupStep("otp");
+      toast.success(`Verification code sent to ${email}`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignupVerify = async () => {
+    if (!otpCode) {
+      toast.error("Enter the verification code");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await signIn("email-code", {
+        email,
+        code: otpCode,
+        redirect: false,
+      });
+      if (res?.error) {
+        toast.error("Invalid or expired code");
+      } else {
+        await new Promise((r) => setTimeout(r, 500));
+        toast.success("Account created successfully! Welcome to Jinzai.");
+        onSuccess?.();
+        onClose();
+      }
+    } catch {
+      toast.error("Verification failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -184,11 +211,12 @@ export function AuthDialog({
           </DialogTitle>
           <DialogDescription>
             {mode === "signup"
-              ? "Sign up to create and export professional resumes."
-              : "Log in to access your resumes and templates."}
+              ? "Sign up with email + OTP verification or Google."
+              : "Log in with password, Google, or email code."}
           </DialogDescription>
         </DialogHeader>
 
+        {/* ===== LOGIN MODE ===== */}
         {mode === "login" && (
           <Tabs value={loginMethod} onValueChange={(v) => setLoginMethod(v as typeof loginMethod)}>
             <TabsList className="grid grid-cols-3 w-full">
@@ -199,7 +227,7 @@ export function AuthDialog({
                 <Chrome className="w-3 h-3" /> Google
               </TabsTrigger>
               <TabsTrigger value="code" className="text-xs gap-1">
-                <KeyRound className="w-3 h-3" /> Code
+                <KeyRound className="w-3 h-3" /> OTP
               </TabsTrigger>
             </TabsList>
 
@@ -207,23 +235,17 @@ export function AuthDialog({
             <TabsContent value="password" className="space-y-3 mt-3">
               <div>
                 <Label className="text-xs">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                  <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@email.com" className="pl-9" />
-                </div>
+                <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@email.com" />
               </div>
               <div>
                 <Label className="text-xs">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                  <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="••••••••" className="pl-9" onKeyDown={(e) => e.key === "Enter" && handleCredentials()} />
-                </div>
+                <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="••••••••" onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
               </div>
-              <Button onClick={handleCredentials} disabled={loading} className="w-full gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
+              <Button onClick={handleLogin} disabled={loading} className="w-full gap-1.5 bg-[#111111] text-white hover:bg-[#000000]">
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
                 Log In
               </Button>
-              <button onClick={fillDemo} className="w-full text-xs text-teal-600 dark:text-teal-400 hover:underline flex items-center justify-center gap-1">
+              <button onClick={fillDemo} className="w-full text-xs text-teal-600 hover:underline flex items-center justify-center gap-1">
                 <Sparkles className="w-3 h-3" /> Use demo credentials
               </button>
             </TabsContent>
@@ -232,53 +254,50 @@ export function AuthDialog({
             <TabsContent value="google" className="space-y-3 mt-3">
               <div className="text-center py-4">
                 <p className="text-sm text-muted-foreground mb-4">
-                  Click below to sign in with your Google account securely.
+                  Click below to sign in with your Google account.
                 </p>
-                <Button onClick={handleGoogle} disabled={loading} className="w-full gap-1.5 bg-white border border-input text-gray-700 hover:bg-gray-50 dark:bg-slate-800 dark:text-white dark:border-slate-600">
+                <Button onClick={handleGoogle} disabled={loading} className="w-full gap-1.5 bg-white border border-input text-gray-700 hover:bg-gray-50">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4" />}
                   Continue with Google
                 </Button>
                 <p className="text-[10px] text-muted-foreground text-center mt-3">
-                  You'll be redirected to Google to complete sign-in securely.
+                  You'll be redirected to Google to choose your account.
                 </p>
               </div>
             </TabsContent>
 
-            {/* Email code login */}
+            {/* OTP login */}
             <TabsContent value="code" className="space-y-3 mt-3">
               <div>
                 <Label className="text-xs">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                  <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@email.com" className="pl-9" />
-                </div>
+                <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@email.com" />
               </div>
-              {sentCode && (
+              {loginOtpSent && (
                 <div>
                   <Label className="text-xs">6-digit code</Label>
                   <Input
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
                     placeholder="123456"
                     maxLength={6}
                     className="text-center text-lg tracking-[0.5em] font-mono"
-                    onKeyDown={(e) => e.key === "Enter" && verifyCode()}
+                    onKeyDown={(e) => e.key === "Enter" && verifyLoginOtp()}
                   />
                 </div>
               )}
-              {!sentCode ? (
-                <Button onClick={sendCode} disabled={loading} variant="outline" className="w-full gap-1.5">
+              {!loginOtpSent ? (
+                <Button onClick={sendLoginOtp} disabled={loading} variant="outline" className="w-full gap-1.5">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                   Send login code
                 </Button>
               ) : (
-                <Button onClick={verifyCode} disabled={loading} className="w-full gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
+                <Button onClick={verifyLoginOtp} disabled={loading} className="w-full gap-1.5 bg-[#111111] text-white hover:bg-[#000000]">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
                   Verify & Log In
                 </Button>
               )}
-              {sentCode && (
-                <button onClick={sendCode} className="w-full text-xs text-muted-foreground hover:underline">
+              {loginOtpSent && (
+                <button onClick={sendLoginOtp} className="w-full text-xs text-muted-foreground hover:underline">
                   Resend code
                 </button>
               )}
@@ -286,50 +305,78 @@ export function AuthDialog({
           </Tabs>
         )}
 
+        {/* ===== SIGNUP MODE ===== */}
         {mode === "signup" && (
           <div className="space-y-3">
-            <div>
-              <Label className="text-xs">Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your Name" className="pl-9" />
-              </div>
-            </div>
-            <div>
-              <Label className="text-xs">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@email.com" className="pl-9" />
-              </div>
-            </div>
-            <div>
-              <Label className="text-xs">Password (min 6 characters)</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="••••••••" className="pl-9" onKeyDown={(e) => e.key === "Enter" && handleSignup()} />
-              </div>
-            </div>
-            <Button onClick={handleSignup} disabled={loading} className="w-full gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <User className="w-4 h-4" />}
-              Create Account
-            </Button>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <div className="flex-1 h-px bg-border" /> or <div className="flex-1 h-px bg-border" />
-            </div>
-            <Button
-              onClick={() => {
-                if (!email || !email.includes("@")) {
-                  toast.error("Enter your email above first");
-                  return;
-                }
-                handleGoogle();
-              }}
-              disabled={loading}
-              className="w-full gap-1.5 bg-white border border-input text-gray-700 hover:bg-gray-50 dark:bg-slate-800 dark:text-white dark:border-slate-600"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4" />}
-              Sign up with Google
-            </Button>
+            {signupStep === "details" ? (
+              <>
+                {/* Step 1: Enter details */}
+                <div>
+                  <Label className="text-xs">Name</Label>
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your Name" />
+                </div>
+                <div>
+                  <Label className="text-xs">Email</Label>
+                  <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@email.com" />
+                </div>
+                <div>
+                  <Label className="text-xs">Password (min 6 characters)</Label>
+                  <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="••••••••" onKeyDown={(e) => e.key === "Enter" && handleSignupSubmit()} />
+                </div>
+                <Button onClick={handleSignupSubmit} disabled={loading} className="w-full gap-1.5 bg-[#111111] text-white hover:bg-[#000000]">
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                  Send Verification Code
+                </Button>
+
+                {/* Divider */}
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex-1 h-px bg-border" /> or <div className="flex-1 h-px bg-border" />
+                </div>
+
+                {/* Google signup */}
+                <Button onClick={handleGoogle} disabled={loading} className="w-full gap-1.5 bg-white border border-input text-gray-700 hover:bg-gray-50">
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4" />}
+                  Sign up with Google
+                </Button>
+                <p className="text-[10px] text-muted-foreground text-center">
+                  You'll be redirected to Google to choose your account and grant access.
+                </p>
+              </>
+            ) : (
+              <>
+                {/* Step 2: Verify OTP */}
+                <div className="text-center py-2">
+                  <div className="w-12 h-12 rounded-full bg-teal-50 flex items-center justify-center mx-auto mb-3">
+                    <Mail className="w-6 h-6 text-teal-600" />
+                  </div>
+                  <p className="text-sm font-medium">Verify your email</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    We sent a 6-digit code to <strong>{email}</strong>
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs">6-digit verification code</Label>
+                  <Input
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    placeholder="123456"
+                    maxLength={6}
+                    className="text-center text-lg tracking-[0.5em] font-mono"
+                    onKeyDown={(e) => e.key === "Enter" && handleSignupVerify()}
+                  />
+                </div>
+                <Button onClick={handleSignupVerify} disabled={loading} className="w-full gap-1.5 bg-[#111111] text-white hover:bg-[#000000]">
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  Verify & Create Account
+                </Button>
+                <button
+                  onClick={() => setSignupStep("details")}
+                  className="w-full text-xs text-muted-foreground hover:underline"
+                >
+                  ← Back to edit details
+                </button>
+              </>
+            )}
           </div>
         )}
       </DialogContent>
