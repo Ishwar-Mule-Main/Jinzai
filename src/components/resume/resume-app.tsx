@@ -838,6 +838,7 @@ function KeyboardShortcutsHint() {
 function EditorView() {
   const data = useResumeStore((s) => s.data);
   const template = useResumeStore((s) => s.template);
+  const setTemplate = useResumeStore((s) => s.setTemplate);
   const accent = useResumeStore((s) => s.accentColor);
   const font = useResumeStore((s) => s.fontFamily);
   const fontSize = useResumeStore((s) => s.fontSize);
@@ -978,17 +979,24 @@ function EditorView() {
         <div className={`border-r bg-muted/20 print:hidden overflow-y-auto max-h-[calc(100vh-113px)] lg:max-h-[calc(100vh-113px)] ${mobileView === "preview" ? "hidden lg:block" : "block"}`}>
           <Tabs defaultValue="content" className="w-full">
             <div className="px-4 pt-3 sticky top-0 bg-muted/20 backdrop-blur z-10 pb-2">
-              <TabsList className="grid grid-cols-2 w-full">
+              <TabsList className="grid grid-cols-3 w-full">
                 <TabsTrigger value="content" className="text-xs gap-1.5">
                   <FileText className="w-3.5 h-3.5" /> Content
                 </TabsTrigger>
                 <TabsTrigger value="design" className="text-xs gap-1.5">
                   <Settings2 className="w-3.5 h-3.5" /> Design
                 </TabsTrigger>
+                <TabsTrigger value="templates" className="text-xs gap-1.5">
+                  <LayoutGrid className="w-3.5 h-3.5" /> Templates
+                </TabsTrigger>
               </TabsList>
             </div>
             <TabsContent value="content" className="p-4 mt-0">
               <ResumeEditor />
+              {/* Import Resume button in content tab */}
+              <div className="mt-4 pt-4 border-t">
+                <ImportResumeDialog />
+              </div>
             </TabsContent>
             <TabsContent value="design" className="p-4 mt-0 space-y-4">
               <div className="rounded-xl border p-4 bg-card">
@@ -1023,6 +1031,38 @@ function EditorView() {
                 </div>
               </div>
             </TabsContent>
+            <TabsContent value="templates" className="p-4 mt-0">
+              <div className="mb-3">
+                <p className="text-xs font-semibold mb-1">Switch Template</p>
+                <p className="text-[11px] text-muted-foreground">Your content stays the same — only the design changes. Live preview shows your data.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2 max-h-[500px] overflow-y-auto">
+                {TEMPLATES.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTemplate(t.id)}
+                    className={`text-left rounded-lg border-2 overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5 ${
+                      template === t.id ? "border-teal-500 ring-2 ring-teal-500/20" : "border-border"
+                    }`}
+                  >
+                    <div className="bg-white overflow-hidden relative" style={{ height: "140px" }}>
+                      <div className="origin-top-left absolute top-0 left-0 pointer-events-none" style={{ transform: "scale(0.18)", width: "556%", height: "556%" }}>
+                        <ResumeRenderer data={data} accent={accent} font={font} fontSize={fontSize} template={t.id} />
+                      </div>
+                      {template === t.id && (
+                        <div className="absolute top-1 right-1 bg-teal-500 text-white rounded-full w-4 h-4 flex items-center justify-center shadow">
+                          <Check className="w-2.5 h-2.5" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-1.5">
+                      <p className="text-[10px] font-semibold truncate">{t.name}</p>
+                      {t.premium && <span className="text-[8px] text-amber-600">PRO</span>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
         )}
@@ -1044,7 +1084,7 @@ function EditorView() {
           <div className="sticky top-2 right-2 z-10 flex justify-end print:hidden p-2">
             <ZoomControls zoom={previewZoom} setZoom={setPreviewZoom} />
           </div>
-          <div className="p-2 sm:p-4 lg:p-8 flex justify-center print:p-0 origin-top transition-transform" style={{ transform: `scale(${previewZoom})` }}>
+          <div className="p-2 sm:p-4 lg:p-8 flex justify-center print:p-0 print:scale-100 print:origin-top-left origin-top transition-transform" style={{ transform: `scale(${previewZoom})` }}>
             <div
               className="bg-white shadow-2xl shadow-slate-400/30 print:shadow-none print:w-auto page-break-indicator resume-protected"
               onContextMenu={(e) => {

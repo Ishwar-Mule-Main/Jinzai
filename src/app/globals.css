@@ -219,6 +219,7 @@
     background: #fff !important;
     margin: 0 !important;
     padding: 0 !important;
+    width: 210mm !important;
   }
   /* Hide everything except the resume preview */
   body * {
@@ -226,15 +227,21 @@
   }
   .resume-page,
   .resume-page * {
-    visibility: visible;
+    visibility: visible !important;
   }
   .resume-page {
     position: absolute;
     left: 0;
     top: 0;
-    width: 210mm;
+    width: 210mm !important;
     min-height: 297mm;
     box-shadow: none !important;
+    display: block !important;
+  }
+  /* The inner resume content must be visible */
+  .resume-page > div {
+    display: block !important;
+    visibility: visible !important;
   }
   /* Force backgrounds to print on sidebar templates */
   * {
@@ -253,6 +260,18 @@
   .resume-page h3 {
     break-after: avoid;
     page-break-after: avoid;
+  }
+  /* Hide UI elements */
+  header, footer, .print\:hidden {
+    display: none !important;
+  }
+  /* Reset zoom transform for print */
+  .resume-page {
+    transform: none !important;
+    scale: 1 !important;
+  }
+  .resume-page * {
+    transform: none !important;
   }
 }
 
