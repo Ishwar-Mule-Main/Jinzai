@@ -161,7 +161,14 @@ export type TemplateId =
   | "nordic-frost"
   | "sahara"
   | "cyber-pulse"
-  | "bauhaus";
+  | "bauhaus"
+  // 6 college / university-oriented templates
+  | "campus-navy"
+  | "placement-maroon"
+  | "scholar-emerald"
+  | "grad-amber"
+  | "uni-charcoal"
+  | "campus-royal";
 
 export interface TemplateMeta {
   id: TemplateId;

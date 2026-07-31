@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Shield, Users, DollarSign, HeadphonesIcon, LogOut, Loader2, Lock,
   LayoutDashboard, Settings as SettingsIcon, TrendingUp, UserPlus,
-  ChevronRight, RefreshCw,
+  ChevronRight, RefreshCw, Menu, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -31,6 +31,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [section, setSection] = useState<Section>("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [tickets, setTickets] = useState<AdminTicket[]>([]);
@@ -132,11 +133,29 @@ export default function AdminPage() {
     { id: "accounts", label: "Account Creation", icon: UserPlus },
   ];
 
+  // Switch section and auto-close the sidebar on mobile
+  const goToSection = (s: Section) => {
+    setSection(s);
+    setSidebarOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-white flex">
-      {/* Left sidebar */}
-      <aside className="w-64 shrink-0 border-r border-slate-800 bg-slate-900 flex flex-col sticky top-0 h-screen">
-        <div className="p-4 border-b border-slate-800">
+      {/* Mobile overlay backdrop — click to close sidebar */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Left sidebar — fixed off-canvas on mobile, static on desktop */}
+      <aside
+        className={`fixed md:sticky top-0 left-0 h-screen w-72 shrink-0 border-r border-slate-800 bg-slate-900 flex flex-col z-40 transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+      >
+        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center shadow-md">
               <Shield className="w-5 h-5 text-white" />
@@ -146,6 +165,14 @@ export default function AdminPage() {
               <p className="text-[10px] text-slate-400 leading-tight">Domain Expansion</p>
             </div>
           </div>
+          {/* Close button — mobile only */}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-800 hover:text-white"
+            aria-label="Close sidebar"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
         <ScrollArea className="flex-1">
           <nav className="p-3 space-y-1">
@@ -154,7 +181,7 @@ export default function AdminPage() {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setSection(item.id)}
+                  onClick={() => goToSection(item.id)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all group ${
                     active
                       ? "bg-gradient-to-r from-teal-600/20 to-emerald-600/10 text-teal-300 border border-teal-700/40"
@@ -188,25 +215,33 @@ export default function AdminPage() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 w-full">
         {/* Top bar */}
         <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-20">
-          <div className="px-6 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold capitalize">{navItems.find((n) => n.id === section)?.label}</h2>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-slate-400">
-              <button onClick={() => loadDashboard(token!)} className="flex items-center gap-1 hover:text-white">
-                <RefreshCw className="w-3 h-3" /> Refresh
+          <div className="px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              {/* Hamburger — mobile only */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="md:hidden w-9 h-9 rounded-lg flex items-center justify-center text-slate-300 hover:bg-slate-800 shrink-0"
+                aria-label="Open sidebar"
+              >
+                <Menu className="w-5 h-5" />
               </button>
-              <span className="text-slate-600">|</span>
-              <span>{new Date().toLocaleString()}</span>
+              <h2 className="text-sm font-semibold capitalize truncate">{navItems.find((n) => n.id === section)?.label}</h2>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 text-xs text-slate-400 shrink-0">
+              <button onClick={() => loadDashboard(token!)} className="flex items-center gap-1 hover:text-white">
+                <RefreshCw className="w-3 h-3" /> <span className="hidden sm:inline">Refresh</span>
+              </button>
+              <span className="hidden sm:inline text-slate-600">|</span>
+              <span className="hidden sm:inline">{new Date().toLocaleString()}</span>
             </div>
           </div>
         </header>
 
-        <div className="p-6">
-          {section === "dashboard" && <DashboardSection stats={stats} users={users} tickets={tickets} onJump={setSection} />}
+        <div className="p-4 sm:p-6">
+          {section === "dashboard" && <DashboardSection stats={stats} users={users} tickets={tickets} onJump={goToSection} token={token!} />}
           {section === "users" && <UsersSection token={token!} onRefresh={() => loadDashboard(token!)} />}
           {section === "finance" && <FinanceSection token={token!} stats={stats} />}
           {section === "traffic" && <TrafficSection token={token!} stats={stats} />}

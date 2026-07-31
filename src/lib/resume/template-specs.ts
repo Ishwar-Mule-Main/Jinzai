@@ -286,6 +286,32 @@ export const NEW_TEMPLATE_SPECS: TemplateSpec[] = [
     id: "bauhaus", name: "Bauhaus", description: "Primary color blocks with geometric headings. Design-school inspired.", hasPhoto: false,
     layout: "split-header", headerStyle: "left", headingStyle: "boxed", bulletStyle: "dot", colorTreatment: "two-tone", density: "normal", font: "space-grotesk", accent: "#dc2626", accent2: "#2563eb", tags: ["Premium", "Geometric", "Bold", "Creative"],
   },
+
+  // ---------- 6 College / University-oriented templates ----------
+  {
+    id: "campus-navy", name: "Campus Navy", description: "Navy-blue sidebar with academic styling. Professional and scholarly.", hasPhoto: true,
+    layout: "sidebar-left", headerStyle: "sidebar", headingStyle: "numbered", bulletStyle: "dot", colorTreatment: "solid-sidebar", density: "normal", font: "inter", accent: "#1e3a8a", tags: ["College", "Academic", "Photo"],
+  },
+  {
+    id: "placement-maroon", name: "Placement Maroon", description: "Maroon sidebar with serif headings. Traditional university placement style.", hasPhoto: true,
+    layout: "sidebar-left", headerStyle: "sidebar", headingStyle: "numbered", bulletStyle: "dash", colorTreatment: "solid-sidebar", density: "spacious", font: "merriweather", accent: "#7f1d1d", tags: ["College", "Placement", "Serif"],
+  },
+  {
+    id: "scholar-emerald", name: "Scholar Emerald", description: "Emerald banner with academic numbering. Fresh and scholarly.", hasPhoto: true,
+    layout: "header-banner", headerStyle: "banner", headingStyle: "numbered", bulletStyle: "check", colorTreatment: "gradient-header", density: "normal", font: "poppins", accent: "#065f46", tags: ["College", "Academic", "Banner"],
+  },
+  {
+    id: "grad-amber", name: "Graduate Amber", description: "Amber sidebar with bold section markers. Warm and professional for new graduates.", hasPhoto: true,
+    layout: "sidebar-right", headerStyle: "sidebar", headingStyle: "bar", bulletStyle: "arrow", colorTreatment: "solid-sidebar", density: "compact", font: "inter", accent: "#b45309", tags: ["Graduate", "College", "Photo"],
+  },
+  {
+    id: "uni-charcoal", name: "University Charcoal", description: "Charcoal sidebar with uppercase headings. Clean and institutional.", hasPhoto: true,
+    layout: "sidebar-left", headerStyle: "sidebar", headingStyle: "uppercase", bulletStyle: "dot", colorTreatment: "dark-sidebar", density: "normal", font: "inter", accent: "#1f2937", tags: ["University", "Institutional", "ATS"],
+  },
+  {
+    id: "campus-royal", name: "Campus Royal", description: "Royal purple banner with pill headings. Modern campus recruitment style.", hasPhoto: true,
+    layout: "header-banner", headerStyle: "banner", headingStyle: "pill", bulletStyle: "diamond", colorTreatment: "gradient-header", density: "normal", font: "poppins", accent: "#6d28d9", accent2: "#4c1d95", tags: ["Campus", "Recruitment", "Modern"],
+  },
 ];
 
 export const SPEC_MAP: Record<string, TemplateSpec> = Object.fromEntries(

@@ -11,7 +11,7 @@ import {
   Users, DollarSign, Loader2, Send, Trash2, Pencil, Search, Eye, FileText,
   TrendingUp, Cpu, KeyRound, CheckCircle2, AlertCircle, ArrowUpCircle,
   ArrowDownCircle, Copy, Plus, Globe, Smartphone, Monitor, Tablet, ExternalLink,
-  X, Building2, GraduationCap, UserPlus, Save, Sparkles,
+  X, Building2, GraduationCap, UserPlus, Save, Sparkles, FlaskConical,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -35,19 +35,67 @@ const authHeaders = (t: string) => ({ Authorization: `Bearer ${t}` });
 // ============================================================
 // DASHBOARD SECTION
 // ============================================================
-export function DashboardSection({ stats, users, tickets, onJump }: {
+export function DashboardSection({ stats, users, tickets, onJump, token }: {
   stats: AdminStats | null;
   users: AdminUser[];
   tickets: AdminTicket[];
   onJump: (s: Section) => void;
+  token: string;
 }) {
+  const [seeding, setSeeding] = useState(false);
+
   if (!stats) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-teal-400" /></div>;
 
   const recentUsers = users.slice(0, 5);
   const recentTickets = tickets.filter((t) => t.status !== "resolved").slice(0, 4);
 
+  const handleSeed = async () => {
+    if (!token || seeding) return;
+    setSeeding(true);
+    try {
+      const res = await fetch("/api/admin/seed-demo", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Seed failed");
+      }
+      const json = await res.json();
+      const r = json.results || {};
+      toast.success(
+        `Seeded: ${r.orgs || 0} orgs · ${r.students || 0} students · ${r.users || 0} users · ${r.transactions || 0} transactions · ${r.pageViews || 0} page views · ${r.tickets || 0} tickets`,
+        { duration: 6000 }
+      );
+      // Reload dashboard stats
+      onJump("dashboard");
+      // Best-effort page reload to refresh all stats from server
+      setTimeout(() => window.location.reload(), 800);
+    } catch (e) {
+      toast.error("Failed to seed demo data: " + (e as Error).message);
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Header with Seed Demo Data action */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-base font-semibold text-white">Dashboard Overview</h3>
+          <p className="text-xs text-slate-400 mt-0.5">Real-time platform metrics and quick actions</p>
+        </div>
+        <Button
+          onClick={handleSeed}
+          disabled={seeding}
+          className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white"
+        >
+          {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <FlaskConical className="w-4 h-4" />}
+          {seeding ? "Seeding..." : "Seed Demo Data"}
+        </Button>
+      </div>
+
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Users} label="Total Users" value={stats.totalUsers} sub={`${stats.freeUsers} free · ${stats.activePaid} paid`} color="teal" onClick={() => onJump("users")} />
@@ -157,8 +205,8 @@ export function UsersSection({ token, onRefresh }: { token: string; onRefresh: (
     try {
       const params = new URLSearchParams();
       if (search) params.set("q", search);
-      if (planFilter) params.set("plan", planFilter);
-      if (roleFilter) params.set("role", roleFilter);
+      if (planFilter && planFilter !== "all") params.set("plan", planFilter);
+      if (roleFilter && roleFilter !== "all") params.set("role", roleFilter);
       const res = await fetch(`/api/admin/users?${params}`, { headers: authHeaders(token) });
       if (!res.ok) throw new Error("Failed");
       const json = await res.json();
@@ -207,17 +255,17 @@ export function UsersSection({ token, onRefresh }: { token: string; onRefresh: (
               onKeyDown={(e) => e.key === "Enter" && loadUsers()}
             />
           </div>
-          <Select value={planFilter} onValueChange={setPlanFilter}>
+          <Select value={planFilter || "all"} onValueChange={(v) => setPlanFilter(v === "all" ? "" : v)}>
             <SelectTrigger className="w-[140px] bg-slate-800 border-slate-700 text-white h-9"><SelectValue placeholder="All plans" /></SelectTrigger>
             <SelectContent className="bg-slate-900 border-slate-700">
-              <SelectItem value="">All plans</SelectItem>
+              <SelectItem value="all">All plans</SelectItem>
               {PLAN_OPTIONS.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <Select value={roleFilter || "all"} onValueChange={(v) => setRoleFilter(v === "all" ? "" : v)}>
             <SelectTrigger className="w-[140px] bg-slate-800 border-slate-700 text-white h-9"><SelectValue placeholder="All roles" /></SelectTrigger>
             <SelectContent className="bg-slate-900 border-slate-700">
-              <SelectItem value="">All roles</SelectItem>
+              <SelectItem value="all">All roles</SelectItem>
               <SelectItem value="user">User</SelectItem>
               <SelectItem value="student">Student</SelectItem>
               <SelectItem value="org_admin">Org Admin</SelectItem>
