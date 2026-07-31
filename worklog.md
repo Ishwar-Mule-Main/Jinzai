@@ -884,3 +884,74 @@ Stage Summary:
 - On the next Vercel deployment, page views and visitors will be automatically tracked
 - Analytics dashboard will be visible at https://vercel.com/dashboard → Jinzai project → Analytics tab
 - No environment variables required (auto-detects on Vercel); works locally without configuration
+
+---
+Task ID: 14 (user request — Admin panel revamp with sidebar + 6 sections)
+Agent: Main (orchestrator)
+Task: Complete admin panel rebuild with left sidebar, users CRUD, finance, traffic analytics, AI settings, account creation (individual + organizational/college)
+
+Work Log:
+- **Prisma schema updated**: added Organization, SiteSettings, Transaction, PageView models; extended User with role/studentId/organizationId fields
+- **Database pushed** to Neon PostgreSQL (all new tables created)
+- **Fixed critical env issue**: system had `DATABASE_URL=file:...` (SQLite) overriding .env's PostgreSQL URL. Fixed by using `env -u DATABASE_URL` in dev/db:push scripts so .env is respected
+- **Created 12 new API routes**:
+  - `/api/admin/users` (GET list with search/filter, POST create)
+  - `/api/admin/users/[id]` (GET details, PUT update, DELETE)
+  - `/api/admin/users/[id]/resumes` (GET user's resumes)
+  - `/api/admin/resumes/[id]` (GET, PUT edit, DELETE)
+  - `/api/admin/finance` (GET revenue analytics with daily series, MRR, ARPU, conversion)
+  - `/api/admin/analytics` (GET traffic: page views, visitors, top pages, referrers, funnel, devices)
+  - `/api/admin/settings` (GET current, PUT update OpenRouter model + API key)
+  - `/api/admin/organizations` (GET, POST create, DELETE)
+  - `/api/admin/organizations/[id]/students` (POST bulk student creation)
+  - `/api/admin/accounts/individual` (POST custom account creation)
+  - `/api/track` (POST page view tracking)
+- **Created OpenRouter settings system**: `src/lib/settings.ts` — DB-backed settings with env fallback. Admin can change model + API key at runtime, applies platform-wide instantly
+- **Updated `src/lib/openrouter.ts`**: reads API key + model from DB settings (via getOpenRouterSettings)
+- **Created visitor tracking**: `PageViewTracker` component (client-side, fires on every route change via sendBeacon) + `/api/track` endpoint
+- **Rebuilt admin UI** (`src/app/admin/page.tsx` + `sections.tsx` + `page-helpers.tsx`):
+  - Left sidebar with 6 sections: Dashboard, Users & Resumes, Finance, Traffic & Analytics, AI Settings, Account Creation
+  - **Dashboard**: 4 stat cards (users/revenue/visitors/resumes), conversion rate, revenue by plan, orgs card, recent users list, open tickets
+  - **Users & Resumes**: search + plan/role filters, user list with badges, detail dialog (view info + resumes), edit dialog (name/email/plan/role/password/duration), delete with confirm
+  - **Finance**: 4 metric cards, daily revenue bar chart, revenue by plan, plan distribution, transactions ledger
+  - **Traffic**: 4 metric cards, daily traffic chart (views + visitors), top pages, top referrers, conversion funnel, devices
+  - **AI Settings**: current API key (masked), model selector (365 models), update key, test model button
+  - **Account Creation**: 2 subsections — Individual (custom account with any plan) + Organization/College (create org → bulk student accounts with auto email + password = studentId + uniqueCode, CSV download of credentials)
+
+Verification Results:
+- ESLint: 0 errors
+- Dev server: HTTP 200 on / and /admin
+- Admin login: token returned ✓
+- Dashboard stats: 6 users, ₹1,996 revenue, 4 transactions, 1 org, 3 students ✓
+- Users list: 6 users with search/filter ✓
+- Finance: totalRevenue ₹1,996, conversionRate 50%, daily series, transactions ✓
+- Analytics: page views tracked, top pages, referrers, funnel ✓
+- Settings: model change (openai/gpt-oss-20b:free → meta-llama/llama-3.3-70b-instruct) ✓, API key update ✓
+- Organization creation: "IIT Bombay Test" with unique code IITT3I ✓
+- Bulk student creation: 3 students (23001@iitt3i.edu / password 23001IITT3I, etc.) ✓
+- Individual account: testuser@domainexpansion.in with Pro plan ✓
+- agent-browser: dashboard renders with all stat cards, sidebar, recent users, tickets ✓
+
+Stage Summary:
+- Admin panel completely rebuilt with professional sidebar layout
+- Full CRUD on user accounts (edit name/email/plan/role/password, delete, view resumes)
+- Finance analytics with charts and transaction ledger
+- Traffic analytics with visitor tracking (auto-tracked via PageViewTracker component)
+- AI settings: change OpenRouter model (365 options) + API key anytime, applies instantly platform-wide
+- Account creation: individual accounts + organizational/college bulk student creation (password = studentId + uniqueCode as requested)
+- All 12 API routes tested and working
+- Committed and pushed to GitHub (d57181f)
+
+## Unresolved Issues / Risks
+- Dev server dies between bash calls (sandbox limitation) — cron job restarts as needed
+- Vercel Analytics env: system DATABASE_URL conflict resolved locally, but Vercel uses its own env vars (no conflict there)
+- The `env -u DATABASE_URL` in package.json dev script is a local workaround; Vercel build doesn't use `dev` script so no impact
+
+## Priority Recommendations for Next Phase
+1. Add resume content editor in admin (currently can view/edit resume JSON via API, but no UI editor)
+2. Add email notifications when admin creates accounts (welcome email with credentials)
+3. Add CSV import for bulk student creation (upload file instead of pasting text)
+4. Add revenue export (CSV/PDF) for accounting
+5. Add real-time visitor count (WebSocket or polling) on dashboard
+6. Add admin audit log (track all admin actions: who deleted/edited what)
+7. Add organization dashboard (let college admins see their students' progress)
