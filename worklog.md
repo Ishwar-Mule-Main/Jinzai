@@ -1026,3 +1026,90 @@ Stage Summary:
 - Vercel build failure fixed — the `useSearchParams()` hook that broke static prerendering of the /404 page has been removed
 - PageViewTracker now reads search params from `window.location.search` inside useEffect (client-only, no Suspense requirement)
 - Vercel should now build successfully on the next deployment
+
+---
+Task ID: 17 (user request — Demo data seeding + college resume templates + admin polish)
+Agent: Main (orchestrator)
+Task: Create demo data seeding API, add "Seed Demo Data" button to admin dashboard, create 6 college-oriented resume templates, generate candidate portrait images, verify admin mobile sidebar
+
+Work Log:
+- **Demo data seeding API** (`src/app/api/admin/seed-demo/route.ts`):
+  - POST endpoint, admin-only via `verifyAdmin(req)`
+  - Idempotent: skips records that already exist (by email / uniqueCode / ticket subject)
+  - Seeds:
+    - 3 organizations: IIT Bombay (IITBMB, pro_499), Delhi University (DELUNI, business_1999), VIT Vellore (VITVEL, pro_499)
+    - 5 students per org (15 total) — auto-generated emails `{studentId}@{uniqueCode}.edu`, password `{studentId}{uniqueCode}`, role "student", plan inherited from org
+    - 8 individual demo users with varied plans (free, trial_99, pro_499, business_1999) and varied createdAt offsets (1–28 days ago)
+    - Transactions for all paid users (method "upi" for individual, "org" for students)
+    - 300 page views spread over last 30 days (random paths, referrers, devices, sessions; 40 unique sessions)
+    - 5 support tickets (mix of open / replied / resolved)
+  - All optional queries wrapped in `.catch(() => null)` for safety
+  - Returns `{ success, results: { orgs, students, users, transactions, pageViews, tickets } }`
+
+- **Seed Demo Data button** in admin dashboard:
+  - `src/app/admin/sections.tsx` — `DashboardSection` now accepts `token` prop
+  - Added a violet→fuchsia gradient "Seed Demo Data" button with `FlaskConical` icon at top of dashboard
+  - Loading state via `seeding` useState — shows spinner + "Seeding..." text
+  - On success: shows toast with detailed breakdown (orgs/students/users/transactions/pageViews/tickets counts), then reloads the page after 800ms to refresh all stats from server
+  - On error: shows toast with the error message
+  - Added `Dashboard Overview` heading + "Real-time platform metrics and quick actions" subtitle for visual hierarchy
+  - `src/app/admin/page.tsx` — updated call site to pass `token={token!}` to DashboardSection
+
+- **6 college-oriented resume templates** (`src/lib/resume/template-specs.ts`):
+  - `campus-navy` — Navy-blue sidebar with academic styling (numbered, dot bullets, inter font)
+  - `placement-maroon` — Maroon sidebar with serif headings (numbered, dash bullets, merriweather font)
+  - `scholar-emerald` — Emerald banner with academic numbering (check bullets, poppins font)
+  - `grad-amber` — Amber right sidebar with bold bar markers (arrow bullets, inter font, compact)
+  - `uni-charcoal` — Charcoal dark sidebar with uppercase headings (dot bullets, inter font, ATS-friendly)
+  - `campus-royal` — Royal purple banner with pill headings (diamond bullets, poppins font, modern recruitment style)
+  - All 6 IDs added to the `TemplateId` union type in `src/lib/resume/types.ts`
+  - Verified via tsx script: total specs = 70 (64 + 6), total templates = 78 (8 handcrafted + 70 specs)
+
+- **Candidate portrait images** (`public/candidates/`):
+  - All 6 student1.png–student6.png already present (verified at task start, no regeneration needed)
+  - Files committed to git in this task
+
+- **Admin mobile sidebar** (already implemented in prior task, verified in this task):
+  - Hamburger menu (`aria-label="Open sidebar"`) visible on mobile via `md:hidden`
+  - Sidebar slides in from left via `-translate-x-full md:translate-x-0` transition
+  - Black overlay backdrop (`fixed inset-0 bg-black/60 z-30 md:hidden`) closes sidebar on outside click
+  - Close button (`aria-label="Close sidebar"`) at top of sidebar (mobile only)
+  - `goToSection()` helper auto-closes sidebar when a nav item is selected
+  - Verified via agent-browser eval: hamburger button present when viewport is mobile-sized
+
+Verification Results:
+- ESLint: 0 errors ✓
+- Dev server: HTTP 200 on /admin ✓
+- Admin login: token returned ✓
+- Pre-seed DB state: 6 users, ₹1,996 revenue, 4 transactions, 1 org, 3 students, 70 page views, 0 tickets
+- Seed-demo POST call: `{success: true, results: {orgs: 3, students: 15, users: 8, transactions: 21, pageViews: 300, tickets: 5}}` ✓
+- Post-seed DB state: 29 users (6 + 15 + 8), ₹20,675 revenue, 25 transactions, 4 orgs, 18 students, 372 page views (70 + 300 + 2 from polling), 4 open tickets ✓
+- Revenue by plan breakdown: pro ₹8,483, business ₹11,994, trial ₹198 (matches seeded transactions)
+- Idempotency: second seed-demo call returned `{orgs: 0, students: 0, users: 0, transactions: 0, pageViews: 300, tickets: 0}` — no duplicate users/orgs/tickets ✓
+- agent-browser UI test:
+  - Dashboard renders "Dashboard Overview" heading, "Seed Demo Data" button, all 4 stat cards (29 users / ₹20,675 / 84 visitors / 1 resume), 90% conversion rate, revenue-by-plan bars, 4 orgs card, recent users list, 4 open support tickets ✓
+  - Finance section: ₹20,675 total revenue, ₹20,477 MRR, 89.7% conversion, ₹795 ARPU, revenue-over-time chart ✓
+  - Traffic section: 673 page views, 84 unique visitors, 172 new, 34.5% signup rate, traffic-over-time chart ✓
+  - Mobile hamburger button (`aria-label="Open sidebar"`) confirmed present at viewport width 375px ✓
+- New templates verified via tsx: all 6 IDs present in both NEW_TEMPLATE_SPECS and TEMPLATES list, with correct names ✓
+- Committed (0f993f2) and pushed to GitHub ✓
+
+Stage Summary:
+- Admin can now seed a fully-populated demo database with one click — useful for sales demos, screenshots, and testing
+- Seeding is idempotent — running it multiple times won't create duplicates (except page views, which always add 300 for traffic-demo purposes)
+- 6 new college-oriented templates bring the total template count from 72 to 78 — these are designed for placement cells and university recruitment scenarios with academic colors (navy/maroon/emerald/amber/charcoal/royal-purple)
+- 6 candidate portrait images committed (already existed on disk)
+- Admin mobile sidebar with hamburger menu verified working at mobile viewport widths
+- All work committed and pushed to GitHub (commit 0f993f2)
+
+## Unresolved Issues / Risks
+- Dev server process dies between bash calls within ~15 seconds of inactivity (sandbox memory pressure / process reaper); workaround is to start the server and run all related tests in a single bash invocation
+- PageViewTracker auto-tracks real visits during testing (adds ~2 page views per admin page load), so the page view count after seeding is slightly higher than the seeded 300
+
+## Priority Recommendations for Next Phase
+1. Add a "Reset Demo Data" button that wipes seeded records (filter by `note LIKE '%demo%'` or a `isDemo` flag)
+2. Wire the 6 college templates to candidate portrait images in the template picker UI
+3. Add organization-scoped admin views (let college placement officers see only their students)
+4. Add CSV export of all seeded credentials for organizations
+5. Add scheduled data refresh (auto-reseed every 24h in a staging environment)
+6. Add a "Demo Mode" banner so it's visually obvious when the admin is viewing seeded data
