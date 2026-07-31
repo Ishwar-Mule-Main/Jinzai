@@ -863,3 +863,24 @@ Stage Summary:
 6. Add AI-powered experience bullet rewrite (improve weak bullets to be quantified + action-verb)
 7. Add resume content examples/templates per role (pre-filled sample data for common roles)
 8. Add print preview with page break indicators
+
+---
+Task ID: 13 (user request — Vercel Analytics)
+Agent: Main (orchestrator)
+Task: Install @vercel/analytics, add <Analytics/> component to app layout, push to git
+
+Work Log:
+- Installed `@vercel/analytics@2.0.1` via `bun add @vercel/analytics`
+- Updated `src/app/layout.tsx`:
+  - Added import: `import { Analytics } from "@vercel/analytics/next"`
+  - Added `<Analytics />` component inside `<body>` (after SonnerToaster)
+- Verified ESLint: 0 errors
+- Verified dev server: HTTP 200 on `/` with no compile errors
+- Committed: "Add Vercel Analytics for visitor and page view tracking"
+- Pushed to `origin/main` (commit 52715b9)
+
+Stage Summary:
+- Vercel Analytics is now active in the codebase
+- On the next Vercel deployment, page views and visitors will be automatically tracked
+- Analytics dashboard will be visible at https://vercel.com/dashboard → Jinzai project → Analytics tab
+- No environment variables required (auto-detects on Vercel); works locally without configuration
