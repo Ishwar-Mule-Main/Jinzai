@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 /**
  * Client-side page view tracker.
  * Fires a POST to /api/track on every route change (with a session ID in localStorage).
+ *
+ * Note: uses usePathname (safe for static prerender) and reads search params
+ * from window.location inside the effect (avoids the useSearchParams Suspense
+ * boundary requirement that breaks static generation of /404 and other pages).
  */
 export function PageViewTracker() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -30,7 +33,9 @@ export function PageViewTracker() {
     }
     localStorage.setItem(SESSION_TS_KEY, String(now));
 
-    const fullPath = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname;
+    // Read search params from window.location (client-only, avoids useSearchParams Suspense requirement)
+    const search = window.location.search;
+    const fullPath = search ? `${pathname}${search}` : pathname;
     const referrer = document.referrer || null;
     const userId = (session?.user as { id?: string } | undefined)?.id || null;
 
@@ -46,7 +51,7 @@ export function PageViewTracker() {
     } catch {
       // ignore tracking errors
     }
-  }, [pathname, searchParams, session]);
+  }, [pathname, session]);
 
   return null;
 }
