@@ -103,7 +103,7 @@ Each round added features and polish:
 
 ## Credentials Summary
 - **Admin Panel**: /admin → Ishwar.mule007@gmail.com / Ishwar@2513
-- **Demo User**: ishwar@domainexpansion.in / Domain Expansion (Business plan)
+- **Demo User**: ishwar@domainexpansion.in / DomainEx@26 (Business plan)
 - **OpenRouter API**: sk-or-v1-YOUR_OPENROUTER_API_KEY
 - **Resend API**: re_YOUR_RESEND_API_KEY
 - **UPI ID**: domainexpansion@okaxis

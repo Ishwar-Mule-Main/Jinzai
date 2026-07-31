@@ -6,7 +6,7 @@
 | Type | Email | Password | URL |
 |------|-------|----------|-----|
 | Admin | Ishwar.mule007@gmail.com | Ishwar@2513 | /admin |
-| Demo User | ishwar@domainexpansion.in | Domain Expansion | / (login) |
+| Demo User | ishwar@domainexpansion.in | DomainEx@26 | / (login) |
 
 ### API Keys
 | Service | Key | Used For |
@@ -26,7 +26,7 @@
 
 ### Branding
 - Name: Jinzai (人材) — Talent Hub
-- Parent: Domain Expansion
+- Parent: DomainEx@26
 - Logo: 人 kanji on teal background
 - Favicon: `/public/favicon.svg`
 - DE Logo URL: https://domainexpansion.in/Domain%20Expansion%20New%20Logo.png

@@ -117,24 +117,9 @@ export function AuthDialog({
   };
 
   const handleGoogle = async () => {
-    if (!email || !email.includes("@")) {
-      toast.error("Enter your Gmail address");
-      return;
-    }
     setLoading(true);
-    const res = await signIn("google", {
-      email,
-      name: name || undefined,
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.error) {
-      toast.error("Google login failed");
-    } else {
-      toast.success("Logged in with Google");
-      onSuccess?.();
-      onClose();
-    }
+    // Use real Google OAuth (redirects to Google login page)
+    await signIn("google", { callbackUrl: "/" });
   };
 
   const sendCode = async () => {
@@ -184,7 +169,7 @@ export function AuthDialog({
 
   const fillDemo = () => {
     setEmail("ishwar@domainexpansion.in");
-    setPassword("Domain Expansion");
+    setPassword("DomainEx@26");
     setLoginMethod("password");
     toast.info("Demo credentials filled — click Login");
   };
@@ -245,27 +230,18 @@ export function AuthDialog({
 
             {/* Google login */}
             <TabsContent value="google" className="space-y-3 mt-3">
-              <div>
-                <Label className="text-xs">Gmail address</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                  <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="yourname@gmail.com" className="pl-9" />
-                </div>
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Click below to sign in with your Google account securely.
+                </p>
+                <Button onClick={handleGoogle} disabled={loading} className="w-full gap-1.5 bg-white border border-input text-gray-700 hover:bg-gray-50 dark:bg-slate-800 dark:text-white dark:border-slate-600">
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4" />}
+                  Continue with Google
+                </Button>
+                <p className="text-[10px] text-muted-foreground text-center mt-3">
+                  You'll be redirected to Google to complete sign-in securely.
+                </p>
               </div>
-              <div>
-                <Label className="text-xs">Your name (optional)</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your Name" className="pl-9" />
-                </div>
-              </div>
-              <Button onClick={handleGoogle} disabled={loading} className="w-full gap-1.5 bg-white border border-input text-gray-700 hover:bg-gray-50 dark:bg-slate-800 dark:text-white dark:border-slate-600">
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4" />}
-                Continue with Google
-              </Button>
-              <p className="text-[10px] text-muted-foreground text-center">
-                Demo mode: any email works. In production, this uses Google OAuth.
-              </p>
             </TabsContent>
 
             {/* Email code login */}

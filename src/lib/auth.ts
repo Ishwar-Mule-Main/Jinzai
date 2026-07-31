@@ -1,12 +1,13 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 const DEMO_EMAIL = "ishwar@domainexpansion.in";
-const DEMO_PASSWORD = "Domain Expansion";
+const DEMO_PASSWORD = "DomainEx@26";
 
-// In-memory store for email verification codes (demo only — use Redis in production)
+// In-memory store for email verification codes
 const codeStore = new Map<string, { code: string; expires: number }>();
 
 export function generateCode(email: string): string {
@@ -30,7 +31,7 @@ export function verifyCode(email: string, code: string): boolean {
   return true;
 }
 
-// Ensure the demo user exists (lazy seed)
+// Ensure the demo user exists with Business plan
 async function ensureDemoUser() {
   try {
     const existing = await db.user.findUnique({ where: { email: DEMO_EMAIL } });
@@ -41,9 +42,19 @@ async function ensureDemoUser() {
           email: DEMO_EMAIL,
           name: "Ishwar",
           password: hashed,
-          plan: "business_1999", // demo user gets full access
+          plan: "business_1999",
         },
       });
+    } else {
+      // Update password to new one if different
+      const match = await bcrypt.compare(DEMO_PASSWORD, existing.password || "");
+      if (!match && existing.password) {
+        const newHashed = await bcrypt.hash(DEMO_PASSWORD, 10);
+        await db.user.update({
+          where: { id: existing.id },
+          data: { password: newHashed, plan: "business_1999" },
+        });
+      }
     }
   } catch {
     // ignore
@@ -60,6 +71,9 @@ async function findOrCreateUser(email: string, name?: string) {
   }
   return user;
 }
+
+const googleClientId = process.env.GOOGLE_CLIENT_ID || "";
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
@@ -91,7 +105,17 @@ export const authOptions: NextAuthOptions = {
       },
     }),
 
-    // 2. Google login simulation — accepts any email (for demo, shows code in toast)
+    // 2. Google OAuth — real Google login
+    ...(googleClientId && googleClientSecret
+      ? [
+          GoogleProvider({
+            clientId: googleClientId,
+            clientSecret: googleClientSecret,
+          }),
+        ]
+      : []),
+
+    // 3. Google simulation (fallback if OAuth not configured)
     CredentialsProvider({
       id: "google",
       name: "google",
@@ -106,7 +130,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
 
-    // 3. Email verification code login
+    // 4. Email verification code login
     CredentialsProvider({
       id: "email-code",
       name: "email-code",
@@ -123,8 +147,13 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async jwt({ token, user, account }) {
+      // Handle Google OAuth sign-in
+      if (account?.provider === "google" && user?.email) {
+        const dbUser = await findOrCreateUser(user.email, user.name || undefined);
+        token.id = dbUser.id;
+        token.plan = dbUser.plan;
+      } else if (user) {
         token.id = (user as { id: string }).id;
         token.plan = (user as { plan: string }).plan || "free";
       }
@@ -146,5 +175,5 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || "resumeforge-dev-secret-change-in-production",
+  secret: process.env.NEXTAUTH_SECRET || "resumeforge-domain-expansion-secret-2025",
 };
