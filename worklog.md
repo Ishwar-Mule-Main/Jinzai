@@ -997,3 +997,32 @@ Stage Summary:
 - Logout now redirects to homepage with a professional success popup
 - Popup has two actions: stay on homepage or log in again (opens login dialog)
 - Full flow verified end-to-end via agent-browser
+
+---
+Task ID: 16 (user request — Fix Vercel build failure)
+Agent: Main (orchestrator)
+Task: Fix Vercel production build error: useSearchParams() should be wrapped in a suspense boundary at page "/404"
+
+Work Log:
+- Root cause: `PageViewTracker` component (rendered in root layout) used `useSearchParams()` from next/navigation. During static prerendering on Vercel, this hook requires a `<Suspense>` boundary. Since the layout wraps ALL pages including `/_not-found` (404), the build failed.
+- Error from Vercel build log:
+  `⨯ useSearchParams() should be wrapped in a suspense boundary at page "/404"`
+  `Error occurred prerendering page "/_not-found"`
+- Fix: Updated `src/components/page-view-tracker.tsx`:
+  - Removed `useSearchParams` import and hook usage
+  - Replaced with `window.location.search` read inside the `useEffect` (client-only)
+  - The tracker only needs search params at runtime in the effect, not during render, so this is safe and avoids the Suspense boundary requirement entirely
+  - Kept `usePathname` (which is safe for static prerender)
+
+Verification Results:
+- ESLint: 0 errors
+- Dev server: homepage HTTP 200 ✓
+- 404 page: HTTP 404 (renders correctly, no Suspense errors) ✓
+- No `useSearchParams` or `suspense` errors in dev log ✓
+- Searched entire codebase: no remaining `useSearchParams` usage (only in comments)
+- Committed (ad4243e) and pushed to GitHub ✓
+
+Stage Summary:
+- Vercel build failure fixed — the `useSearchParams()` hook that broke static prerendering of the /404 page has been removed
+- PageViewTracker now reads search params from `window.location.search` inside useEffect (client-only, no Suspense requirement)
+- Vercel should now build successfully on the next deployment
