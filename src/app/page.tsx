@@ -3,6 +3,7 @@
 import { ResumeApp } from "@/components/resume/resume-app";
 import { useResumeStore } from "@/lib/resume/store";
 import { useEffect, useState } from "react";
+import { LogoutToast } from "@/components/logout-toast";
 
 export default function Home() {
   // Zustand persist hydrates from localStorage on the client only.
@@ -33,6 +34,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <ResumeApp />
+      <LogoutToast />
     </div>
   );
 }

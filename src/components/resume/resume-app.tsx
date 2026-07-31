@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useResumeStore } from "@/lib/resume/store";
 import { TEMPLATES, ACCENT_PRESETS, FONT_OPTIONS, FONT_SIZE_OPTIONS } from "@/lib/resume/types";
@@ -219,6 +219,13 @@ function Dashboard() {
 
   const planConfig = user ? getPlanConfig(user.plan) : getPlanConfig("free");
   const canCreate = user ? canCreateResume(user.plan, user.resumeCount) : true; // not logged in = can try
+
+  // Listen for the "open login" event dispatched by the LogoutToast popup
+  useEffect(() => {
+    const openLogin = () => setAuthMode("login");
+    window.addEventListener("jinzai:open-login", openLogin);
+    return () => window.removeEventListener("jinzai:open-login", openLogin);
+  }, []);
 
   const handleStartBuilding = () => {
     if (!user) {

@@ -388,10 +388,17 @@ export function LogoutButton({ onLogout }: { onLogout?: () => void }) {
   const [loading, setLoading] = useState(false);
   const handleLogout = async () => {
     setLoading(true);
+    // Set a flag so the homepage can show the "logged out successfully" popup
+    try {
+      sessionStorage.setItem("jinzai-logged-out", "1");
+    } catch {
+      // ignore storage errors
+    }
     await signOut({ redirect: false });
     setLoading(false);
-    toast.success("Logged out");
     onLogout?.();
+    // Redirect to the main homepage so the user sees the logged-out state with a popup
+    window.location.href = "/";
   };
   return (
     <Button variant="ghost" size="sm" onClick={handleLogout} disabled={loading} className="gap-1.5">
