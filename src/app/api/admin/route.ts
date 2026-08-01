@@ -18,22 +18,32 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/admin — verify admin token + get dashboard stats
+// GET /api/admin — verify admin token + get dashboard stats (fully resilient)
 export async function GET(req: NextRequest) {
   try {
     if (!verifyAdmin(req)) return adminUnauthorized();
 
-    const users = await db.user.findMany({
-      select: {
-        id: true, email: true, name: true, plan: true, planExpiresAt: true,
-        role: true, studentId: true, organizationId: true, createdAt: true, updatedAt: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    let users: any[] = [];
+    try {
+      users = await db.user.findMany({
+        select: {
+          id: true, email: true, name: true, plan: true, planExpiresAt: true,
+          role: true, studentId: true, organizationId: true, createdAt: true, updatedAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    } catch {
+      users = [];
+    }
 
-    const resumes = await db.resume.findMany({
-      select: { id: true, title: true, template: true, userId: true, createdAt: true, contactLocked: true },
-    });
+    let resumes: any[] = [];
+    try {
+      resumes = await db.resume.findMany({
+        select: { id: true, title: true, template: true, userId: true, createdAt: true, contactLocked: true },
+      });
+    } catch {
+      resumes = [];
+    }
 
     let tickets: { id: string; email: string; name: string | null; subject: string; message: string; status: string; reply: string | null; createdAt: Date }[] = [];
     try {
@@ -66,7 +76,7 @@ export async function GET(req: NextRequest) {
       uniqueVisitors = 0;
     }
 
-    // Revenue from transactions ledger (more accurate) + fallback to plan-based estimate
+    // Revenue calculations
     const planPrices: Record<string, number> = { trial_99: 99, pro_499: 499, business_1999: 1999 };
     let ledgerRevenue = 0;
     const revenueByPlan: Record<string, number> = {};
@@ -76,20 +86,19 @@ export async function GET(req: NextRequest) {
         revenueByPlan[t.plan] = (revenueByPlan[t.plan] || 0) + t.amount;
       }
     }
-    // Fallback: if no transactions recorded, estimate from current paid plans
     let totalRevenue = ledgerRevenue;
     if (totalRevenue === 0) {
       for (const u of users) {
-        if (u.plan !== "free" && planPrices[u.plan]) {
+        if (u.plan && u.plan !== "free" && planPrices[u.plan]) {
           totalRevenue += planPrices[u.plan];
           revenueByPlan[u.plan] = (revenueByPlan[u.plan] || 0) + planPrices[u.plan];
         }
       }
     }
 
-    const activePaid = users.filter((u) => u.plan !== "free").length;
-    const expired = users.filter((u) => u.plan !== "free" && u.planExpiresAt && new Date(u.planExpiresAt) < new Date()).length;
-    const freeUsers = users.filter((u) => u.plan === "free").length;
+    const activePaid = users.filter((u) => u.plan && u.plan !== "free").length;
+    const expired = users.filter((u) => u.plan && u.plan !== "free" && u.planExpiresAt && new Date(u.planExpiresAt) < new Date()).length;
+    const freeUsers = users.filter((u) => !u.plan || u.plan === "free").length;
     const studentCount = users.filter((u) => u.role === "student").length;
 
     return NextResponse.json({

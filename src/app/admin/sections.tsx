@@ -28,7 +28,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { StatCard, planBadge, planLabel, PLAN_OPTIONS, type AdminUser, type AdminStats, type AdminTicket, type AdminResume, type Section } from "./page-helpers";
+import { StatCard, planBadge, planLabel, PLAN_OPTIONS, handleAuthError, type AdminUser, type AdminStats, type AdminTicket, type AdminResume, type Section } from "./page-helpers";
 
 const authHeaders = (t: string) => ({ Authorization: `Bearer ${t}` });
 
@@ -208,7 +208,10 @@ export function UsersSection({ token, onRefresh }: { token: string; onRefresh: (
       if (planFilter && planFilter !== "all") params.set("plan", planFilter);
       if (roleFilter && roleFilter !== "all") params.set("role", roleFilter);
       const res = await fetch(`/api/admin/users?${params}`, { headers: authHeaders(token) });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        if (handleAuthError(res)) return;
+        throw new Error("Failed");
+      }
       const json = await res.json();
       setUsers(json.users);
     } catch {
@@ -585,7 +588,10 @@ export function FinanceSection({ token, stats }: { token: string; stats: AdminSt
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/finance?range=${range}`, { headers: authHeaders(token) });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        if (handleAuthError(res)) return;
+        throw new Error("Failed");
+      }
       const json = await res.json();
       setData(json);
     } catch {
@@ -736,7 +742,10 @@ export function TrafficSection({ token, stats }: { token: string; stats: AdminSt
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/analytics?range=${range}`, { headers: authHeaders(token) });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        if (handleAuthError(res)) return;
+        throw new Error("Failed");
+      }
       const json = await res.json();
       setData(json);
     } catch {
@@ -899,7 +908,10 @@ export function SettingsSection({ token }: { token: string }) {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/settings", { headers: authHeaders(token) });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        if (handleAuthError(res)) return;
+        throw new Error("Failed");
+      }
       const json = await res.json();
       setSettings(json);
       setSelectedModel(json.model);
@@ -1225,7 +1237,10 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
     setLoading(true);
     try {
       const res = await fetch("/api/admin/organizations", { headers: authHeaders(token) });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        if (handleAuthError(res)) return;
+        throw new Error("Failed");
+      }
       const j = await res.json();
       setOrgs(j.organizations || []);
     } catch {

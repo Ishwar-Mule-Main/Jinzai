@@ -63,6 +63,15 @@ export const PLAN_OPTIONS = [
   { id: "business_1999", name: "Business", price: 1999, durationDays: 30 },
 ];
 
+export function handleAuthError(res: Response): boolean {
+  if (res.status === 401) {
+    localStorage.removeItem("admin-token");
+    window.location.reload();
+    return true;
+  }
+  return false;
+}
+
 export function planBadge(plan: string): string {
   switch (plan) {
     case "free": return "bg-white/5 text-[#888898] border border-[#2E2E2E]";

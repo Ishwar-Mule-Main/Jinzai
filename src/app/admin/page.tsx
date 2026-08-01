@@ -49,13 +49,20 @@ export default function AdminPage() {
   const loadDashboard = useCallback(async (t: string) => {
     try {
       const res = await fetch("/api/admin", { headers: authHeaders(t) });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        if (res.status === 401) {
+          localStorage.removeItem("admin-token");
+          setToken(null);
+          return;
+        }
+        throw new Error("Failed");
+      }
       const json = await res.json();
       setStats(json.stats);
       setUsers(json.users);
       setTickets(json.tickets);
     } catch {
-      toast.error("Failed to load dashboard");
+      toast.error("Failed to load admin dashboard");
     }
   }, []);
 
@@ -65,7 +72,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
       if (!res.ok) throw new Error("Invalid credentials");
       const json = await res.json();
