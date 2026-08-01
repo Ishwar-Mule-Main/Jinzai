@@ -44,72 +44,112 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.75rem;
+  /* DE Color Tokens */
+  --de-orange: #FF6200;
+  --de-orange-hover: #E55700;
+  --de-orange-light: #FF8C42;
+  --de-orange-glow: rgba(255, 98, 0, 0.20);
+  --de-dark: #0D0D0D;
+  --de-dark-surface: #141414;
+  --de-dark-card: #1A1A1A;
+  --de-dark-elevated: #222222;
+  --de-dark-border: #2E2E2E;
+
+  --background: #0D0D0D;
+  --foreground: #FFFFFF;
+  --card: #141414;
+  --card-foreground: #FFFFFF;
+  --popover: #141414;
+  --popover-foreground: #FFFFFF;
+  --primary: #FF6200;
+  --primary-foreground: #FFFFFF;
+  --secondary: #1A1A1A;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1A1A1A;
+  --muted-foreground: #888898;
+  --accent: #222222;
+  --accent-foreground: #FF6200;
+  --destructive: #EF4444;
+  --border: #2E2E2E;
+  --input: #252525;
+  --ring: #FF6200;
+  --chart-1: #FF6200;
+  --chart-2: #FF8C42;
+  --chart-3: #22C55E;
+  --chart-4: #3B82F6;
+  --chart-5: #A855F7;
+  --sidebar: #141414;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #FF6200;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1A1A1A;
+  --sidebar-accent-foreground: #FF6200;
+  --sidebar-border: #2E2E2E;
+  --sidebar-ring: #FF6200;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #0D0D0D;
+  --foreground: #FFFFFF;
+  --card: #141414;
+  --card-foreground: #FFFFFF;
+  --popover: #141414;
+  --popover-foreground: #FFFFFF;
+  --primary: #FF6200;
+  --primary-foreground: #FFFFFF;
+  --secondary: #1A1A1A;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1A1A1A;
+  --muted-foreground: #888898;
+  --accent: #222222;
+  --accent-foreground: #FF6200;
+  --destructive: #EF4444;
+  --border: #2E2E2E;
+  --input: #252525;
+  --ring: #FF6200;
+  --chart-1: #FF6200;
+  --chart-2: #FF8C42;
+  --chart-3: #22C55E;
+  --chart-4: #3B82F6;
+  --chart-5: #A855F7;
+  --sidebar: #141414;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #FF6200;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1A1A1A;
+  --sidebar-accent-foreground: #FF6200;
+  --sidebar-border: #2E2E2E;
+  --sidebar-ring: #FF6200;
+}
+
+/* Liquid Glass Effect */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass-orange {
+  background: rgba(255, 98, 0, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 98, 0, 0.25);
+  position: relative;
+}
+
+/* Gradient text */
+.text-gradient-orange {
+  background: linear-gradient(135deg, #FF6200 0%, #FF8C42 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.font-bricolage {
+  font-family: var(--font-bricolage), sans-serif;
 }
 
 @layer base {
@@ -209,69 +249,59 @@
   pointer-events: none;
 }
 
-/* ---------- Print: only the resume ---------- */
+/* ---------- Print: vector ATS-friendly resume export ---------- */
 @media print {
   @page {
-    size: A4;
+    size: A4 portrait;
     margin: 0;
   }
   html, body {
-    background: #fff !important;
+    background: #ffffff !important;
+    color: #111827 !important;
     margin: 0 !important;
     padding: 0 !important;
     width: 210mm !important;
-  }
-  /* Hide everything except the resume preview */
-  body * {
-    visibility: hidden;
-  }
-  .resume-page,
-  .resume-page * {
-    visibility: visible !important;
-  }
-  .resume-page {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 210mm !important;
-    min-height: 297mm;
-    box-shadow: none !important;
-    display: block !important;
-  }
-  /* The inner resume content must be visible */
-  .resume-page > div {
-    display: block !important;
-    visibility: visible !important;
-  }
-  /* Force backgrounds to print on sidebar templates */
-  * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  /* Multi-page: avoid breaking inside sections and list items */
-  .resume-page section,
-  .resume-page .sortable-item,
-  .resume-page ul,
-  .resume-page li {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-  .resume-page h2,
-  .resume-page h3 {
-    break-after: avoid;
-    page-break-after: avoid;
-  }
-  /* Hide UI elements */
-  header, footer, .print\:hidden {
+  /* Hide UI elements during print */
+  header, footer, nav, button, .print\:hidden, .page-separator-bar, [role="dialog"] {
     display: none !important;
   }
-  /* Reset zoom transform for print */
+  /* Reset preview containers for print */
+  .resume-protected,
   .resume-page {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
     transform: none !important;
     scale: 1 !important;
+    position: static !important;
+    display: block !important;
+    visibility: visible !important;
   }
   .resume-page * {
-    transform: none !important;
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  /* Multi-page ATS protection: avoid breaking inside sections and cards */
+  .resume-page section,
+  .resume-page .sortable-item,
+  .resume-page article,
+  .resume-page ul,
+  .resume-page li {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  .resume-page h1,
+  .resume-page h2,
+  .resume-page h3 {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
   }
 }
 

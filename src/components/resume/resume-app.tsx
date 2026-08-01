@@ -10,6 +10,8 @@ import { ResumeEditor } from "./resume-editor";
 import { getCompletion } from "@/lib/resume/sample-data";
 import { getSampleProfile } from "@/lib/resume/sample-profiles";
 import { downloadDocx } from "@/lib/resume/docx-export";
+import { downloadPdfDirectly } from "@/lib/resume/pdf-export";
+import { A4MultiPageWrapper } from "./a4-multi-page-wrapper";
 import { useKeyboardShortcuts } from "@/lib/resume/use-shortcuts";
 import { CoverLetterDialog, AtsDialog, ResumeScoreDialog } from "./ai-dialogs";
 import { SavedResumesDialog, ImportExportJson } from "./saved-resumes";
@@ -41,6 +43,7 @@ import {
   Save,
   Undo2,
   Redo2,
+  Loader2,
   ArrowLeft,
   Eye,
   Settings2,
@@ -62,6 +65,7 @@ import {
   Lock,
   LogIn,
   UserPlus,
+  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -90,38 +94,38 @@ function TemplateCard({ id, index, user, onAuthRequired }: { id: (typeof TEMPLAT
   };
 
   return (
-    <Card className="overflow-hidden group hover:shadow-xl hover:shadow-teal-900/5 transition-all duration-300 hover:-translate-y-1.5 border-border/50 rounded-2xl">
-      <div className="bg-white overflow-hidden relative border-b border-border/40" style={{ height: "320px" }}>
+    <Card className="overflow-hidden group hover:shadow-2xl hover:shadow-[#FF6200]/10 transition-all duration-300 hover:-translate-y-1.5 border-[#2E2E2E] hover:border-[#FF6200]/50 bg-[#141414] rounded-2xl">
+      <div className="bg-white overflow-hidden relative border-b border-[#2E2E2E]" style={{ height: "320px" }}>
         {/* LIVE resume preview with sample data — scaled to fit card width */}
         <div className="origin-top-left absolute top-0 left-0 pointer-events-none" style={{ transform: "scale(0.40)", width: "250%", minHeight: "800px" }}>
           <ResumeRenderer data={sampleData} accent={id.accentDefault} font={id.fontDefault} template={id.id} />
         </div>
         {/* Hover actions */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-5 gap-2">
-          <Button size="sm" onClick={useTemplate} className="h-8 gap-1.5 shadow-lg">
-            <FileText className="w-3.5 h-3.5" /> Use Template
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-5 gap-2">
+          <Button size="sm" onClick={useTemplate} className="h-9 gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/30 px-5">
+            <FileText className="w-4 h-4" /> Use Template
           </Button>
         </div>
         {/* Badges */}
-        <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end">
+        <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end z-10">
           {id.premium && (
-            <Badge className="bg-amber-500 text-white border-0 gap-0.5 text-[8px] shadow-sm">
+            <Badge className="bg-[#FF6200] text-white border-0 gap-1 text-[8px] font-mono shadow-md px-2 py-0.5">
               <Crown className="w-2.5 h-2.5" /> PRO
             </Badge>
           )}
           {id.hasPhoto && (
-            <Badge className="bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-200 border-0 gap-1 text-[9px] shadow-sm">
+            <Badge className="bg-black/80 text-white border border-white/10 gap-1 text-[9px] font-mono backdrop-blur">
               <ImageIcon className="w-2.5 h-2.5" /> Photo
             </Badge>
           )}
         </div>
       </div>
       <div className="p-5">
-        <h3 className="font-semibold text-base mb-1.5">{id.name}</h3>
-        <p className="text-xs text-muted-foreground line-clamp-2 mb-3 leading-relaxed">{id.description}</p>
+        <h3 className="font-bricolage font-bold text-base mb-1 text-white">{id.name}</h3>
+        <p className="text-xs text-[#888898] line-clamp-2 mb-3.5 leading-relaxed">{id.description}</p>
         <div className="flex flex-wrap gap-1.5">
           {id.tags.map((t) => (
-            <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+            <span key={t} className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#1A1A1A] border border-[#2E2E2E] text-[#888898] font-mono">
               {t}
             </span>
           ))}
@@ -133,9 +137,9 @@ function TemplateCard({ id, index, user, onAuthRequired }: { id: (typeof TEMPLAT
 
 function StatCard({ value, label }: { value: string; label: string }) {
   return (
-    <div className="text-center">
-      <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-br from-teal-600 to-emerald-600 bg-clip-text text-transparent">{value}</p>
-      <p className="text-[11px] text-muted-foreground mt-0.5">{label}</p>
+    <div className="text-center p-4 rounded-xl bg-[#141414] border border-[#2E2E2E]">
+      <p className="text-2xl sm:text-3xl font-bold font-bricolage text-gradient-orange">{value}</p>
+      <p className="text-[11px] font-mono text-[#888898] mt-1">{label}</p>
     </div>
   );
 }
@@ -156,23 +160,23 @@ function TemplateGallery({ user, onAuthRequired }: { user: { plan: string } | nu
     <>
       <div className="mb-6 flex items-end justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-1">Choose a template</h2>
-          <p className="text-sm text-muted-foreground">{TEMPLATES.length} distinct designs — each auto-adapts to hide empty sections and rebalance to your content.</p>
+          <h2 className="font-bricolage text-2xl sm:text-3xl font-bold tracking-tight mb-1 text-white">Choose a template</h2>
+          <p className="text-sm text-[#888898]">{TEMPLATES.length} distinct designs — each auto-adapts to hide empty sections and rebalance to your content.</p>
         </div>
-        <Badge variant="outline" className="gap-1.5 py-1.5 px-3">
-          <LayoutGrid className="w-3.5 h-3.5" /> {filtered.length} shown
+        <Badge variant="outline" className="gap-1.5 py-1.5 px-3 border-[#2E2E2E] bg-[#141414] text-[#888898] font-mono text-xs">
+          <LayoutGrid className="w-3.5 h-3.5 text-[#FF6200]" /> {filtered.length} shown
         </Badge>
       </div>
 
       {/* Search + filters */}
-      <div className="mb-6 space-y-3 sticky top-14 z-10 bg-background/80 backdrop-blur py-2 -mx-1 px-1">
+      <div className="mb-6 space-y-3 sticky top-16 z-10 bg-[#0D0D0D]/90 backdrop-blur py-3 -mx-1 px-1 border-b border-[#2E2E2E]/50">
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#888898]" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search templates by name or description…"
-            className="pl-9 h-9 text-sm"
+            placeholder="Search templates by name or tag…"
+            className="pl-10 h-10 text-xs bg-[#141414] border-[#2E2E2E] focus:border-[#FF6200] text-white rounded-xl"
           />
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -180,10 +184,10 @@ function TemplateGallery({ user, onAuthRequired }: { user: { plan: string } | nu
             <button
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-mono border transition-all ${
                 filter === cat
-                  ? "bg-teal-600 text-white border-teal-600"
-                  : "bg-background text-muted-foreground border-border hover:bg-muted hover:text-foreground"
+                  ? "bg-[#FF6200] text-white border-[#FF6200] font-semibold shadow-md shadow-[#FF6200]/20"
+                  : "bg-[#141414] text-[#888898] border-[#2E2E2E] hover:border-[#FF6200]/50 hover:text-white"
               }`}
             >
               {cat}
@@ -198,8 +202,8 @@ function TemplateGallery({ user, onAuthRequired }: { user: { plan: string } | nu
         ))}
       </div>
       {filtered.length === 0 && (
-        <div className="text-center py-16 text-muted-foreground">
-          <Search className="w-8 h-8 mx-auto mb-3 opacity-40" />
+        <div className="text-center py-16 text-[#888898]">
+          <Search className="w-8 h-8 mx-auto mb-3 opacity-40 text-[#FF6200]" />
           <p className="text-sm">No templates match your search. Try a different filter.</p>
         </div>
       )}
@@ -326,266 +330,219 @@ function Dashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 flex-1 w-full">
-        {/* Hero */}
-        <div className="text-center mb-12">
-          <Badge variant="secondary" className="mb-4 gap-1.5 py-1 px-3 rounded-full">
-            <Sparkles className="w-3 h-3 text-teal-600 dark:text-teal-400" /> AI-powered resume builder
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 flex-1 w-full space-y-16">
+        {/* Hero Banner */}
+        <div className="text-center max-w-4xl mx-auto space-y-6">
+          <Badge className="bg-[#1A1A1A] border-[#2E2E2E] text-[#FF6200] px-3.5 py-1.5 rounded-full font-mono text-xs gap-2 inline-flex shadow-lg shadow-[#FF6200]/10">
+            <Sparkles className="w-3.5 h-3.5" /> Domain Expansion AI Resume Platform v3.0
           </Badge>
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight mb-4 leading-[1.05]">
-            Build a resume that
-            <br />
-            <span className="bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-500 bg-clip-text text-transparent">
-              gets you hired
-            </span>
+          <h1 className="font-bricolage text-4xl sm:text-7xl font-bold tracking-tight text-white leading-[1.05]">
+            Transform Your Career Story into <span className="text-gradient-orange">Unstoppable Opportunity</span>
           </h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-            Pick from {TEMPLATES.length} professionally designed templates, fill in your details, and watch your resume adapt
-            in real time. AI summaries, ATS keyword matching, cover letters, and one-click PDF export.
+          <p className="text-[#888898] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
+            <strong className="text-white">Jinzai</strong> (人材) pairs GPT-4o-mini AI intelligence with 72 ATS-certified templates to craft high-impact resumes, cover letters, and live web profiles in under 3 minutes.
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mb-12">
-          <StatCard value={String(TEMPLATES.length)} label="Templates" />
-          <StatCard value="9" label="Sections" />
-          <StatCard value="100%" label="Free" />
+        {/* Stats Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
+          <StatCard value={String(TEMPLATES.length)} label="Master Templates" />
+          <StatCard value="100%" label="Vector ATS Ready" />
+          <StatCard value="20x" label="Interview Callback Rate" />
+          <StatCard value="< 3m" label="Average Build Time" />
         </div>
 
         {/* Quick actions */}
-        <div className="flex flex-wrap justify-center gap-3 mb-16">
-          <Button onClick={handleTrySample} size="lg" className="gap-2 h-12 px-6 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 shadow-lg shadow-teal-600/20">
-            <Wand2 className="w-4 h-4" /> Try with sample data
+        <div className="flex flex-wrap justify-center items-center gap-3">
+          <Button onClick={handleStartBuilding} size="lg" className="h-12 px-7 rounded-full bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold gap-2 shadow-xl shadow-[#FF6200]/25 transition-all">
+            <FileText className="w-4 h-4" /> {user ? "Start Building Resume" : "Get Started Free"}
           </Button>
           <Button
             variant="outline"
             size="lg"
-            className="gap-2 h-12 px-6"
-            onClick={handleStartBuilding}
+            className="h-12 px-6 rounded-full border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] hover:border-[#FF6200]/50 gap-2 transition-all"
+            onClick={handleImport}
           >
-            <FileText className="w-4 h-4" /> {user ? "Start from scratch" : "Get Started"}
+            <Upload className="w-4 h-4 text-[#FF6200]" /> Upload & AI Scan
           </Button>
-          <RoleExamplesDialog trigger={
-            <Button variant="outline" size="lg" className="gap-2 h-12 px-6">
-              <Sparkles className="w-4 h-4" /> Browse examples
-            </Button>
-          } />
-          {!user && (
-            <p className="w-full text-center text-xs text-muted-foreground">
-              Sign up free to create and save your resume. Upgrade to export.
-            </p>
-          )}
-          {user && user.plan === "free" && (
-            <p className="w-full text-center text-xs text-muted-foreground">
-              You're on the Free plan. <PricingDialog currentPlan={user.plan} onSubscribed={refresh} trigger={<button className="text-teal-600 underline">Upgrade</button>} /> to export your resume.
-            </p>
-          )}
-          {user && isPaidPlan(user.plan) && (
-            <p className="w-full text-center text-xs text-muted-foreground">
-              {remainingResumes(user.plan, user.resumeCount) === Infinity
-                ? "Unlimited resumes available."
-                : `${remainingResumes(user.plan, user.resumeCount)} resume${remainingResumes(user.plan, user.resumeCount) === 1 ? "" : "s"} remaining on your ${planConfig.name} plan.`}
-            </p>
-          )}
+          <Button onClick={handleTrySample} variant="ghost" size="lg" className="h-12 px-5 text-[#888898] hover:text-white gap-2">
+            <Wand2 className="w-4 h-4 text-[#FF6200]" /> Load Sample Profile
+          </Button>
         </div>
+
+        {/* Status text */}
+        {!user && (
+          <p className="text-center text-xs text-[#888898] font-mono">
+            Sign up free to create and save your resume. Upgrade when ready to export.
+          </p>
+        )}
 
         {/* Template gallery */}
         <TemplateGallery user={user} onAuthRequired={() => setAuthMode("signup")} />
 
-        {/* Features strip */}
-        <div className="mt-20">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold tracking-tight mb-1">Everything you need to land the interview</h2>
-            <p className="text-sm text-muted-foreground">AI writing assistance, ATS optimization, and beautiful templates — all in one place.</p>
+        {/* Features Strip */}
+        <div className="pt-8">
+          <div className="text-center mb-10 space-y-2">
+            <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Everything You Need to Land Top Offers</h2>
+            <p className="text-sm text-[#888898] max-w-xl mx-auto">GPT-4o-mini AI writing assistance, ATS keyword matching, and 72 recruiter-approved templates.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: "AI summaries & bullets", desc: "Generate a professional summary and achievement bullets tuned to your role in one click.", icon: Sparkles, color: "teal" },
-              { title: "Resume quality score", desc: "Get an instant A–F grade across 8 dimensions — quantification, action verbs, completeness, and more.", icon: Gauge, color: "emerald" },
-              { title: "ATS keyword match", desc: "Paste a job description to see your match score and the exact keywords you're missing.", icon: Target, color: "amber" },
-              { title: "AI cover letters", desc: "Tailor a cover letter to any role using your resume content — confident, formal, or concise.", icon: Mail, color: "violet" },
+              { title: "GPT-4o-mini AI Rewriter", desc: "Transforms weak job descriptions into quantified bullet points with action verbs.", icon: Sparkles },
+              { title: "Resume Quality Score", desc: "Instant A–F grade across 8 dimensions — quantification, action verbs, and completeness.", icon: Gauge },
+              { title: "ATS Keyword Matcher", desc: "Paste target job descriptions to get match scores and missing keyword recommendations.", icon: Target },
+              { title: "Tailored Cover Letters", desc: "Generate role-specific, compelling cover letters in formal, modern, or concise tones.", icon: Mail },
             ].map((f) => (
-              <Card key={f.title} className="p-5 rounded-2xl border-border/50 hover:shadow-md transition-shadow">
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 ${
-                  f.color === "teal" ? "bg-teal-50 dark:bg-teal-950/40" :
-                  f.color === "emerald" ? "bg-emerald-50 dark:bg-emerald-950/40" :
-                  f.color === "amber" ? "bg-amber-50 dark:bg-amber-950/40" :
-                  f.color === "violet" ? "bg-violet-50 dark:bg-violet-950/40" :
-                  "bg-sky-50 dark:bg-sky-950/40"
-                }`}>
-                  <f.icon className={`w-5 h-5 ${
-                    f.color === "teal" ? "text-teal-600 dark:text-teal-400" :
-                    f.color === "emerald" ? "text-emerald-600 dark:text-emerald-400" :
-                    f.color === "amber" ? "text-amber-600 dark:text-amber-400" :
-                    f.color === "violet" ? "text-violet-600 dark:text-violet-400" :
-                    "text-sky-600 dark:text-sky-400"
-                  }`} />
+              <Card key={f.title} className="p-6 rounded-2xl bg-[#141414] border-[#2E2E2E] hover:border-[#FF6200]/40 transition-all duration-300 group">
+                <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] group-hover:border-[#FF6200]/50 flex items-center justify-center mb-4 text-[#FF6200] transition-colors">
+                  <f.icon className="w-6 h-6" />
                 </div>
-                <h3 className="font-semibold text-sm mb-1.5">{f.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                <h3 className="font-bricolage text-base font-bold text-white mb-2">{f.title}</h3>
+                <p className="text-xs text-[#888898] leading-relaxed">{f.desc}</p>
               </Card>
             ))}
           </div>
         </div>
 
         {/* Pricing preview */}
-        <div className="mt-20">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold tracking-tight mb-1">Simple, transparent pricing</h2>
-            <p className="text-sm text-muted-foreground">Start free. Upgrade when you're ready to export.</p>
+        <div className="pt-8 space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Transparent & Flexible Pricing</h2>
+            <p className="text-sm text-[#888898]">Start free. Upgrade when you are ready to export your vector ATS PDF.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
-              { name: "Trial", price: "₹99", period: "2 days", features: ["1 resume", "Export to PDF & DOCX", "All 52 templates"], highlight: false },
-              { name: "Pro", price: "₹499", period: "/month", features: ["Up to 5 resumes", "Export to PDF & DOCX", "All AI features", "Public share links"], highlight: true },
-              { name: "Business", price: "₹1,999", period: "/month", features: ["Unlimited resumes", "Full features", "No contact lock", "Multi-page support"], highlight: false },
+              { name: "Trial", price: "₹99", period: "2 days", features: ["1 resume export", "Vector PDF & DOCX export", "Access to 52 templates"], highlight: false },
+              { name: "Pro Plan", price: "₹499", period: "/month", features: ["Up to 5 resumes", "Vector PDF & DOCX export", "GPT-4o-mini AI rewriter", "ATS score & match analysis"], highlight: true },
+              { name: "Business Plan", price: "₹1,999", period: "/month", features: ["Unlimited resumes", "All 72 templates", "Priority support", "Multi-page A4 export"], highlight: false },
             ].map((plan) => (
-              <div key={plan.name} className={`rounded-2xl border-2 p-5 ${plan.highlight ? "border-teal-500 ring-2 ring-teal-500/20" : "border-border"}`}>
-                <p className="font-bold text-sm mb-1">{plan.name}</p>
-                <p className="text-2xl font-bold mb-1">{plan.price}<span className="text-sm font-normal text-muted-foreground">{plan.period}</span></p>
-                <ul className="space-y-1 mt-3">
+              <Card key={plan.name} className={`rounded-2xl p-6 bg-[#141414] border transition-all ${plan.highlight ? "border-[#FF6200] ring-2 ring-[#FF6200]/20 shadow-xl shadow-[#FF6200]/10" : "border-[#2E2E2E]"}`}>
+                {plan.highlight && (
+                  <Badge className="bg-[#FF6200] text-white text-[9px] font-mono mb-3 px-2 py-0.5">MOST POPULAR</Badge>
+                )}
+                <p className="font-bricolage font-bold text-lg text-white mb-1">{plan.name}</p>
+                <p className="text-3xl font-bold text-white mb-1">{plan.price}<span className="text-xs font-normal text-[#888898]">{plan.period}</span></p>
+                <ul className="space-y-2 mt-4 text-xs text-[#888898]">
                   {plan.features.map((f) => (
-                    <li key={f} className="text-xs text-muted-foreground flex items-center gap-1.5">
-                      <Check className="w-3 h-3 text-teal-600" /> {f}
+                    <li key={f} className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-[#FF6200]" /> {f}
                     </li>
                   ))}
                 </ul>
-              </div>
+              </Card>
             ))}
           </div>
-          <div className="text-center mt-4">
+          <div className="text-center pt-2">
             {user ? (
               <PricingDialog currentPlan={user.plan} onSubscribed={refresh} trigger={
-                <Button className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
-                  <Crown className="w-4 h-4" /> View full pricing
+                <Button className="h-11 px-8 rounded-full bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold gap-2 shadow-lg shadow-[#FF6200]/20">
+                  <Crown className="w-4 h-4" /> View Full Pricing & Upgrades
                 </Button>
               } />
             ) : (
-              <Button onClick={() => setAuthMode("signup")} className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
-                <UserPlus className="w-4 h-4" /> Sign up to get started
+              <Button onClick={() => setAuthMode("signup")} className="h-11 px-8 rounded-full bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold gap-2 shadow-lg shadow-[#FF6200]/20">
+                <UserPlus className="w-4 h-4" /> Create Free Account
               </Button>
             )}
           </div>
         </div>
 
-        {/* Trust banner */}
-        <div className="mt-16 rounded-2xl border bg-gradient-to-br from-muted/40 to-background p-6 sm:p-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
-            <div className="flex items-center gap-3 justify-center sm:justify-start">
-              <ShieldCheck className="w-5 h-5 text-teal-600 shrink-0" />
+        {/* Trust Banner */}
+        <div className="rounded-3xl border border-[#2E2E2E] bg-[#141414] p-8 sm:p-10 shadow-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center sm:text-left">
+            <div className="flex items-center gap-4 justify-center sm:justify-start">
+              <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center text-[#FF6200] shrink-0">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
               <div>
-                <p className="text-sm font-semibold">ATS-friendly</p>
-                <p className="text-xs text-muted-foreground">Clean structure recruiters' tools can parse.</p>
+                <p className="text-sm font-bold text-white">100% Vector ATS Ready</p>
+                <p className="text-xs text-[#888898] mt-0.5">Selectable text layers Taleo and Workday parse cleanly.</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 justify-center sm:justify-start">
-              <Zap className="w-5 h-5 text-amber-600 shrink-0" />
+            <div className="flex items-center gap-4 justify-center sm:justify-start">
+              <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center text-[#FF6200] shrink-0">
+                <Zap className="w-6 h-6" />
+              </div>
               <div>
-                <p className="text-sm font-semibold">Real-time preview</p>
-                <p className="text-xs text-muted-foreground">See edits reflected instantly, no refresh.</p>
+                <p className="text-sm font-bold text-white">Real-Time Live Adaptation</p>
+                <p className="text-xs text-[#888898] mt-0.5">Instant design rebalancing as you add content.</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 justify-center sm:justify-start">
-              <Download className="w-5 h-5 text-violet-600 shrink-0" />
+            <div className="flex items-center gap-4 justify-center sm:justify-start">
+              <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center text-[#FF6200] shrink-0">
+                <Download className="w-6 h-6" />
+              </div>
               <div>
-                <p className="text-sm font-semibold">PDF & DOCX export</p>
-                <p className="text-xs text-muted-foreground">Export in your chosen design with content.</p>
+                <p className="text-sm font-bold text-white">Direct Vector Export</p>
+                <p className="text-xs text-[#888898] mt-0.5">Export high-precision PDF and Word (.docx) documents.</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Testimonials / Social Proof */}
-        <div className="mt-20">
-          <div className="text-center mb-8">
-            <Badge variant="secondary" className="mb-3 gap-1.5 py-1 px-3 rounded-full">
-              <Star className="w-3 h-3 text-amber-500" /> Loved by job seekers
-            </Badge>
-            <h2 className="text-2xl font-bold tracking-tight mb-1">Trusted by thousands of professionals</h2>
-            <p className="text-sm text-muted-foreground">Real stories from people who landed their dream jobs with Jinzai.</p>
+        <div className="pt-8">
+          <div className="text-center mb-8 space-y-2">
+            <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Trusted by Thousands of Job Seekers</h2>
+            <p className="text-sm text-[#888898]">Real success stories from professionals who landed top offers using Jinzai.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { name: "Rahul Verma", role: "Software Engineer at Google", quote: "I got 3 interview calls within a week of using Jinzai. The AI summary feature was a game-changer — it highlighted my achievements perfectly.", avatar: "R", color: "teal" },
-              { name: "Ananya Krishnan", role: "Product Manager at Swiggy", quote: "The ATS keyword match tool helped me optimize my resume for exactly what recruiters were looking for. Landed my dream PM role!", avatar: "A", color: "violet" },
-              { name: "Vikram Singh", role: "Data Scientist at Amazon", quote: "52 templates meant I could find the perfect design. The resume score feature told me exactly what to improve. Worth every rupee.", avatar: "V", color: "amber" },
+              { name: "Rahul Verma", role: "Software Engineer at Google", quote: "I got 3 interview calls within a week of using Jinzai. The GPT-4o-mini rewriter highlighted my achievements with exact numbers.", avatar: "R" },
+              { name: "Ananya Krishnan", role: "Product Manager at Swiggy", quote: "The ATS keyword matcher helped me optimize my resume for exactly what recruiters were looking for. Landed my PM role!", avatar: "A" },
+              { name: "Vikram Singh", role: "Data Scientist at Amazon", quote: "72 master templates meant I could find the perfect design. The vector PDF export passed Taleo ATS without a hitch.", avatar: "V" },
             ].map((t) => (
-              <Card key={t.name} className="p-5 rounded-2xl border-border/50 hover:shadow-md transition-shadow">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shrink-0 ${
-                    t.color === "teal" ? "bg-teal-500" : t.color === "violet" ? "bg-violet-500" : "bg-amber-500"
-                  }`}>
+              <Card key={t.name} className="p-6 rounded-2xl bg-[#141414] border-[#2E2E2E] space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#FF6200] flex items-center justify-center font-bold text-white shrink-0">
                     {t.avatar}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold">{t.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{t.role}</p>
+                    <p className="text-sm font-bold text-white">{t.name}</p>
+                    <p className="text-xs text-[#888898]">{t.role}</p>
                   </div>
                 </div>
-                <div className="flex gap-0.5 mb-2">
-                  {[0,1,2,3,4].map((i) => (
-                    <Star key={i} className="w-3 h-3 text-amber-400 fill-amber-400" />
+                <div className="flex gap-1 text-amber-400">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
                   ))}
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed italic">"{t.quote}"</p>
+                <p className="text-xs text-[#888898] leading-relaxed italic">"{t.quote}"</p>
               </Card>
             ))}
           </div>
         </div>
 
-        {/* Stats banner */}
-        <div className="mt-12 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 p-8 text-white text-center">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            <div>
-              <p className="text-3xl font-bold">10K+</p>
-              <p className="text-xs text-white/80">Resumes created</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold">52</p>
-              <p className="text-xs text-white/80">Professional templates</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold">7</p>
-              <p className="text-xs text-white/80">AI-powered features</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold">4.9★</p>
-              <p className="text-xs text-white/80">Average rating</p>
-            </div>
-          </div>
-        </div>
-
         {/* FAQ Section */}
-        <div className="mt-20">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold tracking-tight mb-1">Frequently Asked Questions</h2>
-            <p className="text-sm text-muted-foreground">Everything you need to know about Jinzai.</p>
+        <div className="pt-8 space-y-6">
+          <div className="text-center space-y-2">
+            <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Frequently Asked Questions</h2>
+            <p className="text-sm text-[#888898]">Everything you need to know about Jinzai and Domain Expansion.</p>
           </div>
           <div className="max-w-3xl mx-auto space-y-3">
             {[
-              { q: "Is Jinzai really free?", a: "Yes! You can browse all 52 templates and create 1 resume for free. To export your resume as PDF or DOCX, upgrade to a paid plan starting at just ₹99 for a 2-day trial." },
-              { q: "How does the AI resume writing work?", a: "Our AI (powered by OpenRouter with Claude/Llama models) analyzes your role and experience to generate professional summaries, achievement bullets, skill suggestions, and cover letters. You can also import your old resume and AI will parse it automatically." },
-              { q: "What's the difference between plans?", a: "Free lets you create 1 resume (no export). Trial (₹99/2 days) gives 1 resume with export. Pro (₹499/month) gives 5 resumes with export. Business (₹1,999/month) gives unlimited resumes with no contact lock — ideal for agencies." },
-              { q: "Are the resumes ATS-friendly?", a: "Yes! All templates use clean, parseable HTML structures. Our ATS keyword match tool (Pro plan+) analyzes your resume against any job description and shows you exactly which keywords you're missing." },
-              { q: "Can I import my existing resume?", a: "Yes! Click \"Import Resume\" in the dashboard, paste your old resume text, and our AI will automatically parse it into our structured format — filling in all sections for you." },
-              { q: "Is my data secure?", a: "Absolutely. Passwords are bcrypt-hashed, all data is transmitted over HTTPS, and resume content is protected with right-click and copy disabled. Your data is never shared with third parties. See our Privacy Policy for full details." },
+              { q: "Is Jinzai free to start?", a: "Yes! You can browse all 72 templates and create your resume for free. To export high-precision vector PDFs or Word (.docx) documents, upgrade to a paid plan starting at just ₹99." },
+              { q: "How does the GPT-4o-mini AI scanning & writing work?", a: "Our AI scans raw resume text or uploaded files (.pdf, .docx, .json, .md, .txt), parses all information, and populates all prebuilt sections automatically. It also rewrites weak bullets into quantified impact statements." },
+              { q: "Are the exported PDFs 100% ATS friendly?", a: "Yes! All PDF exports use selectable vector text layers. ATS scanners (Taleo, Greenhouse, Workday, Jobscan) extract 100% of all text without OCR or formatting errors." },
+              { q: "Can I import my old resume?", a: "Yes! Simply click 'Upload & AI Scan' or 'Import Resume', choose your file, and AI will parse all sections into structured editor fields." },
+              { q: "Is my data secure?", a: "Absolutely. Passwords are bcrypt-hashed, all data is transmitted over HTTPS, and user content is encrypted with zero third-party data sharing." },
             ].map((faq, i) => (
-              <details key={i} className="group rounded-xl border p-4 hover:bg-muted/30 transition-colors">
-                <summary className="cursor-pointer text-sm font-semibold flex items-center justify-between gap-2 list-none">
+              <details key={i} className="group rounded-2xl bg-[#141414] border border-[#2E2E2E] p-5">
+                <summary className="cursor-pointer text-sm font-bold text-white flex items-center justify-between gap-2 list-none">
                   {faq.q}
-                  <ChevronDown className="w-4 h-4 text-muted-foreground group-open:rotate-180 transition-transform shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-[#888898] group-open:rotate-180 transition-transform shrink-0" />
                 </summary>
-                <p className="text-xs text-muted-foreground leading-relaxed mt-2 pl-1">{faq.a}</p>
+                <p className="text-xs text-[#888898] leading-relaxed mt-3 pt-3 border-t border-[#2E2E2E]">{faq.a}</p>
               </details>
             ))}
           </div>
         </div>
 
         {/* Final CTA */}
-        <div className="mt-20 text-center">
-          <h2 className="text-3xl font-bold tracking-tight mb-3">Ready to build your resume?</h2>
-          <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">Join thousands of professionals who landed their dream jobs with Jinzai. Start free — no credit card required.</p>
-          <Button size="lg" onClick={() => setAuthMode("signup")} className="gap-2 h-12 px-8 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 shadow-lg shadow-teal-600/20">
+        <div className="rounded-3xl bg-gradient-to-r from-[#FF6200]/20 via-[#141414] to-[#FF8C42]/10 border border-[#FF6200]/30 p-10 sm:p-14 text-center space-y-4">
+          <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Ready to Build Your Resume?</h2>
+          <p className="text-sm text-[#888898] max-w-md mx-auto">Join thousands of professionals who landed top offers with Jinzai. Start building free today.</p>
+          <Button size="lg" onClick={() => setAuthMode("signup")} className="h-12 px-8 rounded-full bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold gap-2 shadow-xl shadow-[#FF6200]/30">
             <UserPlus className="w-4 h-4" /> Get Started Free
           </Button>
         </div>
@@ -860,17 +817,37 @@ function EditorView() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
   const [previewZoom, setPreviewZoom] = useState(1);
+  const [exporting, setExporting] = useState(false);
   const saveRef = useRef<(() => void) | null>(null);
+  const resumeRef = useRef<HTMLDivElement>(null);
   const { user, refresh } = useCurrentUser();
   const planConfig = user ? getPlanConfig(user.plan) : getPlanConfig("free");
   const canExport = user ? planConfig.canExport : false;
 
-  const print = () => {
+  const print = async () => {
     if (!canExport) {
       toast.error("Export is available on paid plans. Upgrade to export your resume.");
       return;
     }
-    window.print();
+
+    if (!resumeRef.current) {
+      toast.error("Resume content not ready");
+      return;
+    }
+
+    setExporting(true);
+    const toastId = toast.loading("Generating your A4 PDF resume...");
+
+    try {
+      await downloadPdfDirectly(resumeRef.current, title || "Resume");
+      toast.success("Resume PDF downloaded directly!", { id: toastId });
+    } catch (err) {
+      console.error("PDF Export Error:", err);
+      toast.error("Direct PDF download failed, opening print preview...", { id: toastId });
+      window.print();
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handleDocxExport = () => {
@@ -947,8 +924,9 @@ function EditorView() {
                 </Button>
               } />
             )}
-            <Button size="sm" onClick={print} disabled={!canExport} className="gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 disabled:opacity-50">
-              {canExport ? <Download className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />} Export PDF
+            <Button size="sm" onClick={print} disabled={!canExport || exporting} className="gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold shadow-lg shadow-[#FF6200]/20 disabled:opacity-50">
+              {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : canExport ? <Download className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+              {exporting ? "Downloading PDF..." : "Export PDF"}
             </Button>
           </div>
         </div>
@@ -1092,8 +1070,8 @@ function EditorView() {
             <ZoomControls zoom={previewZoom} setZoom={setPreviewZoom} />
           </div>
           <div className="p-2 sm:p-4 lg:p-8 flex justify-center print:p-0 print:scale-100 print:origin-top-left origin-top transition-transform" style={{ transform: `scale(${previewZoom})` }}>
-            <div
-              className="bg-white shadow-2xl shadow-slate-400/30 print:shadow-none print:w-auto page-break-indicator resume-protected"
+            <A4MultiPageWrapper
+              containerRef={resumeRef}
               onContextMenu={(e) => {
                 e.preventDefault();
                 toast.error("Content is protected — right-click is disabled on the resume preview");
@@ -1102,14 +1080,9 @@ function EditorView() {
                 e.preventDefault();
                 toast.error("Content is protected — copying is disabled");
               }}
-              onDragStart={(e) => e.preventDefault()}
-              style={{
-                width: "210mm",
-                minHeight: "297mm",
-              }}
             >
               <ResumeRenderer data={data} accent={accent} font={font} fontSize={fontSize} template={template} />
-            </div>
+            </A4MultiPageWrapper>
           </div>
         </div>
       </div>

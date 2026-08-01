@@ -9,6 +9,8 @@ import { Upload, Sparkles, FileText, Loader2, Lock, FileUp, Wand2, PenLine, Arro
 import { toast } from "sonner";
 import { isPaidPlan } from "@/lib/resume/plans";
 
+import { extractTextFromFile } from "@/lib/resume/text-extract";
+
 interface BuildChoiceProps {
   user: { plan: string; email: string } | null;
   onChooseEditor: () => void;
@@ -23,15 +25,6 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
 
   const canRewrite = user && (user.plan === "pro_499" || user.plan === "business_1999");
 
-  const readFile = (f: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsText(f);
-    });
-  };
-
   const handleUploadEdit = async () => {
     if (!file) {
       toast.error("Please choose a file first");
@@ -39,7 +32,22 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
     }
     setLoading("edit");
     try {
-      const text = await readFile(file);
+      const extracted = await extractTextFromFile(file);
+
+      if (extracted.json) {
+        setData(extracted.json);
+        setContactLocked(false);
+        onChooseEditor();
+        toast.success("Resume imported successfully from JSON!");
+        return;
+      }
+
+      const text = extracted.text || "";
+      if (text.trim().length < 20) {
+        toast.error("Could not extract readable text from file. Try pasting text manually.");
+        return;
+      }
+
       const res = await fetch("/api/ai/import-resume", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -71,7 +79,22 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
     }
     setLoading("rewrite");
     try {
-      const text = await readFile(file);
+      const extracted = await extractTextFromFile(file);
+
+      if (extracted.json) {
+        setData(extracted.json);
+        setContactLocked(false);
+        onChooseEditor();
+        toast.success("Resume data loaded successfully!");
+        return;
+      }
+
+      const text = extracted.text || "";
+      if (text.trim().length < 20) {
+        toast.error("Could not extract readable text from file.");
+        return;
+      }
+
       const res = await fetch("/api/ai/upload-rewrite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -103,28 +126,34 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-teal-50/30 dark:from-slate-950 dark:to-slate-900">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-            How would you like to build your resume?
+    <div className="min-h-screen bg-[#0D0D0D] text-white py-12 px-4 sm:px-6 relative overflow-hidden">
+      {/* Background radial glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#FF6200]/10 rounded-full blur-[140px] pointer-events-none" />
+
+      <div className="max-w-5xl mx-auto relative z-10">
+        <div className="text-center mb-12">
+          <Badge className="bg-[#FF6200]/10 text-[#FF6200] border border-[#FF6200]/20 mb-3 px-3 py-1 text-xs font-mono">
+            人材 · BUILD MODE
+          </Badge>
+          <h1 className="font-bricolage text-3xl sm:text-5xl font-bold tracking-tight mb-4 text-white">
+            How would you like to build your <span className="text-gradient-orange">resume</span>?
           </h1>
-          <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto">
-            Choose the option that works best for you. You can always switch later.
+          <p className="text-[#888898] text-sm sm:text-base max-w-xl mx-auto">
+            Choose the option that fits your current starting point. You can customize every detail in our editor.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Upload & Edit */}
-          <Card className="p-6 rounded-2xl border-border/50 hover:shadow-lg transition-all hover:-translate-y-1 flex flex-col">
-            <div className="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-950/40 flex items-center justify-center mb-4">
-              <FileUp className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+          <div className="p-6 rounded-2xl bg-[#141414] border border-[#2E2E2E] hover:border-[#FF6200]/50 hover:shadow-xl hover:shadow-[#FF6200]/10 transition-all duration-300 flex flex-col group">
+            <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center mb-5 group-hover:border-[#FF6200]/50 transition-colors">
+              <FileUp className="w-6 h-6 text-[#FF6200]" />
             </div>
-            <h2 className="font-bold text-lg mb-2">Upload & Edit</h2>
-            <p className="text-xs text-muted-foreground leading-relaxed mb-4 flex-1">
-              Already have a resume? Simply upload it to instantly pull your data into our professional templates. You can refine and polish the details later.
+            <h2 className="font-bricolage font-bold text-xl mb-2 text-white">Upload & Edit</h2>
+            <p className="text-xs text-[#888898] leading-relaxed mb-6 flex-1">
+              Already have a resume? Simply upload it to instantly pull your data into our 72 professional templates.
             </p>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="block">
                 <input
                   ref={fileRef}
@@ -135,15 +164,15 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
                 />
                 <div
                   onClick={() => fileRef.current?.click()}
-                  className="border-2 border-dashed border-border rounded-lg p-3 text-center cursor-pointer hover:border-teal-500 hover:bg-teal-50/50 dark:hover:bg-teal-950/20 transition-colors"
+                  className="border-2 border-dashed border-[#2E2E2E] rounded-xl p-3.5 text-center cursor-pointer hover:border-[#FF6200] hover:bg-[#FF6200]/5 transition-colors"
                 >
                   {file ? (
-                    <p className="text-xs font-medium text-teal-600">{file.name}</p>
+                    <p className="text-xs font-medium text-[#FF6200] truncate">{file.name}</p>
                   ) : (
                     <>
-                      <Upload className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-[10px] text-muted-foreground">Click to choose file</p>
-                      <p className="text-[9px] text-muted-foreground/60 mt-0.5">PDF, DOCX, MD, TXT</p>
+                      <Upload className="w-4 h-4 mx-auto mb-1 text-[#888898]" />
+                      <p className="text-xs text-[#888898] font-medium">Click to select file</p>
+                      <p className="text-[9px] text-[#888898]/70 mt-0.5 font-mono">PDF, DOCX, MD, TXT</p>
                     </>
                   )}
                 </div>
@@ -151,32 +180,32 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
               <Button
                 onClick={handleUploadEdit}
                 disabled={loading === "edit" || !file}
-                className="w-full gap-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700"
+                className="w-full gap-2 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-xl shadow-lg shadow-[#FF6200]/20"
                 size="sm"
               >
-                {loading === "edit" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileUp className="w-3.5 h-3.5" />}
+                {loading === "edit" ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
                 {loading === "edit" ? "Importing..." : "Upload & Edit"}
               </Button>
             </div>
-          </Card>
+          </div>
 
           {/* Upload & Rewrite */}
-          <Card className={`p-6 rounded-2xl border-2 ${canRewrite ? "border-teal-500/50 hover:shadow-lg" : "border-border/50 opacity-75"} transition-all hover:-translate-y-1 flex flex-col relative`}>
+          <div className={`p-6 rounded-2xl bg-[#141414] border ${canRewrite ? "border-[#FF6200]/40" : "border-[#2E2E2E] opacity-80"} hover:border-[#FF6200] hover:shadow-xl hover:shadow-[#FF6200]/10 transition-all duration-300 flex flex-col relative group`}>
             {!canRewrite && (
-              <div className="absolute -top-2.5 right-3">
-                <Badge className="bg-amber-500 text-white border-0 gap-0.5 text-[9px] shadow-sm">
-                  <Lock className="w-2.5 h-2.5" /> PRO
+              <div className="absolute -top-3 right-4">
+                <Badge className="bg-[#FF6200] text-white border-0 gap-1 text-[9px] font-mono px-2.5 py-0.5 shadow-md">
+                  <Lock className="w-2.5 h-2.5" /> PRO PLAN
                 </Badge>
               </div>
             )}
-            <div className="w-12 h-12 rounded-xl bg-violet-50 dark:bg-violet-950/40 flex items-center justify-center mb-4">
-              <Wand2 className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+            <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center mb-5 group-hover:border-[#FF6200]/50 transition-colors">
+              <Wand2 className="w-6 h-6 text-[#FF6200]" />
             </div>
-            <h2 className="font-bold text-lg mb-2">Upload & Rewrite</h2>
-            <p className="text-xs text-muted-foreground leading-relaxed mb-4 flex-1">
-              Upload your current resume and let our AI rewrite your experience for maximum impact. We'll fix grammar, optimize keywords, and boost your professional tone automatically.
+            <h2 className="font-bricolage font-bold text-xl mb-2 text-white">Upload & Rewrite</h2>
+            <p className="text-xs text-[#888898] leading-relaxed mb-6 flex-1">
+              Upload your current resume and let our AI agent rewrite your bullet points for maximum ATS & executive impact.
             </p>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="block">
                 <input
                   type="file"
@@ -186,15 +215,15 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
                 />
                 <div
                   onClick={() => fileRef.current?.click()}
-                  className="border-2 border-dashed border-border rounded-lg p-3 text-center cursor-pointer hover:border-violet-500 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 transition-colors"
+                  className="border-2 border-dashed border-[#2E2E2E] rounded-xl p-3.5 text-center cursor-pointer hover:border-[#FF6200] hover:bg-[#FF6200]/5 transition-colors"
                 >
                   {file ? (
-                    <p className="text-xs font-medium text-violet-600">{file.name}</p>
+                    <p className="text-xs font-medium text-[#FF6200] truncate">{file.name}</p>
                   ) : (
                     <>
-                      <Upload className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-[10px] text-muted-foreground">Click to choose file</p>
-                      <p className="text-[9px] text-muted-foreground/60 mt-0.5">PDF, DOCX, MD, TXT</p>
+                      <Upload className="w-4 h-4 mx-auto mb-1 text-[#888898]" />
+                      <p className="text-xs text-[#888898] font-medium">Click to select file</p>
+                      <p className="text-[9px] text-[#888898]/70 mt-0.5 font-mono">PDF, DOCX, MD, TXT</p>
                     </>
                   )}
                 </div>
@@ -202,49 +231,49 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
               <Button
                 onClick={handleUploadRewrite}
                 disabled={loading === "rewrite" || !file || !canRewrite}
-                variant={canRewrite ? "default" : "outline"}
-                className="w-full gap-1.5"
+                className="w-full gap-2 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-xl shadow-lg shadow-[#FF6200]/20 disabled:opacity-50"
                 size="sm"
               >
-                {loading === "rewrite" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                {loading === "rewrite" ? "AI Rewriting..." : canRewrite ? "Upload & Rewrite" : "Upgrade to Unlock"}
+                {loading === "rewrite" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {loading === "rewrite" ? "AI Rewriting..." : canRewrite ? "Upload & AI Rewrite" : "Upgrade to Unlock"}
               </Button>
               {!canRewrite && (
-                <p className="text-[9px] text-amber-600 text-center">Available on Pro (₹499) & Business (₹1,999)</p>
+                <p className="text-[9px] text-[#FF6200]/90 text-center font-mono">Available on Pro (₹499) & Business (₹1,999)</p>
               )}
             </div>
-          </Card>
+          </div>
 
           {/* Build from Scratch */}
-          <Card className="p-6 rounded-2xl border-border/50 hover:shadow-lg transition-all hover:-translate-y-1 flex flex-col">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center mb-4">
-              <PenLine className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+          <div className="p-6 rounded-2xl bg-[#141414] border border-[#2E2E2E] hover:border-[#FF6200]/50 hover:shadow-xl hover:shadow-[#FF6200]/10 transition-all duration-300 flex flex-col group">
+            <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center mb-5 group-hover:border-[#FF6200]/50 transition-colors">
+              <PenLine className="w-6 h-6 text-[#FF6200]" />
             </div>
-            <h2 className="font-bold text-lg mb-2">Build from Scratch</h2>
-            <p className="text-xs text-muted-foreground leading-relaxed mb-4 flex-1">
-              Starting from zero? Use our expert-guided builder with pre-written job-specific examples to create a standout resume that gets noticed by recruiters.
+            <h2 className="font-bricolage font-bold text-xl mb-2 text-white">Build from Scratch</h2>
+            <p className="text-xs text-[#888898] leading-relaxed mb-6 flex-1">
+              Starting from zero? Use our guided editor with AI bullet suggestions and role presets to build a standout CV.
             </p>
             <Button
               onClick={handleScratch}
               disabled={loading !== null}
               variant="outline"
-              className="w-full gap-1.5"
+              className="w-full gap-2 border-[#2E2E2E] text-white hover:bg-[#FF6200] hover:border-[#FF6200] hover:text-white transition-all rounded-xl mt-auto"
               size="sm"
             >
-              <PenLine className="w-3.5 h-3.5" />
+              <PenLine className="w-4 h-4" />
               Start Building
-              <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              <ArrowRight className="w-4 h-4 ml-auto" />
             </Button>
-          </Card>
+          </div>
         </div>
 
         {/* Web Profile teaser */}
-        <div className="mt-12 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 p-6 text-white text-center">
-          <h3 className="font-bold text-lg mb-2">🌍 Your resume becomes a web profile</h3>
-          <p className="text-sm text-white/80 max-w-md mx-auto">
-            When you export your resume, Jinzai automatically creates a shareable web profile page that recruiters can find and browse. Advanced resume users get a fully customizable landing page.
+        <div className="mt-12 rounded-2xl bg-[#141414] border border-[#2E2E2E] p-6 text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6200]/10 rounded-full blur-2xl pointer-events-none" />
+          <h3 className="font-bricolage font-bold text-xl mb-2 text-white">🌍 Your resume becomes an interactive web profile</h3>
+          <p className="text-xs text-[#888898] max-w-lg mx-auto leading-relaxed">
+            When you export your resume, Jinzai automatically generates a public web link recruiter page that can be shared anywhere.
           </p>
-          <Badge className="mt-3 bg-white/20 text-white border-0">Coming Soon — Job Seeker Hub</Badge>
+          <Badge className="mt-4 bg-[#FF6200]/10 text-[#FF6200] border border-[#FF6200]/30 font-mono text-[10px]">Job Seeker Hub Integrated</Badge>
         </div>
       </div>
     </div>

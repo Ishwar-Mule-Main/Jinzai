@@ -16,6 +16,8 @@ import { Label } from "@/components/ui/label";
 import { Upload, Loader2, FileText, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
+import { extractTextFromFile } from "@/lib/resume/text-extract";
+
 export function ImportResumeDialog() {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
@@ -24,9 +26,9 @@ export function ImportResumeDialog() {
   const setContactLocked = useResumeStore((s) => s.setContactLocked);
   const setView = useResumeStore((s) => s.setView);
 
-  const importResume = async () => {
-    if (text.trim().length < 50) {
-      toast.error("Please paste at least 50 characters of your resume text");
+  const parseTextWithAI = async (resumeText: string) => {
+    if (resumeText.trim().length < 20) {
+      toast.error("Please provide valid resume text to parse");
       return;
     }
     setLoading(true);
@@ -34,7 +36,7 @@ export function ImportResumeDialog() {
       const res = await fetch("/api/ai/import-resume", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text: resumeText }),
       });
       if (!res.ok) throw new Error("Failed");
       const json = await res.json();
@@ -44,27 +46,53 @@ export function ImportResumeDialog() {
         setView("editor");
         setOpen(false);
         setText("");
-        toast.success("Resume imported! Review and edit the parsed content.");
+        toast.success("Resume scanned and parsed with AI! Review your structured sections.");
       } else {
         throw new Error("No data returned");
       }
     } catch {
-      toast.error("Could not import resume. Try pasting cleaner text.");
+      toast.error("Could not parse resume text. Please check the text in the editor.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const importResume = async () => {
+    await parseTextWithAI(text);
+  };
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.type === "text/plain" || file.name.endsWith(".txt")) {
-      const reader = new FileReader();
-      reader.onload = () => setText(reader.result as string);
-      reader.readAsText(file);
-      toast.success("File loaded — review and click Import");
-    } else {
-      toast.error("Please paste your resume text directly (PDF parsing requires desktop software)");
+
+    setLoading(true);
+    toast.info(`Extracting text from ${file.name}...`);
+
+    try {
+      const extracted = await extractTextFromFile(file);
+
+      if (extracted.json) {
+        setData(extracted.json);
+        setContactLocked(false);
+        setView("editor");
+        setOpen(false);
+        setLoading(false);
+        toast.success("Resume imported successfully from JSON!");
+        return;
+      }
+
+      if (extracted.text && extracted.text.trim().length >= 20) {
+        setText(extracted.text);
+        toast.success("File content extracted! Scanning with AI...");
+        await parseTextWithAI(extracted.text);
+      } else {
+        setLoading(false);
+        toast.error("Could not extract readable text from file. Please paste text directly.");
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error("File extraction error:", err);
+      toast.error("Error reading file.");
     }
   };
 
@@ -91,9 +119,9 @@ export function ImportResumeDialog() {
             <div className="flex items-center justify-between mb-1.5">
               <Label className="text-xs">Your resume text</Label>
               <label className="cursor-pointer">
-                <input type="file" accept=".txt,text/plain" onChange={handleFile} className="hidden" />
+                <input type="file" accept=".pdf,.docx,.json,.md,.txt,text/plain,application/json,application/pdf" onChange={handleFile} className="hidden" />
                 <Button size="sm" variant="ghost" className="h-6 text-xs gap-1">
-                  <FileText className="w-3 h-3" /> Upload .txt file
+                  <FileText className="w-3 h-3 text-[#FF6200]" /> Upload File (.pdf, .docx, .json, .txt)
                 </Button>
               </label>
             </div>

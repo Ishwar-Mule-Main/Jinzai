@@ -30,17 +30,17 @@ export default function TemplatesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f5f1ec] flex flex-col">
+    <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col">
       <PublicNav />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         {/* Header */}
         <div className="text-center mb-10">
-          <p className="text-sm font-medium text-[#626260] mb-2">72 professional designs</p>
-          <h1 className="text-4xl sm:text-5xl font-medium tracking-tight text-[#111111] mb-3" style={{ letterSpacing: "-1.4px" }}>
-            Resume Templates
+          <p className="text-xs font-mono text-[#FF6200] mb-2 uppercase tracking-widest">72 professional designs</p>
+          <h1 className="font-bricolage text-4xl sm:text-6xl font-bold tracking-tight text-white mb-3">
+            Resume <span className="text-gradient-orange">Templates</span>
           </h1>
-          <p className="text-[#626260] max-w-xl mx-auto text-base">
+          <p className="text-[#888898] max-w-xl mx-auto text-sm sm:text-base">
             Browse all 72 templates. Each auto-adapts to your content. Free templates for everyone, premium designs for paid plans.
           </p>
         </div>
@@ -48,12 +48,12 @@ export default function TemplatesPage() {
         {/* Search + filters */}
         <div className="mb-8 space-y-3">
           <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9c9fa5]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#888898]" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search templates..."
-              className="pl-9 h-10 text-sm bg-white border-[#d3cec6] rounded-md"
+              placeholder="Search templates by name or tag..."
+              className="pl-10 h-10 text-xs bg-[#141414] border-[#2E2E2E] focus:border-[#FF6200] text-white rounded-xl"
             />
           </div>
           <div className="flex flex-wrap gap-1.5 justify-center">
@@ -61,44 +61,44 @@ export default function TemplatesPage() {
               <button
                 key={cat}
                 onClick={() => setFilter(cat)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-mono border transition-all ${
                   filter === cat
-                    ? "bg-[#111111] text-white border-[#111111]"
-                    : "bg-white text-[#626260] border-[#d3cec6] hover:bg-[#ebe7e1]"
+                    ? "bg-[#FF6200] text-white border-[#FF6200] font-semibold shadow-md shadow-[#FF6200]/20"
+                    : "bg-[#141414] text-[#888898] border-[#2E2E2E] hover:border-[#FF6200]/50 hover:text-white"
                 }`}
               >
                 {cat}
               </button>
             ))}
           </div>
-          <p className="text-center text-xs text-[#7b7b78]">{filtered.length} templates</p>
+          <p className="text-center text-xs font-mono text-[#888898]">{filtered.length} templates available</p>
         </div>
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {mounted && filtered.map((t) => (
-            <div key={t.id} className="bg-white rounded-xl border border-[#d3cec6]/60 overflow-hidden hover:shadow-md transition-all hover:-translate-y-0.5 group">
-              <div className="bg-white overflow-hidden relative" style={{ height: "300px" }}>
+            <div key={t.id} className="bg-[#141414] rounded-2xl border border-[#2E2E2E] hover:border-[#FF6200]/50 overflow-hidden hover:shadow-2xl hover:shadow-[#FF6200]/10 transition-all duration-300 hover:-translate-y-1 group">
+              <div className="bg-white overflow-hidden relative border-b border-[#2E2E2E]" style={{ height: "300px" }}>
                 <TemplateThumbnail templateId={t.id} className="w-full h-full" />
-                <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end">
+                <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end z-10">
                   {t.premium && (
-                    <Badge className="bg-amber-500 text-white border-0 gap-0.5 text-[8px] shadow-sm">
+                    <Badge className="bg-[#FF6200] text-white border-0 gap-1 text-[8px] font-mono shadow-md px-2 py-0.5">
                       <Crown className="w-2.5 h-2.5" /> PRO
                     </Badge>
                   )}
                   {t.hasPhoto && (
-                    <Badge className="bg-white/90 text-slate-700 border-0 gap-1 text-[9px] shadow-sm">
+                    <Badge className="bg-black/80 text-white border border-white/10 gap-1 text-[9px] font-mono backdrop-blur">
                       <ImageIcon className="w-2.5 h-2.5" /> Photo
                     </Badge>
                   )}
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="font-semibold text-sm text-[#111111] mb-1">{t.name}</h3>
-                <p className="text-[11px] text-[#7b7b78] line-clamp-2 mb-2 leading-relaxed">{t.description}</p>
+                <h3 className="font-bricolage font-bold text-base text-white mb-1">{t.name}</h3>
+                <p className="text-xs text-[#888898] line-clamp-2 mb-3 leading-relaxed">{t.description}</p>
                 <div className="flex flex-wrap gap-1">
                   {t.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded bg-[#f5f1ec] text-[#626260] font-medium">{tag}</span>
+                    <span key={tag} className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[#1A1A1A] border border-[#2E2E2E] text-[#888898]">{tag}</span>
                   ))}
                 </div>
               </div>

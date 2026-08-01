@@ -1001,21 +1001,31 @@ export function SettingsSection({ token }: { token: string }) {
           </div>
 
           <div>
-            <Label className="text-xs text-slate-300 flex items-center gap-1.5"><Cpu className="w-3 h-3" /> AI Model</Label>
+            <div className="flex items-center justify-between mb-1.5">
+              <Label className="text-xs text-slate-300 flex items-center gap-1.5"><Cpu className="w-3 h-3 text-[#FF6200]" /> Select OpenRouter Model ({settings.models?.length || 0} models available)</Label>
+            </div>
+            <Input
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              placeholder="e.g. openai/gpt-4o-mini or anthropic/claude-3.5-sonnet"
+              className="bg-slate-800 border-slate-700 text-white font-mono text-xs mb-2"
+            />
             <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger className="bg-slate-800 border-slate-700 text-white"><SelectValue placeholder="Select a model" /></SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-700 max-h-72">
+              <SelectTrigger className="bg-slate-800 border-slate-700 text-white"><SelectValue placeholder="Choose from OpenRouter catalog..." /></SelectTrigger>
+              <SelectContent className="bg-slate-900 border-slate-700 max-h-80">
                 {(settings.models || []).map((m: any) => (
                   <SelectItem key={m.id} value={m.id} className="text-xs">
                     <div className="flex flex-col">
-                      <span>{m.name}</span>
-                      <span className="text-[10px] text-slate-500 font-mono">{m.id}</span>
+                      <span className="font-semibold text-white">{m.name}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">{m.id}</span>
                     </div>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-[10px] text-slate-500 mt-1">{(settings.models || []).length} models available. Selected model is used for all AI features (summary, rewrite, ATS, cover letter, etc.)</p>
+            <p className="text-[10px] text-slate-400 mt-1">
+              Select from catalog or type any valid OpenRouter model ID string above (e.g. <code className="text-[#FF6200]">openai/gpt-4o-mini</code>, <code className="text-[#FF6200]">deepseek/deepseek-r1</code>).
+            </p>
           </div>
 
           <div className="flex items-center gap-2 pt-2">

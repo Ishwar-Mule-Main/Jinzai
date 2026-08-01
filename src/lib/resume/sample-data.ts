@@ -232,3 +232,93 @@ export function getCompletion(data: ResumeData): number {
   const done = checks.filter(Boolean).length;
   return Math.round((done / checks.length) * 100);
 }
+
+export function ensureResumeIds(data: Partial<ResumeData>): ResumeData {
+  if (!data || typeof data !== "object") {
+    return JSON.parse(JSON.stringify(emptyResume));
+  }
+
+  const defaults = JSON.parse(JSON.stringify(emptyResume));
+  const merged: ResumeData = {
+    ...defaults,
+    ...data,
+    personalInfo: {
+      ...defaults.personalInfo,
+      ...(data.personalInfo || {}),
+    },
+    summary: typeof data.summary === "string" ? data.summary : "",
+    experience: Array.isArray(data.experience)
+      ? data.experience.map((item) => ({
+          id: item.id || uid(),
+          company: item.company || "",
+          position: item.position || "",
+          location: item.location || "",
+          startDate: item.startDate || "",
+          endDate: item.endDate || "",
+          current: !!item.current,
+          description: item.description || "",
+          achievements: Array.isArray(item.achievements) ? item.achievements : [],
+        }))
+      : [],
+    education: Array.isArray(data.education)
+      ? data.education.map((item) => ({
+          id: item.id || uid(),
+          institution: item.institution || "",
+          degree: item.degree || "",
+          field: item.field || "",
+          startDate: item.startDate || "",
+          endDate: item.endDate || "",
+          gpa: item.gpa || "",
+          description: item.description || "",
+        }))
+      : [],
+    skills: Array.isArray(data.skills)
+      ? data.skills.map((item) => ({
+          id: item.id || uid(),
+          category: item.category || "General Skills",
+          items: Array.isArray(item.items) ? item.items : [],
+        }))
+      : [],
+    projects: Array.isArray(data.projects)
+      ? data.projects.map((item) => ({
+          id: item.id || uid(),
+          name: item.name || "",
+          description: item.description || "",
+          technologies: Array.isArray(item.technologies) ? item.technologies : [],
+          link: item.link || "",
+        }))
+      : [],
+    certifications: Array.isArray(data.certifications)
+      ? data.certifications.map((item) => ({
+          id: item.id || uid(),
+          name: item.name || "",
+          issuer: item.issuer || "",
+          date: item.date || "",
+        }))
+      : [],
+    languages: Array.isArray(data.languages)
+      ? data.languages.map((item) => ({
+          id: item.id || uid(),
+          name: item.name || "",
+          proficiency: item.proficiency || "",
+        }))
+      : [],
+    customSections: Array.isArray(data.customSections)
+      ? data.customSections.map((sec) => ({
+          id: sec.id || uid(),
+          title: sec.title || "Custom Section",
+          items: Array.isArray(sec.items)
+            ? sec.items.map((it) => ({
+                id: it.id || uid(),
+                title: it.title || "",
+                subtitle: it.subtitle || "",
+                date: it.date || "",
+                description: it.description || "",
+              }))
+            : [],
+        }))
+      : [],
+  };
+
+  return merged;
+}

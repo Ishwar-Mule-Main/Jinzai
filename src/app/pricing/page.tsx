@@ -8,81 +8,81 @@ import { PLAN_LIMITS, PAID_PLANS, type PlanId } from "@/lib/resume/plans";
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-[#f5f1ec] flex flex-col">
+    <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col">
       <PublicNav />
 
-      <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <div className="text-center mb-10">
-          <p className="text-sm font-medium text-[#626260] mb-2">Simple, transparent pricing</p>
-          <h1 className="text-4xl sm:text-5xl font-medium tracking-tight text-[#111111] mb-3" style={{ letterSpacing: "-1.4px" }}>
-            Choose your plan
+      <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 w-full relative">
+        <div className="text-center mb-12">
+          <p className="text-xs font-mono text-[#FF6200] mb-2 uppercase tracking-widest">Simple, transparent pricing</p>
+          <h1 className="font-bricolage text-4xl sm:text-6xl font-bold tracking-tight text-white mb-3">
+            Choose your <span className="text-gradient-orange">plan</span>
           </h1>
-          <p className="text-[#626260] max-w-xl mx-auto text-base">
-            Start free. Upgrade when you're ready to export. Cancel anytime.
+          <p className="text-[#888898] max-w-xl mx-auto text-sm sm:text-base">
+            Start free. Upgrade when you're ready to export high-conversion resumes. Cancel anytime.
           </p>
         </div>
 
         {/* Free plan */}
-        <div className="mb-6">
-          <div className="bg-white rounded-xl border border-[#d3cec6]/60 p-6 flex items-center justify-between">
+        <div className="mb-8">
+          <div className="bg-[#141414] rounded-2xl border border-[#2E2E2E] p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h2 className="font-semibold text-lg text-[#111111]">Free</h2>
-              <p className="text-sm text-[#626260]">Browse all 72 templates, create 1 resume, no export.</p>
+              <h2 className="font-bricolage font-bold text-xl text-white">Free Plan</h2>
+              <p className="text-xs text-[#888898] mt-1">Browse all 72 templates, create 1 resume, interactive preview included.</p>
             </div>
-            <div className="text-right">
-              <p className="text-3xl font-medium text-[#111111]">₹0</p>
-              <p className="text-xs text-[#7b7b78]">forever</p>
+            <div className="text-left sm:text-right">
+              <p className="text-3xl font-bold font-mono text-white">₹0</p>
+              <p className="text-[10px] text-[#888898] font-mono">Forever Free</p>
             </div>
           </div>
         </div>
 
         {/* Paid plans */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {PAID_PLANS.map((planId) => {
             const plan = PLAN_LIMITS[planId];
             const isFeatured = plan.highlight;
             return (
               <div
                 key={planId}
-                className={`rounded-xl p-6 ${
+                className={`rounded-2xl p-6 flex flex-col transition-all duration-300 ${
                   isFeatured
-                    ? "bg-[#111111] text-white"
-                    : "bg-white text-[#111111] border border-[#d3cec6]/60"
+                    ? "bg-[#1A1A1A] border-2 border-[#FF6200] shadow-2xl shadow-[#FF6200]/10 relative"
+                    : "bg-[#141414] border border-[#2E2E2E] hover:border-[#FF6200]/40"
                 }`}
               >
                 {plan.badge && (
                   <div className="mb-3">
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                      isFeatured ? "bg-white/20 text-white" : "bg-[#ebe7e1] text-[#626260]"
+                    <span className={`text-[9px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase ${
+                      isFeatured ? "bg-[#FF6200] text-white" : "bg-[#1A1A1A] text-[#888898] border border-[#2E2E2E]"
                     }`}>
                       {plan.badge}
                     </span>
                   </div>
                 )}
-                <h2 className="font-semibold text-lg mb-1">{plan.name}</h2>
-                <div className="mb-4">
-                  <span className="text-3xl font-medium">{plan.priceLabel}</span>
-                  <span className={`text-sm ${isFeatured ? "text-white/60" : "text-[#7b7b78]"}`}>{plan.period}</span>
+                <h2 className="font-bricolage font-bold text-2xl mb-1 text-white">{plan.name}</h2>
+                <div className="mb-5">
+                  <span className="text-3xl sm:text-4xl font-bold font-mono text-white">{plan.priceLabel}</span>
+                  <span className="text-xs text-[#888898] ml-1 font-mono">{plan.period}</span>
                 </div>
-                <ul className="space-y-2 mb-6">
+                <ul className="space-y-3 mb-8 flex-1">
                   {plan.features.map((f, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm">
-                      <Check className={`w-4 h-4 shrink-0 mt-0.5 ${isFeatured ? "text-white" : "text-[#111111]"}`} />
-                      <span className={isFeatured ? "text-white/80" : "text-[#626260]"}>{f}</span>
+                    <li key={i} className="flex items-start gap-2.5 text-xs text-[#888898]">
+                      <Check className="w-4 h-4 shrink-0 text-[#FF6200] mt-0.5" />
+                      <span>{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Button
-                  className={`w-full gap-1.5 rounded-md ${
+                  className={`w-full gap-2 rounded-xl font-semibold ${
                     isFeatured
-                      ? "bg-white text-[#111111] hover:bg-white/90"
-                      : "bg-[#111111] text-white hover:bg-[#000000]"
+                      ? "bg-[#FF6200] hover:bg-[#E55700] text-white shadow-lg shadow-[#FF6200]/30"
+                      : "bg-[#1A1A1A] text-white hover:bg-[#FF6200] border border-[#2E2E2E] hover:border-[#FF6200]"
                   }`}
                 >
-                  <Crown className="w-3.5 h-3.5" /> Get {plan.name}
+                  <Crown className="w-4 h-4" /> Get {plan.name}
                 </Button>
-                <p className={`text-[10px] text-center mt-2 ${isFeatured ? "text-white/40" : "text-[#7b7b78]"}`}>
-                  {planId === "trial_99" ? "2-day access, one-time payment" : "Billed monthly, cancel anytime"}
+                <p className="text-[10px] text-center mt-2.5 text-[#888898] font-mono">
+                  {planId === "trial_99" ? "2-day full access, one-time payment" : "Billed monthly, cancel anytime"}
                 </p>
               </div>
             );
@@ -90,8 +90,8 @@ export default function PricingPage() {
         </div>
 
         {/* FAQ */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-medium text-[#111111] mb-4 text-center">Frequently Asked Questions</h2>
+        <div className="mt-16">
+          <h2 className="font-bricolage text-2xl font-bold text-white mb-6 text-center">Frequently Asked Questions</h2>
           <div className="max-w-2xl mx-auto space-y-3">
             {[
               { q: "Is there a free plan?", a: "Yes! Browse all 72 templates and create 1 resume for free. Upgrade to export." },
@@ -99,12 +99,12 @@ export default function PricingPage() {
               { q: "What is the contact lock?", a: "On Trial and Pro plans, contact details are locked once added to prevent plan sharing. Business plan has no lock." },
               { q: "Do you offer refunds?", a: "Trial (₹99) is non-refundable. Monthly plans are refundable within 7 days if usage is minimal (under 3 exports)." },
             ].map((faq, i) => (
-              <details key={i} className="group rounded-lg bg-white border border-[#d3cec6]/60 p-4">
-                <summary className="cursor-pointer text-sm font-medium text-[#111111] flex items-center justify-between">
+              <details key={i} className="group rounded-xl bg-[#141414] border border-[#2E2E2E] p-4">
+                <summary className="cursor-pointer text-sm font-semibold text-white flex items-center justify-between">
                   {faq.q}
-                  <span className="text-[#9c9fa5] group-open:rotate-180 transition-transform">▼</span>
+                  <span className="text-[#FF6200] group-open:rotate-180 transition-transform">▼</span>
                 </summary>
-                <p className="text-xs text-[#626260] leading-relaxed mt-2">{faq.a}</p>
+                <p className="text-xs text-[#888898] leading-relaxed mt-2.5">{faq.a}</p>
               </details>
             ))}
           </div>

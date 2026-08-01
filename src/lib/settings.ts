@@ -13,7 +13,7 @@ export interface OpenRouterSettings {
  */
 export async function getOpenRouterSettings(): Promise<OpenRouterSettings> {
   const envKey = process.env.OPENROUTER_API_KEY || "";
-  const envModel = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.3-70b-instruct";
+  const envModel = process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini";
 
   try {
     const rows = await db.siteSettings.findMany({

@@ -4,20 +4,71 @@ import { openRouterChat } from "@/lib/openrouter";
 export const runtime = "nodejs";
 
 // POST /api/ai/import-resume — takes raw text from an old resume and parses it into structured ResumeData
+function fallbackParse(text: string) {
+  const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  const phoneMatch = text.match(/(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/);
+  const linkedinMatch = text.match(/linkedin\.com\/in\/[a-zA-Z0-9_-]+/i);
+  const githubMatch = text.match(/github\.com\/[a-zA-Z0-9_-]+/i);
+
+  const lines = text.split(/[\r\n]+/).map((l) => l.trim()).filter((l) => l.length > 2);
+  const rawName = lines[0] || "Imported Resume";
+  const fullName = rawName.replace(/email:.*|phone:.*|summary:.*|experience:.*/i, "").trim();
+  const jobTitle = lines[1] && lines[1].length < 60 && !lines[1].includes("@") ? lines[1] : "";
+
+  return {
+    personalInfo: {
+      fullName: fullName.slice(0, 60),
+      jobTitle: jobTitle,
+      email: emailMatch ? emailMatch[0] : "",
+      phone: phoneMatch ? phoneMatch[0] : "",
+      location: "",
+      website: "",
+      linkedin: linkedinMatch ? linkedinMatch[0] : "",
+      github: githubMatch ? githubMatch[0] : "",
+      tagline: "",
+    },
+    summary: text.slice(0, 500).trim(),
+    experience: [],
+    education: [],
+    skills: [],
+    projects: [],
+    certifications: [],
+    languages: [],
+    customSections: [],
+  };
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { text } = body;
-
-    if (!text || text.trim().length < 50) {
-      return NextResponse.json({ error: "Please provide at least 50 characters of resume text" }, { status: 400 });
+    let text = "";
+    try {
+      const body = await req.json();
+      text = typeof body?.text === "string" ? body.text : "";
+    } catch {
+      const rawBody = await req.text();
+      try {
+        const sanitizedBody = rawBody.replace(/[\x00-\x1F\x7F-\x9F]/g, (match) => {
+          if (match === "\n" || match === "\r" || match === "\t") return " ";
+          return "";
+        });
+        const body = JSON.parse(sanitizedBody);
+        text = typeof body?.text === "string" ? body.text : rawBody;
+      } catch {
+        text = rawBody;
+      }
     }
+
+    if (!text || typeof text !== "string" || text.trim().length < 15) {
+      return NextResponse.json({ error: "Please provide resume text to import" }, { status: 400 });
+    }
+
+    const cleanText = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, " ").replace(/\s+/g, " ");
 
     const prompt = `Parse the following resume text into a structured JSON object. Extract all available information.
 
 Resume text:
 """
-${text.slice(0, 8000)}
+${cleanText.slice(0, 8000)}
 """
 
 Return ONLY a valid JSON object with this exact structure (omit fields you can't find, use empty strings/arrays):
@@ -78,25 +129,27 @@ Rules:
 - Group skills into logical categories.
 - Return ONLY the JSON, no markdown, no commentary.`;
 
-    const raw = await openRouterChat([
-      {
-        role: "system",
-        content:
-          "You are a resume parser that extracts structured data from raw text. Return ONLY valid JSON, no markdown or commentary.",
-      },
-      { role: "user", content: prompt },
-    ]);
-
-    const cleaned = raw.replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
-
-    let parsed;
     try {
-      parsed = JSON.parse(cleaned);
-    } catch {
-      return NextResponse.json({ error: "Could not parse resume. Please try pasting cleaner text." }, { status: 500 });
-    }
+      const raw = await openRouterChat(
+        [
+          {
+            role: "system",
+            content:
+              "You are an expert AI resume scanner. You scan raw resume text, extract every section (personal info, summary, experience, education, skills, projects, certifications, languages, custom sections), and allocate each content item into prebuilt JSON sections. Return ONLY valid JSON.",
+          },
+          { role: "user", content: prompt },
+        ],
+        { model: "openai/gpt-4o-mini" }
+      );
 
-    return NextResponse.json({ data: parsed });
+      const cleaned = raw.replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
+      const parsed = JSON.parse(cleaned);
+      return NextResponse.json({ data: parsed });
+    } catch {
+      // Deterministic fallback if OpenRouter key is unconfigured or AI parsing times out
+      const fallback = fallbackParse(cleanText);
+      return NextResponse.json({ data: fallback });
+    }
   } catch (e) {
     console.error("Import resume error:", e);
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });

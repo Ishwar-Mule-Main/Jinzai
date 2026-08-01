@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import {
   Dialog,
   DialogContent,
@@ -386,23 +386,34 @@ export function AuthDialog({
 
 export function LogoutButton({ onLogout }: { onLogout?: () => void }) {
   const [loading, setLoading] = useState(false);
-  const handleLogout = async () => {
+  const handleLogout = () => {
     setLoading(true);
-    // Set a flag so the homepage can show the "logged out successfully" popup
+
     try {
       sessionStorage.setItem("jinzai-logged-out", "1");
     } catch {
       // ignore storage errors
     }
-    await signOut({ redirect: false });
-    setLoading(false);
+
     onLogout?.();
-    // Redirect to the main homepage so the user sees the logged-out state with a popup
+
+    // 0ms instant cookie clearance
+    try {
+      document.cookie = "next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie = "__Secure-next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie = "next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    } catch {}
+
+    // Asynchronous background signout request (non-blocking)
+    signOut({ redirect: false }).catch(() => {});
+
+    // Instant browser navigation to homepage
     window.location.href = "/";
   };
+
   return (
-    <Button variant="ghost" size="sm" onClick={handleLogout} disabled={loading} className="gap-1.5">
-      {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogOut className="w-3.5 h-3.5" />}
+    <Button variant="ghost" size="sm" onClick={handleLogout} disabled={loading} className="gap-1.5 hover:text-[#FF6200] transition-colors">
+      {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#FF6200]" /> : <LogOut className="w-3.5 h-3.5" />}
       <span className="hidden sm:inline">Log out</span>
     </Button>
   );

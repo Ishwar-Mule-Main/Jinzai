@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ResumeData, TemplateId } from "./types";
-import { emptyResume, sampleResume, uid } from "./sample-data";
+import { emptyResume, sampleResume, uid, ensureResumeIds } from "./sample-data";
 import { SPEC_MAP } from "./template-specs";
 
 interface ResumeState {
@@ -132,7 +132,7 @@ export const useResumeStore = create<ResumeState>()(
         pushHistory(set, get, cloned);
         set({ savedId: null, title: "Untitled Resume" });
       },
-      setData: (d) => pushHistory(set, get, d),
+      setData: (d) => pushHistory(set, get, ensureResumeIds(d)),
       updateData: (updater) => {
         const next = updater(structuredClone(get().data));
         pushHistory(set, get, next);
