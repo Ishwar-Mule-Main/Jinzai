@@ -13,13 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Mail, Lock, User, Chrome, KeyRound, LogOut, ShieldCheck, Sparkles, CheckCircle2 } from "lucide-react";
+import { Loader2, Mail, Lock, Chrome, KeyRound, LogOut, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 export type AuthMode = "login" | "signup" | null;
 
 export function AuthDialog({
-  mode,
+  mode: initialMode,
   onClose,
   onSuccess,
 }: {
@@ -27,6 +27,7 @@ export function AuthDialog({
   onClose: () => void;
   onSuccess?: () => void;
 }) {
+  const [activeMode, setActiveMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -37,7 +38,11 @@ export function AuthDialog({
   const [signupStep, setSignupStep] = useState<"details" | "otp">("details");
   const [otpCode, setOtpCode] = useState("");
 
-  const open = mode !== null;
+  const open = initialMode !== null;
+
+  useEffect(() => {
+    setActiveMode(initialMode);
+  }, [initialMode]);
 
   useEffect(() => {
     if (!open) {
@@ -53,7 +58,7 @@ export function AuthDialog({
   // ===== LOGIN: Password =====
   const handleLogin = async () => {
     if (!email || !password) {
-      toast.error("Enter email and password");
+      toast.error("Enter your email and password");
       return;
     }
     setLoading(true);
@@ -64,10 +69,10 @@ export function AuthDialog({
         redirect: false,
       });
       if (res?.error) {
-        toast.error("Invalid email or password");
+        toast.error("Invalid credentials. If you registered via Google or Email Code, click the Google or Email Code tab above!");
       } else {
         await new Promise((r) => setTimeout(r, 500));
-        toast.success("Logged in successfully");
+        toast.success("Signed in successfully!");
         onSuccess?.();
         onClose();
       }
@@ -111,7 +116,7 @@ export function AuthDialog({
 
   const verifyLoginOtp = async () => {
     if (!email || !otpCode) {
-      toast.error("Enter the code");
+      toast.error("Enter the code from your email");
       return;
     }
     setLoading(true);
@@ -125,7 +130,7 @@ export function AuthDialog({
         toast.error("Invalid or expired code");
       } else {
         await new Promise((r) => setTimeout(r, 500));
-        toast.success("Logged in successfully");
+        toast.success("Signed in successfully!");
         onSuccess?.();
         onClose();
       }
@@ -155,6 +160,11 @@ export function AuthDialog({
       });
       const json = await res.json();
       if (!res.ok) {
+        if (res.status === 409) {
+          toast.info("An account with this email already exists! Switching to Sign In...");
+          setActiveMode("login");
+          return;
+        }
         throw new Error(json.error || "Signup failed");
       }
       setSignupStep("otp");
@@ -193,13 +203,6 @@ export function AuthDialog({
     }
   };
 
-  const fillDemo = () => {
-    setEmail("ishwar@domainexpansion.in");
-    setPassword("DomainEx@26");
-    setLoginMethod("password");
-    toast.info("Demo credentials filled — click Login");
-  };
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md bg-[#141414] border border-[#2E2E2E] text-white">
@@ -208,40 +211,40 @@ export function AuthDialog({
             <div className="w-8 h-8 rounded-lg bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center">
               <ShieldCheck className="w-4 h-4 text-[#FF6200]" />
             </div>
-            {mode === "signup" ? "Join free — it takes 30 seconds" : "Welcome back! Sign in to continue"}
+            {activeMode === "signup" ? "Join free — it takes 30 seconds" : "Welcome back! Sign in to continue"}
           </DialogTitle>
           <DialogDescription className="text-[#888898] text-sm">
-            {mode === "signup"
+            {activeMode === "signup"
               ? "Create your free account to save and manage your resumes."
               : "Sign in to access your saved resumes."}
           </DialogDescription>
         </DialogHeader>
 
         {/* ===== LOGIN MODE ===== */}
-        {mode === "login" && (
+        {activeMode === "login" && (
           <Tabs value={loginMethod} onValueChange={(v) => setLoginMethod(v as typeof loginMethod)}>
             <TabsList className="grid grid-cols-3 w-full bg-[#1A1A1A] border border-[#2E2E2E] rounded-lg p-1">
               <TabsTrigger
                 value="google"
                 className="text-xs gap-1 text-[#888898] data-[state=active]:bg-[#FF6200] data-[state=active]:text-white rounded-md transition-all"
               >
-                <Chrome className="w-3 h-3" /> Google
+                <Chrome className="w-3.5 h-3.5" /> Google
               </TabsTrigger>
               <TabsTrigger
                 value="password"
                 className="text-xs gap-1 text-[#888898] data-[state=active]:bg-[#FF6200] data-[state=active]:text-white rounded-md transition-all"
               >
-                <Lock className="w-3 h-3" /> Password
+                <Lock className="w-3.5 h-3.5" /> Password
               </TabsTrigger>
               <TabsTrigger
                 value="code"
                 className="text-xs gap-1 text-[#888898] data-[state=active]:bg-[#FF6200] data-[state=active]:text-white rounded-md transition-all"
               >
-                <KeyRound className="w-3 h-3" /> Email Code
+                <KeyRound className="w-3.5 h-3.5" /> Email Code
               </TabsTrigger>
             </TabsList>
 
-            {/* Google login — shown first */}
+            {/* Google login */}
             <TabsContent value="google" className="space-y-3 mt-4">
               <div className="text-center py-3">
                 <p className="text-sm text-[#888898] mb-4">
@@ -255,9 +258,6 @@ export function AuthDialog({
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4 text-[#FF6200]" />}
                   Continue with Google
                 </Button>
-                <p className="text-xs text-[#5A5A6A] text-center mt-3">
-                  You'll be redirected to Google — takes just a few seconds.
-                </p>
               </div>
             </TabsContent>
 
@@ -339,22 +339,24 @@ export function AuthDialog({
                   Verify &amp; Sign In
                 </Button>
               )}
-              {loginOtpSent && (
-                <button
-                  onClick={sendLoginOtp}
-                  className="w-full text-xs text-[#888898] hover:text-[#FF6200] transition-colors"
-                >
-                  Didn't receive it? Resend the code
-                </button>
-              )}  
             </TabsContent>
+
+            <div className="pt-3 border-t border-[#2E2E2E] text-center">
+              <button
+                onClick={() => setActiveMode("signup")}
+                className="text-xs text-[#888898] hover:text-[#FF6200] transition-colors"
+              >
+                Don't have an account yet? <strong className="text-[#FF6200]">Sign up free →</strong>
+              </button>
+            </div>
           </Tabs>
         )}
 
         {/* ===== SIGNUP MODE ===== */}
-        {mode === "signup" && (
+        {activeMode === "signup" && (
           <div className="space-y-3">
-            {signupStep === "details" ? (<>
+            {signupStep === "details" ? (
+              <>
                 {/* Google signup — top option */}
                 <Button
                   onClick={handleGoogle}
@@ -365,12 +367,10 @@ export function AuthDialog({
                   Sign up with Google (Recommended)
                 </Button>
 
-                {/* Divider */}
                 <div className="flex items-center gap-2 text-xs text-[#5A5A6A]">
                   <div className="flex-1 h-px bg-[#2E2E2E]" /> or sign up with email <div className="flex-1 h-px bg-[#2E2E2E]" />
                 </div>
 
-                {/* Step 1: Enter details */}
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-sm text-[#888898]">Your name</Label>
                   <Input
@@ -409,21 +409,16 @@ export function AuthDialog({
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                   Send me a verification code
                 </Button>
-
-                <p className="text-[10px] text-[#5A5A6A] text-center">
-                  We'll send a 6-digit code to your email to verify it's you. Check spam if you don't see it.
-                </p>
               </>
             ) : (
               <>
-                {/* Step 2: Verify OTP */}
                 <div className="text-center py-2">
                   <div className="w-14 h-14 rounded-full bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center mx-auto mb-3">
                     <Mail className="w-6 h-6 text-[#FF6200]" />
                   </div>
                   <p className="text-sm font-semibold text-white">Check your email inbox</p>
                   <p className="text-sm text-[#888898] mt-1">
-                    We sent a 6-digit code to <strong className="text-white">{email}</strong>. Check your spam folder if you don't see it.
+                    We sent a 6-digit code to <strong className="text-white">{email}</strong>
                   </p>
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -445,14 +440,17 @@ export function AuthDialog({
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                   Confirm &amp; Create My Account
                 </Button>
-                <button
-                  onClick={() => setSignupStep("details")}
-                  className="w-full text-xs text-[#888898] hover:text-[#FF6200] transition-colors"
-                >
-                  ← Back to edit details
-                </button>
               </>
             )}
+
+            <div className="pt-3 border-t border-[#2E2E2E] text-center">
+              <button
+                onClick={() => setActiveMode("login")}
+                className="text-xs text-[#888898] hover:text-[#FF6200] transition-colors"
+              >
+                Already have an account? <strong className="text-[#FF6200]">Sign In →</strong>
+              </button>
+            </div>
           </div>
         )}
       </DialogContent>
@@ -468,22 +466,18 @@ export function LogoutButton({ onLogout }: { onLogout?: () => void }) {
     try {
       sessionStorage.setItem("jinzai-logged-out", "1");
     } catch {
-      // ignore storage errors
+      // ignore
     }
 
     onLogout?.();
 
-    // 0ms instant cookie clearance
     try {
       document.cookie = "next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       document.cookie = "__Secure-next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       document.cookie = "next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     } catch {}
 
-    // Asynchronous background signout request (non-blocking)
     signOut({ redirect: false }).catch(() => {});
-
-    // Instant browser navigation to homepage
     window.location.href = "/";
   };
 

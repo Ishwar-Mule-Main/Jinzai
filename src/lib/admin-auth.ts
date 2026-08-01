@@ -16,7 +16,8 @@ export function verifyAdmin(req: NextRequest): boolean {
   const token = auth.replace("Bearer ", "");
   try {
     const decoded = Buffer.from(token, "base64").toString();
-    return decoded.startsWith(ADMIN_EMAIL);
+    const tokenEmail = decoded.split(":")[0];
+    return tokenEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase();
   } catch {
     return false;
   }
@@ -30,7 +31,7 @@ export function adminUnauthorized() {
  * Login admin — returns token if credentials match.
  */
 export function adminLogin(email: string, password: string): string | null {
-  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+  if (email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD) {
     return Buffer.from(`${ADMIN_EMAIL}:${Date.now()}`).toString("base64");
   }
   return null;
