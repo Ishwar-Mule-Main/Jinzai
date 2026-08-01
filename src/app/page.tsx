@@ -1,40 +1,27 @@
 "use client";
 
-import { ResumeApp } from "@/components/resume/resume-app";
-import { useResumeStore } from "@/lib/resume/store";
-import { useEffect, useState } from "react";
-import { LogoutToast } from "@/components/logout-toast";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/lib/resume/use-current-user";
+import { Loader2 } from "lucide-react";
 
 export default function Home() {
-  // Zustand persist hydrates from localStorage on the client only.
-  // We subscribe to hydration so the first paint matches SSR (default state).
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => {
-    const markHydrated = () => setHydrated(true);
-    const unsub = useResumeStore.persist.onFinishHydration(markHydrated);
-    // Defer the synchronous check so setState is not called directly in the effect body
-    if (useResumeStore.persist.hasHydrated()) {
-      const id = setTimeout(markHydrated, 0);
-      return () => {
-        clearTimeout(id);
-        unsub();
-      };
-    }
-    return () => unsub();
-  }, []);
+  const router = useRouter();
+  const { user, loading } = useCurrentUser();
 
-  if (!hydrated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground text-sm">Loading Jinzai…</div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!loading) {
+      // All users (logged in or not) land on dashboard which handles unauthenticated state
+      router.replace("/dashboard");
+    }
+  }, [loading, router]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <ResumeApp />
-      <LogoutToast />
+    <div className="min-h-screen flex items-center justify-center bg-[#0D0D0D]">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-[#FF6200]" />
+        <p className="text-[#888898] text-sm font-mono">Loading Jinzai…</p>
+      </div>
     </div>
   );
 }

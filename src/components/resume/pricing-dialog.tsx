@@ -70,7 +70,7 @@ export function PricingDialog({
               Choose your plan
             </DialogTitle>
             <DialogDescription className="text-[#888898]">
-              Pay via UPI (QR scan or UPI ID). Your plan activates after payment verification.
+              Pay easily using any UPI app — GPay, PhonePe, Paytm, or BHIM. Your plan starts the moment your payment is confirmed.
             </DialogDescription>
           </DialogHeader>
 
@@ -133,18 +133,18 @@ export function PricingDialog({
 
                   {isCurrent ? (
                     <div className="rounded-full bg-[#FF6200]/10 border border-[#FF6200]/30 text-[#FF6200] text-center py-2 text-sm font-semibold flex items-center justify-center gap-1.5">
-                      <Check className="w-4 h-4" /> Current plan
+                      <Check className="w-4 h-4" /> ✓ Your current plan
                     </div>
                   ) : (
                     <Button
                       onClick={() => setPaymentPlan(planId)}
-                      className={`w-full gap-1.5 rounded-full font-semibold transition-all duration-300 ${
+                      className={`w-full h-10 gap-1.5 rounded-full font-semibold transition-all duration-300 ${
                         plan.highlight
                           ? "bg-[#FF6200] hover:bg-[#E55700] text-white shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40"
                           : "bg-transparent border border-[#2E2E2E] hover:border-[#FF6200] text-white hover:bg-[#1A1A1A]"
                       }`}
                     >
-                      <Smartphone className="w-3.5 h-3.5" /> Pay ₹{plan.price} via UPI
+                      <Smartphone className="w-3.5 h-3.5" /> Get {plan.name} — ₹{plan.price}
                     </Button>
                   )}
 
@@ -162,10 +162,11 @@ export function PricingDialog({
               <div className="w-7 h-7 rounded-md bg-[#FF6200]/10 border border-[#FF6200]/20 flex items-center justify-center">
                 <Smartphone className="w-3.5 h-3.5 text-[#FF6200]" />
               </div>
-              <p className="text-xs font-semibold text-white">Payment Method: UPI Only</p>
+              <p className="text-xs font-semibold text-white">How to pay: Just use any UPI app</p>
             </div>
-            <p className="text-[11px] text-[#888898]">
-              We accept payments via UPI only. Scan the QR code or use UPI ID to pay. After payment, enter your transaction ID to verify and activate your plan instantly. No credit card, no net banking — just UPI.
+            <p className="text-sm text-[#888898]">
+              Open GPay, PhonePe, Paytm, or BHIM → scan the QR code → enter the amount → pay.
+              Once paid, copy the 12-digit reference number from your app and enter it to activate your plan.
             </p>
           </div>
         </DialogContent>
