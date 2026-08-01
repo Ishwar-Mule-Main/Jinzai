@@ -81,7 +81,6 @@ export function AuthDialog({
   // ===== LOGIN/SIGNUP: Google =====
   const handleGoogle = async () => {
     setLoading(true);
-    // This opens Google's consent screen in a popup/redirect
     await signIn("google", { callbackUrl: "/", redirect: true });
   };
 
@@ -203,13 +202,16 @@ export function AuthDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-[#141414] border border-[#2E2E2E] text-white">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <ShieldCheck className="w-5 h-5 text-teal-600" />
+          <DialogTitle className="flex items-center gap-2.5 text-xl font-semibold text-white">
+            {/* DE-branded icon wrapper */}
+            <div className="w-8 h-8 rounded-lg bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center">
+              <ShieldCheck className="w-4 h-4 text-[#FF6200]" />
+            </div>
             {mode === "signup" ? "Create your account" : "Welcome back"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-[#888898] text-sm">
             {mode === "signup"
               ? "Sign up with email + OTP verification or Google."
               : "Log in with password, Google, or email code."}
@@ -219,85 +221,135 @@ export function AuthDialog({
         {/* ===== LOGIN MODE ===== */}
         {mode === "login" && (
           <Tabs value={loginMethod} onValueChange={(v) => setLoginMethod(v as typeof loginMethod)}>
-            <TabsList className="grid grid-cols-3 w-full">
-              <TabsTrigger value="password" className="text-xs gap-1">
+            <TabsList className="grid grid-cols-3 w-full bg-[#1A1A1A] border border-[#2E2E2E] rounded-lg p-1">
+              <TabsTrigger
+                value="password"
+                className="text-xs gap-1 text-[#888898] data-[state=active]:bg-[#FF6200] data-[state=active]:text-white rounded-md transition-all"
+              >
                 <Lock className="w-3 h-3" /> Password
               </TabsTrigger>
-              <TabsTrigger value="google" className="text-xs gap-1">
+              <TabsTrigger
+                value="google"
+                className="text-xs gap-1 text-[#888898] data-[state=active]:bg-[#FF6200] data-[state=active]:text-white rounded-md transition-all"
+              >
                 <Chrome className="w-3 h-3" /> Google
               </TabsTrigger>
-              <TabsTrigger value="code" className="text-xs gap-1">
+              <TabsTrigger
+                value="code"
+                className="text-xs gap-1 text-[#888898] data-[state=active]:bg-[#FF6200] data-[state=active]:text-white rounded-md transition-all"
+              >
                 <KeyRound className="w-3 h-3" /> OTP
               </TabsTrigger>
             </TabsList>
 
             {/* Password login */}
-            <TabsContent value="password" className="space-y-3 mt-3">
-              <div>
-                <Label className="text-xs">Email</Label>
-                <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@email.com" />
+            <TabsContent value="password" className="space-y-3 mt-4">
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-[11px] font-mono text-[#888898]">Email Address:</Label>
+                <Input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="you@email.com"
+                  className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm"
+                />
               </div>
-              <div>
-                <Label className="text-xs">Password</Label>
-                <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="••••••••" onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-[11px] font-mono text-[#888898]">Password:</Label>
+                <Input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type="password"
+                  placeholder="••••••••"
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                  className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm"
+                />
               </div>
-              <Button onClick={handleLogin} disabled={loading} className="w-full gap-1.5 bg-[#111111] text-white hover:bg-[#000000]">
+              <Button
+                onClick={handleLogin}
+                disabled={loading}
+                className="w-full gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40 transition-all duration-300"
+              >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
                 Log In
               </Button>
-              <button onClick={fillDemo} className="w-full text-xs text-teal-600 hover:underline flex items-center justify-center gap-1">
+              <button
+                onClick={fillDemo}
+                className="w-full text-xs text-[#FF6200]/70 hover:text-[#FF6200] flex items-center justify-center gap-1 transition-colors"
+              >
                 <Sparkles className="w-3 h-3" /> Use demo credentials
               </button>
             </TabsContent>
 
             {/* Google login */}
-            <TabsContent value="google" className="space-y-3 mt-3">
+            <TabsContent value="google" className="space-y-3 mt-4">
               <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-[#888898] mb-4">
                   Click below to sign in with your Google account.
                 </p>
-                <Button onClick={handleGoogle} disabled={loading} className="w-full gap-1.5 bg-white border border-input text-gray-700 hover:bg-gray-50">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4" />}
+                <Button
+                  onClick={handleGoogle}
+                  disabled={loading}
+                  className="w-full gap-2 bg-[#1A1A1A] border border-[#2E2E2E] hover:border-[#FF6200]/50 text-white hover:bg-[#222222] transition-all rounded-full"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4 text-[#FF6200]" />}
                   Continue with Google
                 </Button>
-                <p className="text-[10px] text-muted-foreground text-center mt-3">
+                <p className="text-[10px] text-[#5A5A6A] text-center mt-3">
                   You'll be redirected to Google to choose your account.
                 </p>
               </div>
             </TabsContent>
 
             {/* OTP login */}
-            <TabsContent value="code" className="space-y-3 mt-3">
-              <div>
-                <Label className="text-xs">Email</Label>
-                <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@email.com" />
+            <TabsContent value="code" className="space-y-3 mt-4">
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-[11px] font-mono text-[#888898]">Email Address:</Label>
+                <Input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="you@email.com"
+                  className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm"
+                />
               </div>
               {loginOtpSent && (
-                <div>
-                  <Label className="text-xs">6-digit code</Label>
+                <div className="flex flex-col gap-1.5">
+                  <Label className="text-[11px] font-mono text-[#888898]">6-digit code:</Label>
                   <Input
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
                     placeholder="123456"
                     maxLength={6}
-                    className="text-center text-lg tracking-[0.5em] font-mono"
+                    className="text-center text-lg tracking-[0.5em] font-mono bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg"
                     onKeyDown={(e) => e.key === "Enter" && verifyLoginOtp()}
                   />
                 </div>
               )}
               {!loginOtpSent ? (
-                <Button onClick={sendLoginOtp} disabled={loading} variant="outline" className="w-full gap-1.5">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                <Button
+                  onClick={sendLoginOtp}
+                  disabled={loading}
+                  className="w-full gap-1.5 bg-transparent border border-[#2E2E2E] hover:border-[#FF6200] text-white hover:bg-[#1A1A1A] rounded-full transition-all duration-300"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4 text-[#FF6200]" />}
                   Send login code
                 </Button>
               ) : (
-                <Button onClick={verifyLoginOtp} disabled={loading} className="w-full gap-1.5 bg-[#111111] text-white hover:bg-[#000000]">
+                <Button
+                  onClick={verifyLoginOtp}
+                  disabled={loading}
+                  className="w-full gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 transition-all duration-300"
+                >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
-                  Verify & Log In
+                  Verify &amp; Log In
                 </Button>
               )}
               {loginOtpSent && (
-                <button onClick={sendLoginOtp} className="w-full text-xs text-muted-foreground hover:underline">
+                <button
+                  onClick={sendLoginOtp}
+                  className="w-full text-xs text-[#888898] hover:text-[#FF6200] transition-colors"
+                >
                   Resend code
                 </button>
               )}
@@ -311,34 +363,60 @@ export function AuthDialog({
             {signupStep === "details" ? (
               <>
                 {/* Step 1: Enter details */}
-                <div>
-                  <Label className="text-xs">Name</Label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your Name" />
+                <div className="flex flex-col gap-1.5">
+                  <Label className="text-[11px] font-mono text-[#888898]">Full Name:</Label>
+                  <Input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your Name"
+                    className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm"
+                  />
                 </div>
-                <div>
-                  <Label className="text-xs">Email</Label>
-                  <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@email.com" />
+                <div className="flex flex-col gap-1.5">
+                  <Label className="text-[11px] font-mono text-[#888898]">Email Address:</Label>
+                  <Input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    type="email"
+                    placeholder="you@email.com"
+                    className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm"
+                  />
                 </div>
-                <div>
-                  <Label className="text-xs">Password (min 6 characters)</Label>
-                  <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="••••••••" onKeyDown={(e) => e.key === "Enter" && handleSignupSubmit()} />
+                <div className="flex flex-col gap-1.5">
+                  <Label className="text-[11px] font-mono text-[#888898]">Password (min 6 characters):</Label>
+                  <Input
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    type="password"
+                    placeholder="••••••••"
+                    onKeyDown={(e) => e.key === "Enter" && handleSignupSubmit()}
+                    className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm"
+                  />
                 </div>
-                <Button onClick={handleSignupSubmit} disabled={loading} className="w-full gap-1.5 bg-[#111111] text-white hover:bg-[#000000]">
+                <Button
+                  onClick={handleSignupSubmit}
+                  disabled={loading}
+                  className="w-full gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40 transition-all duration-300"
+                >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                   Send Verification Code
                 </Button>
 
                 {/* Divider */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <div className="flex-1 h-px bg-border" /> or <div className="flex-1 h-px bg-border" />
+                <div className="flex items-center gap-2 text-xs text-[#5A5A6A]">
+                  <div className="flex-1 h-px bg-[#2E2E2E]" /> or <div className="flex-1 h-px bg-[#2E2E2E]" />
                 </div>
 
                 {/* Google signup */}
-                <Button onClick={handleGoogle} disabled={loading} className="w-full gap-1.5 bg-white border border-input text-gray-700 hover:bg-gray-50">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4" />}
+                <Button
+                  onClick={handleGoogle}
+                  disabled={loading}
+                  className="w-full gap-2 bg-[#1A1A1A] border border-[#2E2E2E] hover:border-[#FF6200]/50 text-white hover:bg-[#222222] transition-all rounded-full"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4 text-[#FF6200]" />}
                   Sign up with Google
                 </Button>
-                <p className="text-[10px] text-muted-foreground text-center">
+                <p className="text-[10px] text-[#5A5A6A] text-center">
                   You'll be redirected to Google to choose your account and grant access.
                 </p>
               </>
@@ -346,32 +424,36 @@ export function AuthDialog({
               <>
                 {/* Step 2: Verify OTP */}
                 <div className="text-center py-2">
-                  <div className="w-12 h-12 rounded-full bg-teal-50 flex items-center justify-center mx-auto mb-3">
-                    <Mail className="w-6 h-6 text-teal-600" />
+                  <div className="w-14 h-14 rounded-full bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center mx-auto mb-3">
+                    <Mail className="w-6 h-6 text-[#FF6200]" />
                   </div>
-                  <p className="text-sm font-medium">Verify your email</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    We sent a 6-digit code to <strong>{email}</strong>
+                  <p className="text-sm font-semibold text-white">Verify your email</p>
+                  <p className="text-xs text-[#888898] mt-1">
+                    We sent a 6-digit code to <strong className="text-white">{email}</strong>
                   </p>
                 </div>
-                <div>
-                  <Label className="text-xs">6-digit verification code</Label>
+                <div className="flex flex-col gap-1.5">
+                  <Label className="text-[11px] font-mono text-[#888898]">6-digit verification code:</Label>
                   <Input
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
                     placeholder="123456"
                     maxLength={6}
-                    className="text-center text-lg tracking-[0.5em] font-mono"
+                    className="text-center text-lg tracking-[0.5em] font-mono bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg"
                     onKeyDown={(e) => e.key === "Enter" && handleSignupVerify()}
                   />
                 </div>
-                <Button onClick={handleSignupVerify} disabled={loading} className="w-full gap-1.5 bg-[#111111] text-white hover:bg-[#000000]">
+                <Button
+                  onClick={handleSignupVerify}
+                  disabled={loading}
+                  className="w-full gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40 transition-all duration-300"
+                >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  Verify & Create Account
+                  Verify &amp; Create Account
                 </Button>
                 <button
                   onClick={() => setSignupStep("details")}
-                  className="w-full text-xs text-muted-foreground hover:underline"
+                  className="w-full text-xs text-[#888898] hover:text-[#FF6200] transition-colors"
                 >
                   ← Back to edit details
                 </button>
