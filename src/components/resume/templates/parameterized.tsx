@@ -103,7 +103,7 @@ function TimelineLayout({ data, spec }: { data: ResumeData; spec: TemplateSpec }
           {contacts.length > 0 && (
             <div className="text-xs text-gray-600 text-right space-y-0.5 font-mono">
               {contacts.map((c) => (
-                <p key={c.label}>span className="text-[#FF6200] font-bold">{c.label}:</span> {c.value}</p>
+                <p key={c.label}><span className="text-[#FF6200] font-bold">{c.label}:</span> {c.value}</p>
               ))}
             </div>
           )}
