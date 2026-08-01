@@ -1,12 +1,12 @@
 "use client";
 
-import type { TemplateSpec } from "@/lib/resume/template-specs";
+import type { TemplateSpec, VisualArchetype } from "@/lib/resume/template-specs";
 import type { TemplateId } from "@/lib/resume/types";
 import { TEMPLATES } from "@/lib/resume/types";
 import { SPEC_MAP } from "@/lib/resume/template-specs";
 
 // Fast CSS-only thumbnail representing a template's visual style.
-// Used in the dashboard gallery + compare dialog for performance (avoids 52 live renders).
+// Used in the dashboard gallery + compare dialog for performance.
 export function TemplateThumbnail({ templateId, className = "" }: { templateId: TemplateId; className?: string }) {
   const meta = TEMPLATES.find((t) => t.id === templateId);
   const spec = SPEC_MAP[templateId];
@@ -41,23 +41,146 @@ function HeadingBar({ accent, label }: { accent: string; label: string }) {
 }
 
 function SpecThumbnail({ spec, accent, accent2, className }: { spec: TemplateSpec; accent: string; accent2?: string; className?: string }) {
-  const isSidebar = spec.layout === "sidebar-left" || spec.layout === "sidebar-right";
-  const isBanner = spec.layout === "header-banner";
-  const isSplit = spec.layout === "split-header";
+  const archetype: VisualArchetype = spec.visualArchetype || "minimal-swiss";
 
-  // Sidebar layout thumbnail
-  if (isSidebar) {
-    const sidebarBg = spec.colorTreatment === "dark-sidebar" ? "#1e293b" : accent;
+  // 1. TIMELINE ARCHETYPE THUMBNAIL
+  if (archetype === "timeline") {
+    return (
+      <div className={`h-full bg-white p-1.5 flex flex-col ${className}`}>
+        <div className="space-y-0.5 mb-1 pb-1 border-b" style={{ borderColor: accent }}>
+          <div className="h-1.5 w-1/2 rounded-full" style={{ background: accent }} />
+          <div className="h-0.5 w-1/3 rounded-full bg-gray-300" />
+        </div>
+        <div className="flex-1 pl-2 border-l-2 space-y-1.5" style={{ borderColor: accent }}>
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="relative">
+              <div className="w-1.5 h-1.5 rounded-full absolute -left-[11px] top-0.5" style={{ background: accent }} />
+              <div className="h-1 w-2/3 rounded-full" style={{ background: accent }} />
+              <Lines count={2} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // 2. CARD BLOCKS ARCHETYPE THUMBNAIL
+  if (archetype === "card-blocks") {
+    return (
+      <div className={`h-full bg-slate-50 p-1.5 flex flex-col gap-1 ${className}`}>
+        <div className="p-1 rounded bg-white border border-slate-200 shadow-2xs space-y-0.5">
+          <div className="h-1.5 w-1/2 rounded-full" style={{ background: accent }} />
+          <div className="h-0.5 w-1/3 rounded-full bg-slate-300" />
+        </div>
+        {[1, 2].map((i) => (
+          <div key={i} className="p-1 rounded bg-white border-l-2 shadow-2xs space-y-0.5" style={{ borderColor: accent }}>
+            <div className="h-1 w-3/4 rounded-full" style={{ background: accent }} />
+            <Lines count={2} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // 3. EDITORIAL ARCHETYPE THUMBNAIL
+  if (archetype === "editorial") {
+    return (
+      <div className={`h-full bg-[#FAF8F5] p-1 flex flex-col ${className}`}>
+        <div className="border border-stone-300 p-1.5 h-full flex flex-col">
+          <div className="text-center space-y-0.5 mb-1.5">
+            <div className="h-1.5 w-2/3 rounded-full mx-auto" style={{ background: accent }} />
+            <div className="h-0.5 w-1/3 rounded-full mx-auto bg-stone-300" />
+          </div>
+          <div className="text-center text-[4px] text-stone-400 mb-1">❖ ────── ❖</div>
+          <div className="flex-1 space-y-1">
+            <div className="flex gap-1">
+              <div className="w-1/4 h-1 rounded-full bg-stone-300" />
+              <div className="flex-1 space-y-0.5"><div className="h-1 w-3/4 rounded-full" style={{ background: accent }} /><Lines count={2} color="#e7e5e4" /></div>
+            </div>
+            <div className="flex gap-1">
+              <div className="w-1/4 h-1 rounded-full bg-stone-300" />
+              <div className="flex-1 space-y-0.5"><div className="h-1 w-3/4 rounded-full" style={{ background: accent }} /><Lines count={2} color="#e7e5e4" /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 4. TECH TERMINAL ARCHETYPE THUMBNAIL
+  if (archetype === "tech-terminal") {
+    return (
+      <div className={`h-full bg-slate-950 p-1 flex flex-col ${className}`}>
+        <div className="bg-slate-900 border border-slate-800 rounded-t p-1 flex items-center gap-1">
+          <span className="w-1 h-1 rounded-full bg-red-500 inline-block" />
+          <span className="w-1 h-1 rounded-full bg-amber-500 inline-block" />
+          <span className="w-1 h-1 rounded-full bg-emerald-500 inline-block" />
+        </div>
+        <div className="bg-slate-900/90 border-x border-b border-slate-800 p-1 flex-1 space-y-1">
+          <div className="h-1 w-1/2 rounded-full bg-emerald-400" />
+          <div className="h-0.5 w-1/3 rounded-full bg-slate-500" />
+          <div className="text-[4px] font-mono text-emerald-400 mt-1">// EXP</div>
+          <Lines count={2} color="#475569" />
+          <Lines count={2} color="#475569" />
+        </div>
+      </div>
+    );
+  }
+
+  // 5. DARK EXECUTIVE ARCHETYPE THUMBNAIL
+  if (archetype === "dark-executive") {
+    return (
+      <div className={`h-full bg-[#0f172a] p-1.5 flex flex-col space-y-1 ${className}`}>
+        <div className="flex items-center gap-1 border-b pb-1" style={{ borderColor: accent }}>
+          <div className="w-3.5 h-3.5 rounded-full border border-amber-400 bg-slate-800 shrink-0" />
+          <div className="space-y-0.5 flex-1">
+            <div className="h-1 w-3/4 rounded-full" style={{ background: accent }} />
+            <div className="h-0.5 w-1/2 rounded-full bg-slate-500" />
+          </div>
+        </div>
+        <div className="p-1 bg-slate-900 rounded border border-slate-800 space-y-0.5">
+          <div className="h-1 w-2/3 rounded-full" style={{ background: accent }} />
+          <Lines count={2} color="#475569" />
+        </div>
+        <div className="p-1 bg-slate-900 rounded border border-slate-800 space-y-0.5">
+          <div className="h-1 w-2/3 rounded-full" style={{ background: accent }} />
+          <Lines count={2} color="#475569" />
+        </div>
+      </div>
+    );
+  }
+
+  // 6. BANNER GRADIENT ARCHETYPE THUMBNAIL
+  if (archetype === "banner-gradient") {
+    const bg = accent2 ? `linear-gradient(135deg, ${accent}, ${accent2})` : accent;
+    return (
+      <div className={`h-full bg-white flex flex-col ${className}`}>
+        <div className="p-2 flex items-center gap-1.5" style={{ background: bg }}>
+          <div className="w-4 h-4 rounded-full" style={{ background: "rgba(255,255,255,0.4)" }} />
+          <div className="flex-1 space-y-0.5">
+            <div className="h-1.5 w-3/4 rounded-full" style={{ background: "rgba(255,255,255,0.8)" }} />
+            <div className="h-1 w-1/2 rounded-full" style={{ background: "rgba(255,255,255,0.5)" }} />
+          </div>
+        </div>
+        <div className="p-1.5 flex-1 space-y-1">
+          <HeadingBar accent={accent} label="Experience" />
+          <Lines count={3} />
+          <HeadingBar accent={accent} label="Skills" />
+          <Lines count={2} />
+        </div>
+      </div>
+    );
+  }
+
+  // 7. SIDEBAR MODERN ARCHETYPE THUMBNAIL
+  if (archetype === "sidebar-modern") {
     const sidebar = (
-      <div className="w-1/3 p-1.5 flex flex-col gap-1" style={{ background: sidebarBg }}>
+      <div className="w-1/3 p-1.5 flex flex-col gap-1" style={{ background: accent }}>
         <div className="w-5 h-5 rounded-full mx-auto mb-0.5" style={{ background: "rgba(255,255,255,0.3)" }} />
         <div className="h-1 rounded-full mx-auto w-3/4" style={{ background: "rgba(255,255,255,0.6)" }} />
-        <div className="h-0.5 rounded-full mx-auto w-1/2" style={{ background: "rgba(255,255,255,0.4)" }} />
         <div className="mt-1 space-y-0.5">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="flex flex-wrap gap-0.5">
-              {[0, 1].map((j) => <div key={j} className="h-1 w-3 rounded-sm" style={{ background: "rgba(255,255,255,0.25)" }} />)}
-            </div>
+            <div key={i} className="h-1 w-full rounded-sm" style={{ background: "rgba(255,255,255,0.25)" }} />
           ))}
         </div>
       </div>
@@ -68,8 +191,6 @@ function SpecThumbnail({ spec, accent, accent2, className }: { spec: TemplateSpe
         <Lines count={2} />
         <HeadingBar accent={accent} label="Experience" />
         <Lines count={3} />
-        <HeadingBar accent={accent} label="Education" />
-        <Lines count={2} />
       </div>
     );
     return (
@@ -80,103 +201,19 @@ function SpecThumbnail({ spec, accent, accent2, className }: { spec: TemplateSpe
     );
   }
 
-  // Banner layout thumbnail
-  if (isBanner) {
-    const bg = spec.colorTreatment === "gradient-header" && accent2
-      ? `linear-gradient(135deg, ${accent}, ${accent2})`
-      : accent;
-    return (
-      <div className="h-full bg-white flex flex-col">
-        <div className="p-2 flex items-center gap-1.5" style={{ background: bg }}>
-          <div className="w-4 h-4 rounded-full" style={{ background: "rgba(255,255,255,0.4)" }} />
-          <div className="flex-1 space-y-0.5">
-            <div className="h-1.5 w-3/4 rounded-full" style={{ background: "rgba(255,255,255,0.8)" }} />
-            <div className="h-1 w-1/2 rounded-full" style={{ background: "rgba(255,255,255,0.5)" }} />
-          </div>
-        </div>
-        <div className="p-1.5 flex-1 space-y-1">
-          <HeadingBar accent={accent} label="Profile" />
-          <Lines count={2} />
-          <HeadingBar accent={accent} label="Experience" />
-          <Lines count={3} />
-          <HeadingBar accent={accent} label="Skills" />
-          <Lines count={2} />
-        </div>
-      </div>
-    );
-  }
-
-  // Split header thumbnail
-  if (isSplit) {
-    return (
-      <div className="h-full bg-white flex flex-col">
-        <div className="p-1.5 flex items-end justify-between border-b-2" style={{ borderColor: accent }}>
-          <div className="space-y-0.5">
-            <div className="h-1.5 w-12 rounded-full" style={{ background: accent }} />
-            <div className="h-1 w-8 rounded-full bg-gray-300" />
-          </div>
-          <div className="space-y-0.5">
-            <div className="h-0.5 w-8 rounded-full bg-gray-300" />
-            <div className="h-0.5 w-6 rounded-full bg-gray-300" />
-          </div>
-        </div>
-        <div className="p-1.5 flex-1 space-y-1">
-          <HeadingBar accent={accent} label="Profile" />
-          <Lines count={2} />
-          <HeadingBar accent={accent} label="Experience" />
-          <Lines count={3} />
-          <HeadingBar accent={accent} label="Education" />
-          <Lines count={2} />
-        </div>
-      </div>
-    );
-  }
-
-  // Single column — varies by header style + heading style
-  const isCentered = spec.headerStyle === "centered";
-  const isMinimal = spec.colorTreatment === "minimal";
-  const headColor = isMinimal ? "#374151" : accent;
-
-  const headerEl = isCentered ? (
-    <div className="text-center space-y-0.5 mb-1.5">
-      <div className="h-1.5 w-2/3 rounded-full mx-auto" style={{ background: headColor }} />
-      <div className="h-1 w-1/3 rounded-full mx-auto bg-gray-300" />
-    </div>
-  ) : (
-    <div className="space-y-0.5 mb-1.5 pb-1 border-b-2" style={{ borderColor: accent }}>
-      <div className="h-1.5 w-1/2 rounded-full" style={{ background: headColor }} />
-      <div className="h-1 w-1/3 rounded-full bg-gray-300" />
-    </div>
-  );
-
-  // Numbered heading style shows a number
-  const headingEl = (label: string, n: number) => {
-    if (spec.headingStyle === "numbered") {
-      return (
-        <div className="flex items-center gap-1 mb-0.5">
-          <span className="text-[4px] font-mono" style={{ color: accent }}>{String(n).padStart(2, "0")}</span>
-          <div className="h-0.5 flex-1 rounded-full" style={{ background: accent }} />
-        </div>
-      );
-    }
-    if (spec.headingStyle === "pill") {
-      return <div className="inline-block h-1.5 w-8 rounded-full mb-0.5" style={{ background: accent }} />;
-    }
-    if (spec.headingStyle === "boxed") {
-      return <div className="inline-block h-1.5 w-8 rounded-sm border mb-0.5" style={{ borderColor: accent, background: withAlpha(accent, 0.1) }} />;
-    }
-    return <HeadingBar accent={accent} label={label} />;
-  };
-
+  // 8. MINIMAL SWISS ARCHETYPE THUMBNAIL (DEFAULT)
   return (
-    <div className="h-full bg-white p-1.5 flex flex-col">
-      {headerEl}
+    <div className={`h-full bg-white p-1.5 flex flex-col ${className}`}>
+      <div className="space-y-0.5 mb-1.5 pb-1 border-b-2" style={{ borderColor: accent }}>
+        <div className="h-1.5 w-1/2 rounded-full" style={{ background: accent }} />
+        <div className="h-1 w-1/3 rounded-full bg-gray-300" />
+      </div>
       <div className="flex-1 space-y-1">
-        {headingEl("Profile", 1)}
+        <HeadingBar accent={accent} label="Profile" />
         <Lines count={2} />
-        {headingEl("Experience", 2)}
+        <HeadingBar accent={accent} label="Experience" />
         <Lines count={3} />
-        {headingEl("Education", 3)}
+        <HeadingBar accent={accent} label="Education" />
         <Lines count={2} />
       </div>
     </div>
