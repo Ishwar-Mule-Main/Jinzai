@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, ReactNode } from "react";
-import { Layers } from "lucide-react";
+import { Layers, FileText } from "lucide-react";
 
 interface A4MultiPageWrapperProps {
   children: ReactNode;
@@ -37,14 +37,20 @@ export function A4MultiPageWrapper({
   }, []);
 
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative flex flex-col items-center w-full">
       {/* Page Count Badge Bar */}
-      <div className="mb-3 print:hidden flex items-center gap-2 px-3 py-1 bg-[#141414] border border-[#2E2E2E] rounded-full text-xs font-mono text-[#888898] shadow-md">
-        <Layers className="w-3.5 h-3.5 text-[#FF6200]" />
-        <span>Document Size: <strong className="text-white">{pageCount} A4 {pageCount === 1 ? "Page" : "Pages"}</strong></span>
+      <div className="mb-4 print:hidden flex items-center justify-between gap-3 px-4 py-1.5 bg-[#141414] border border-[#2E2E2E] rounded-full text-xs font-mono text-[#888898] shadow-lg">
+        <div className="flex items-center gap-2">
+          <Layers className="w-3.5 h-3.5 text-[#FF6200]" />
+          <span>Document Size: <strong className="text-white font-semibold">{pageCount} A4 {pageCount === 1 ? "Page" : "Pages"}</strong></span>
+        </div>
+        <div className="flex items-center gap-1 text-[11px] text-[#22C55E] bg-[#22C55E]/10 px-2.5 py-0.5 rounded-full border border-[#22C55E]/20">
+          <FileText className="w-3 h-3" />
+          <span>Clean Page Separation Active</span>
+        </div>
       </div>
 
-      {/* A4 Container */}
+      {/* A4 Document Container with Auto-Break Protection */}
       <div
         ref={(node) => {
           contentRef.current = node;
@@ -52,7 +58,7 @@ export function A4MultiPageWrapper({
             (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
           }
         }}
-        className="bg-white shadow-2xl shadow-slate-900/20 dark:shadow-black/50 print:shadow-none print:w-auto relative resume-protected transition-all duration-200"
+        className="bg-white shadow-2xl shadow-slate-900/30 print:shadow-none relative resume-protected transition-all duration-200 rounded-sm overflow-hidden text-slate-900"
         onContextMenu={onContextMenu}
         onCopy={onCopy}
         onDragStart={(e) => e.preventDefault()}
@@ -65,19 +71,25 @@ export function A4MultiPageWrapper({
       >
         {children}
 
-        {/* Visual A4 Page Break Lines & Page Number Badges for Preview */}
+        {/* Visual Page Break Dividers for Preview */}
         {Array.from({ length: pageCount - 1 }).map((_, index) => {
           const pageNum = index + 2;
           const topMm = (index + 1) * 297;
           return (
             <div
               key={pageNum}
-              className="absolute left-0 right-0 pointer-events-none print:hidden z-20 page-separator-bar"
+              className="absolute left-0 right-0 pointer-events-none print:hidden z-30 page-separator-bar"
               style={{ top: `${topMm}mm` }}
             >
-              <div className="w-full border-t-2 border-dashed border-[#FF6200]/40 relative flex items-center justify-center">
-                <span className="bg-[#141414] text-[#FF6200] border border-[#FF6200]/50 px-3 py-0.5 rounded-full text-[10px] font-mono font-bold shadow-lg transform -translate-y-1/2">
-                  PAGE {pageNum} OF {pageCount}
+              <div className="w-full border-t-2 border-dashed border-[#FF6200] relative flex items-center justify-between px-6 bg-[#0D0D0D]/90 py-1 backdrop-blur-sm shadow-md transform -translate-y-1/2">
+                <span className="text-[10px] font-mono text-[#888898] uppercase tracking-wider">
+                  Page Break Line
+                </span>
+                <span className="bg-[#FF6200] text-white px-3 py-0.5 rounded-full text-[10px] font-mono font-bold shadow-md">
+                  END OF PAGE {index + 1} • START OF PAGE {pageNum}
+                </span>
+                <span className="text-[10px] font-mono text-[#888898]">
+                  210mm × 297mm A4
                 </span>
               </div>
             </div>
