@@ -239,6 +239,30 @@ export default function DashboardPage() {
       {/* Extra bottom padding on mobile so content isn't hidden behind sticky bar */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-10 pb-28 sm:pb-10">
 
+        {/* ── Free Account Purchase Notice Banner ── */}
+        {user?.plan === "free" && (
+          <div className="rounded-2xl bg-gradient-to-r from-[#FF6200]/20 via-[#141414] to-[#141414] border-2 border-[#FF6200]/50 p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+            <div className="space-y-1.5 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF6200]/20 border border-[#FF6200]/40 text-[#FF6200] text-xs font-bold">
+                <Crown className="w-3.5 h-3.5" /> FREE ACCOUNT NOTICE
+              </div>
+              <h3 className="text-lg font-bold text-white">Purchase a Plan to Download PDF &amp; Unlock All Premium Features</h3>
+              <p className="text-xs text-[#888898]">
+                Free accounts can build and preview resumes. Activate a plan starting at just ₹99 to download high-precision ATS PDFs &amp; unlock 78 premium templates.
+              </p>
+            </div>
+            <PricingDialog
+              currentPlan="free"
+              onSubscribed={refresh}
+              trigger={
+                <Button className="h-11 px-6 bg-[#FF6200] hover:bg-[#E55700] text-white font-bold rounded-full gap-2 shadow-lg shadow-[#FF6200]/30 shrink-0">
+                  <Crown className="w-4 h-4" /> Purchase Plan &amp; Download PDF
+                </Button>
+              }
+            />
+          </div>
+        )}
+
         {/* ── Welcome Banner ── */}
         <section className="relative rounded-3xl bg-[#141414] border border-[#2E2E2E] p-6 sm:p-8 overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-72 sm:w-96 h-72 sm:h-96 bg-[#FF6200]/10 rounded-full blur-[120px] pointer-events-none" />

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, Zap, Rocket, Loader2, CreditCard, CheckCircle2, Smartphone } from "lucide-react";
+import { Check, Crown, Zap, Rocket, CheckCircle2, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { PLAN_LIMITS, PAID_PLANS, type PlanId } from "@/lib/resume/plans";
 import { PaymentDialog } from "./payment-dialog";
@@ -27,13 +27,21 @@ export function PricingDialog({
   currentPlan,
   onSubscribed,
   trigger,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
 }: {
   currentPlan: string;
   onSubscribed?: () => void;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [paymentPlan, setPaymentPlan] = useState<PlanId | null>(null);
+
+  const isControlled = controlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
+  const setIsOpen = isControlled ? (setControlledOpen || (() => {})) : setInternalOpen;
 
   const handlePaymentSuccess = async (plan: PlanId) => {
     try {
@@ -43,9 +51,10 @@ export function PricingDialog({
         body: JSON.stringify({ plan }),
       });
       if (!res.ok) throw new Error("Failed");
-      toast.success(`${PLAN_LIMITS[plan].name} plan activated!`);
+      toast.success(`${PLAN_LIMITS[plan].name} plan activated successfully! You can now download PDFs.`);
       onSubscribed?.();
       setPaymentPlan(null);
+      setIsOpen(false);
     } catch {
       toast.error("Failed to activate plan. Please contact support.");
     }
@@ -53,135 +62,129 @@ export function PricingDialog({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          {trigger || (
-            <Button size="sm" className="gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 transition-all duration-300">
-              <Crown className="w-3.5 h-3.5" /> Upgrade
-            </Button>
-          )}
-        </DialogTrigger>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-[#0D0D0D] border border-[#2E2E2E] text-white">
-          <DialogHeader>
-            <DialogTitle className="text-2xl flex items-center gap-3 font-semibold text-white">
-              <div className="w-9 h-9 rounded-lg bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center">
-                <CreditCard className="w-5 h-5 text-[#FF6200]" />
-              </div>
-              Choose your plan
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-[#141414] border border-[#2E2E2E] text-white p-6 sm:p-8">
+          <DialogHeader className="text-center space-y-2">
+            <div className="w-12 h-12 rounded-2xl bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center mx-auto mb-1">
+              <Crown className="w-6 h-6 text-[#FF6200]" />
+            </div>
+            <DialogTitle className="text-2xl sm:text-3xl font-bold text-white">
+              Unlock Unlimited Resumes &amp; Direct PDF Export
             </DialogTitle>
-            <DialogDescription className="text-[#888898]">
-              Pay easily using any UPI app — GPay, PhonePe, Paytm, or BHIM. Your plan starts the moment your payment is confirmed.
+            <DialogDescription className="text-[#888898] text-sm max-w-md mx-auto">
+              Choose the plan that fits your career goals. Instant UPI activation with 100% ATS-friendly PDF downloads.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          {/* Pricing cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
             {PAID_PLANS.map((planId) => {
-              const plan = PLAN_LIMITS[planId];
+              const config = PLAN_LIMITS[planId];
               const Icon = PLAN_ICONS[planId];
               const isCurrent = currentPlan === planId;
+              const isPopular = planId === "pro_499";
 
               return (
                 <div
                   key={planId}
-                  className={`relative rounded-xl border-2 p-5 flex flex-col transition-all duration-300 ${
-                    plan.highlight
-                      ? "border-[#FF6200] shadow-lg shadow-[#FF6200]/10 bg-[#FF6200]/5"
-                      : "border-[#2E2E2E] bg-[#141414]"
-                  } ${isCurrent ? "ring-2 ring-[#FF6200]/30" : ""}`}
+                  className={`relative p-6 rounded-2xl bg-[#1A1A1A] border transition-all duration-300 flex flex-col justify-between ${
+                    isPopular
+                      ? "border-[#FF6200] shadow-xl shadow-[#FF6200]/10 ring-1 ring-[#FF6200]"
+                      : "border-[#2E2E2E] hover:border-[#FF6200]/40"
+                  }`}
                 >
-                  {plan.badge && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge
-                        className={`shadow-sm border-0 text-white font-semibold text-[11px] px-3 ${
-                          plan.highlight ? "bg-[#FF6200]" : "bg-[#1A1A1A] border border-[#2E2E2E] text-[#888898]"
-                        }`}
-                      >
-                        {plan.badge}
-                      </Badge>
-                    </div>
+                  {isPopular && (
+                    <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#FF6200] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-0.5">
+                      Most Popular
+                    </Badge>
                   )}
 
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      plan.highlight ? "bg-[#FF6200]/15 border border-[#FF6200]/30" : "bg-[#222222] border border-[#2E2E2E]"
-                    }`}>
-                      <Icon className={`w-5 h-5 ${plan.highlight ? "text-[#FF6200]" : "text-[#888898]"}`} />
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#FF6200]/10 flex items-center justify-center">
+                        <Icon className="w-4 h-4 text-[#FF6200]" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg text-white">{config.name}</h3>
+                        <p className="text-[11px] text-[#888898]">
+                          {config.durationDays ? `${config.durationDays}-day access` : "Monthly subscription"}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-base text-white">{plan.name}</p>
-                      <p className="text-[11px] text-[#888898]">{plan.period}</p>
+
+                    {/* Price */}
+                    <div className="mb-5 pb-4 border-b border-[#2E2E2E]">
+                      <span className="text-3xl font-extrabold text-white">₹{config.price}</span>
+                      <span className="text-xs text-[#888898] ml-1">
+                        / {config.durationDays ? `${config.durationDays} days` : "month"}
+                      </span>
                     </div>
-                  </div>
 
-                  <div className="mb-5">
-                    <span className={`text-3xl font-bold ${plan.highlight ? "text-[#FF6200]" : "text-white"}`}>
-                      ₹{plan.price}
-                    </span>
-                    {plan.period !== "2 days" && (
-                      <span className="text-sm text-[#888898] ml-1">{plan.period}</span>
-                    )}
-                  </div>
-
-                  <ul className="space-y-2 mb-5 flex-1">
-                    {plan.features.map((f, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs">
-                        <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${plan.highlight ? "text-[#FF6200]" : "text-[#22C55E]"}`} />
-                        <span className="text-[#888898]">{f}</span>
+                    {/* Features list */}
+                    <ul className="space-y-2.5 mb-6 text-xs text-[#888898]">
+                      {config.features.map((feat) => (
+                        <li key={feat} className="flex items-start gap-2 text-[#CCCCCC]">
+                          <Check className="w-4 h-4 text-[#FF6200] shrink-0 mt-0.5" />
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                      <li className="flex items-start gap-2 text-white font-medium">
+                        <CheckCircle2 className="w-4 h-4 text-[#22C55E] shrink-0 mt-0.5" />
+                        <span>Direct High-Precision PDF Download</span>
                       </li>
-                    ))}
-                  </ul>
+                      <li className="flex items-start gap-2 text-white font-medium">
+                        <CheckCircle2 className="w-4 h-4 text-[#22C55E] shrink-0 mt-0.5" />
+                        <span>Instant UPI Payment &amp; Activation</span>
+                      </li>
+                    </ul>
+                  </div>
 
-                  {isCurrent ? (
-                    <div className="rounded-full bg-[#FF6200]/10 border border-[#FF6200]/30 text-[#FF6200] text-center py-2 text-sm font-semibold flex items-center justify-center gap-1.5">
-                      <Check className="w-4 h-4" /> ✓ Your current plan
-                    </div>
-                  ) : (
-                    <Button
-                      onClick={() => setPaymentPlan(planId)}
-                      className={`w-full h-10 gap-1.5 rounded-full font-semibold transition-all duration-300 ${
-                        plan.highlight
-                          ? "bg-[#FF6200] hover:bg-[#E55700] text-white shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40"
-                          : "bg-transparent border border-[#2E2E2E] hover:border-[#FF6200] text-white hover:bg-[#1A1A1A]"
-                      }`}
-                    >
-                      <Smartphone className="w-3.5 h-3.5" /> Get {plan.name} — ₹{plan.price}
-                    </Button>
-                  )}
-
-                  <p className="text-[10px] text-[#5A5A6A] text-center mt-2">
-                    {planId === "trial_99" ? "2-day access, one-time payment" : "Billed monthly, cancel anytime"}
-                  </p>
+                  {/* CTA Button */}
+                  <Button
+                    onClick={() => {
+                      if (isCurrent) return;
+                      setPaymentPlan(planId);
+                    }}
+                    disabled={isCurrent}
+                    className={`w-full h-11 font-semibold rounded-full gap-2 transition-all duration-300 ${
+                      isCurrent
+                        ? "bg-[#2E2E2E] text-[#888898] cursor-default"
+                        : isPopular
+                        ? "bg-[#FF6200] hover:bg-[#E55700] text-white shadow-lg shadow-[#FF6200]/20"
+                        : "bg-transparent border border-[#2E2E2E] hover:border-[#FF6200] text-white hover:bg-[#222222]"
+                    }`}
+                  >
+                    {isCurrent ? (
+                      "Your Current Plan"
+                    ) : (
+                      <>
+                        <Smartphone className="w-4 h-4" />
+                        Pay ₹{config.price} via UPI
+                      </>
+                    )}
+                  </Button>
                 </div>
               );
             })}
           </div>
 
-          {/* Payment info banner */}
-          <div className="rounded-xl border border-[#2E2E2E] p-4 bg-[#141414] mt-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 rounded-md bg-[#FF6200]/10 border border-[#FF6200]/20 flex items-center justify-center">
-                <Smartphone className="w-3.5 h-3.5 text-[#FF6200]" />
-              </div>
-              <p className="text-xs font-semibold text-white">How to pay: Just use any UPI app</p>
-            </div>
-            <p className="text-sm text-[#888898]">
-              Open GPay, PhonePe, Paytm, or BHIM → scan the QR code → enter the amount → pay.
-              Once paid, copy the 12-digit reference number from your app and enter it to activate your plan.
+          <div className="mt-6 p-4 rounded-xl bg-black/40 border border-[#2E2E2E] text-center space-y-1">
+            <p className="text-xs font-semibold text-white">⚡ Instant UPI Activation</p>
+            <p className="text-[11px] text-[#888898]">
+              Scan QR code or use UPI ID <strong className="text-[#FF6200]">domainexpansion@okaxis</strong> with GPay, PhonePe, Paytm, or BHIM. Enter reference number for instant upgrade.
             </p>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Payment dialog */}
+      {/* UPI Payment Flow Modal */}
       {paymentPlan && (
         <PaymentDialog
           plan={paymentPlan}
           open={!!paymentPlan}
           onClose={() => setPaymentPlan(null)}
-          onPaymentSuccess={() => {
-            handlePaymentSuccess(paymentPlan);
-            setOpen(false);
-          }}
+          onPaymentSuccess={() => handlePaymentSuccess(paymentPlan)}
         />
       )}
     </>

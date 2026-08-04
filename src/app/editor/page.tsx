@@ -63,6 +63,7 @@ export default function EditorPage() {
   const [exporting, setExporting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [pricingOpen, setPricingOpen] = useState(false);
 
   // Mobile tab: "edit" or "preview"
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
@@ -121,7 +122,8 @@ export default function EditorPage() {
 
   const handleExportPDF = async () => {
     if (!canExport) {
-      toast.error("Downloading requires a paid plan. Upgrade to unlock PDF downloads.");
+      toast.info("Downloading requires an active plan. Choose a plan to unlock instant PDF downloads!");
+      setPricingOpen(true);
       return;
     }
     if (!resumeRef.current) {
@@ -135,7 +137,6 @@ export default function EditorPage() {
       toast.success("Your PDF is downloading!", { id: toastId });
     } catch {
       toast.error("Download failed. Please try again.", { id: toastId });
-      window.print();
     } finally {
       setExporting(false);
     }
@@ -143,6 +144,25 @@ export default function EditorPage() {
 
   return (
     <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col font-sans selection:bg-[#FF6200] selection:text-white">
+
+      {/* ── Free Account Purchase Notice Top Banner ── */}
+      {!canExport && (
+        <div className="bg-gradient-to-r from-[#FF6200]/20 via-[#141414] to-[#141414] border-b border-[#FF6200]/40 px-4 py-2 flex items-center justify-between gap-3 text-xs z-50">
+          <div className="flex items-center gap-2">
+            <Crown className="w-4 h-4 text-[#FF6200] shrink-0" />
+            <span>
+              <strong className="text-white font-semibold">Free Account Notice:</strong> You are editing on a Free Account. Purchase a plan to download your high-precision PDF resume &amp; unlock all 78 templates.
+            </span>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => setPricingOpen(true)}
+            className="h-7 px-3 bg-[#FF6200] hover:bg-[#E55700] text-white font-bold rounded-full text-[11px] shrink-0 gap-1 shadow-md shadow-[#FF6200]/20"
+          >
+            <Crown className="w-3.5 h-3.5" /> Purchase Plan &amp; Download PDF
+          </Button>
+        </div>
+      )}
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 bg-[#0D0D0D]/95 backdrop-blur-xl border-b border-[#2E2E2E]">
@@ -276,6 +296,18 @@ export default function EditorPage() {
               Save
             </Button>
 
+            {/* Upgrade Button (shown if free user) */}
+            {!canExport && (
+              <Button
+                onClick={() => setPricingOpen(true)}
+                size="sm"
+                className="h-9 px-3 rounded-full bg-gradient-to-r from-[#FF6200] to-[#E55700] text-white font-bold text-xs gap-1.5 shadow-md shadow-[#FF6200]/20"
+              >
+                <Crown className="w-3.5 h-3.5" />
+                <span>Upgrade Plan</span>
+              </Button>
+            )}
+
             {/* Download PDF */}
             <Button
               onClick={handleExportPDF}
@@ -295,88 +327,73 @@ export default function EditorPage() {
           <Info className="w-3.5 h-3.5 text-[#FF6200] shrink-0" />
           <p className="text-xs text-[#888898]">
             <strong className="text-white">Tip:</strong> Fill in each section on the left and watch your resume update live on the right.
-            Don't worry about the order — you can rearrange sections anytime.
+            {!canExport && <> <span className="text-[#FF6200] font-semibold">Purchase a plan</span> to download your PDF anytime.</>}
           </p>
-        </div>
-
-        {/* ── Mobile tab switcher (stuck under header) ── */}
-        <div className="md:hidden flex items-center bg-[#141414] border-t border-[#2E2E2E]">
-          <button
-            onClick={() => setMobileTab("edit")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-all ${
-              mobileTab === "edit"
-                ? "text-[#FF6200] border-b-2 border-[#FF6200]"
-                : "text-[#888898] border-b-2 border-transparent"
-            }`}
-          >
-            <Pencil className="w-4 h-4" /> Fill in Details
-          </button>
-          <button
-            onClick={() => setMobileTab("preview")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-all ${
-              mobileTab === "preview"
-                ? "text-[#FF6200] border-b-2 border-[#FF6200]"
-                : "text-[#888898] border-b-2 border-transparent"
-            }`}
-          >
-            <Eye className="w-4 h-4" /> Preview Resume
-          </button>
         </div>
       </header>
 
-      {/* ── Workspace ── */}
-      <div className="flex-1 max-w-[1800px] w-full mx-auto p-3 sm:p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+      {/* ── Mobile Tab Switcher (Fill Details vs Preview Resume) ── */}
+      <div className="md:hidden sticky top-14 z-30 bg-[#0D0D0D] border-b border-[#2E2E2E] px-4 py-2">
+        <div className="grid grid-cols-2 gap-2 p-1 bg-[#141414] border border-[#2E2E2E] rounded-full">
+          <button
+            onClick={() => setMobileTab("edit")}
+            className={`py-2 px-4 rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+              mobileTab === "edit"
+                ? "bg-[#FF6200] text-white shadow-md shadow-[#FF6200]/20"
+                : "text-[#888898] hover:text-white"
+            }`}
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            1. Fill Details
+          </button>
+          <button
+            onClick={() => setMobileTab("preview")}
+            className={`py-2 px-4 rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+              mobileTab === "preview"
+                ? "bg-[#FF6200] text-white shadow-md shadow-[#FF6200]/20"
+                : "text-[#888898] hover:text-white"
+            }`}
+          >
+            <Eye className="w-3.5 h-3.5" />
+            2. Preview Resume
+          </button>
+        </div>
+      </div>
 
-        {/* Left panel — Form (hidden on mobile when preview tab active) */}
-        <div className={`lg:col-span-5 flex flex-col gap-4 ${mobileTab === "preview" ? "hidden md:flex" : "flex"}`}>
-
-          {/* Mobile save status */}
-          <div className="md:hidden flex items-center justify-between px-1">
-            <p className="text-xs text-[#888898]">
-              Fill in your details below — your resume updates automatically.
-            </p>
-            {saving ? (
-              <span className="flex items-center gap-1 text-xs text-[#888898]"><Loader2 className="w-3 h-3 animate-spin text-[#FF6200]" /> Saving…</span>
-            ) : saved ? (
-              <span className="flex items-center gap-1 text-xs text-[#22C55E]"><CheckCircle2 className="w-3 h-3" /> Saved</span>
-            ) : null}
-          </div>
-
-          <Card className="p-4 sm:p-6 bg-[#141414] border-[#2E2E2E] rounded-2xl flex-1 overflow-y-auto" style={{ maxHeight: "calc(100vh - 180px)" }}>
-            <ResumeEditor />
-          </Card>
-
-          {/* Mobile save + AI tools strip */}
-          <div className="md:hidden flex items-center gap-2">
-            <Button
-              onClick={() => handleSave(false)}
-              disabled={saving}
-              variant="outline"
-              className="flex-1 h-10 rounded-xl border-[#2E2E2E] bg-[#141414] text-white text-sm gap-1.5"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 text-[#FF6200]" />}
-              Save Resume
-            </Button>
-            <ResumeScoreDialog />
-            <AtsDialog />
-          </div>
+      {/* ── Main Editor Area ── */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+        {/* Left Column: Form Editor */}
+        <div
+          className={`w-full md:w-1/2 lg:w-[45%] xl:w-[40%] bg-[#0D0D0D] border-r border-[#2E2E2E] overflow-y-auto p-4 sm:p-6 ${
+            mobileTab === "preview" ? "hidden md:block" : "block"
+          }`}
+        >
+          <ResumeEditor />
         </div>
 
-        {/* Right panel — Preview (hidden on mobile when edit tab active) */}
-        <div className={`lg:col-span-7 flex flex-col gap-3 ${mobileTab === "edit" ? "hidden md:flex" : "flex"}`}>
-
-          {/* Preview bar */}
-          <div className="flex items-center justify-between bg-[#141414] border border-[#2E2E2E] px-4 py-2.5 rounded-2xl">
-            <div className="flex items-center gap-2 text-xs text-[#888898]">
-              <Sparkles className="w-3.5 h-3.5 text-[#FF6200]" />
-              <span>Live Preview — this is exactly how your resume will look when downloaded</span>
-            </div>
+        {/* Right Column: Live Preview & Zoom */}
+        <div
+          className={`w-full md:w-1/2 lg:w-[55%] xl:w-[60%] bg-[#111111] overflow-y-auto p-4 sm:p-8 flex flex-col items-center justify-start space-y-6 ${
+            mobileTab === "edit" ? "hidden md:flex" : "flex"
+          }`}
+        >
+          {/* Zoom & View Controls */}
+          <div className="w-full flex items-center justify-between gap-4 max-w-[210mm]">
             <ZoomControls />
+            {!canExport && (
+              <Button
+                size="sm"
+                onClick={() => setPricingOpen(true)}
+                className="h-8 px-3 bg-[#FF6200] hover:bg-[#E55700] text-white font-bold text-xs rounded-full gap-1.5 shadow-md shadow-[#FF6200]/20"
+              >
+                <Crown className="w-3.5 h-3.5" /> Purchase Plan &amp; Download PDF
+              </Button>
+            )}
           </div>
 
-          {/* Resume preview area */}
+          {/* Live A4 Render Canvas */}
           <div
-            className="flex-1 bg-[#0B0B0C] border border-[#2E2E2E] rounded-2xl p-4 sm:p-6 overflow-auto flex justify-center items-start"
+            className="w-full flex justify-center overflow-x-auto pb-12"
             style={{ minHeight: "500px" }}
           >
             <A4MultiPageWrapper>
@@ -387,7 +404,7 @@ export default function EditorPage() {
           </div>
 
           {/* Download button repeated below preview on mobile */}
-          <div className="md:hidden">
+          <div className="md:hidden w-full max-w-[210mm]">
             <Button
               onClick={handleExportPDF}
               disabled={exporting}
@@ -397,13 +414,24 @@ export default function EditorPage() {
               {exporting ? "Preparing your download…" : "Download as PDF"}
             </Button>
             {!canExport && (
-              <p className="text-xs text-[#888898] text-center mt-2">
-                💡 PDF download requires a paid plan. <span className="text-[#FF6200]">Upgrade now</span> to unlock it.
-              </p>
+              <button
+                onClick={() => setPricingOpen(true)}
+                className="w-full text-xs text-[#FF6200] text-center mt-2 font-semibold hover:underline"
+              >
+                💡 Free Account: Click here to Purchase a Plan &amp; Download PDF →
+              </button>
             )}
           </div>
         </div>
       </div>
+
+      {/* Controlled Pricing Dialog */}
+      <PricingDialog
+        currentPlan={user?.plan || "free"}
+        onSubscribed={refresh}
+        open={pricingOpen}
+        onOpenChange={setPricingOpen}
+      />
     </div>
   );
 }
