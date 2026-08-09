@@ -15,7 +15,7 @@ model User {
   email          String         @unique
   name           String?
   password       String?        // hashed, for credentials login
-  plan           String         @default("free") // free | trial_99 | pro_499 | business_1999
+  plan           String         @default("free") // free | single_99 | pro_399 | business_999 | institution_4999
   planExpiresAt  DateTime?
   role           String         @default("user") // user | student | org_admin | superadmin
   studentId      String?        // college ID number (for student accounts)
@@ -65,7 +65,7 @@ model Organization {
   uniqueCode   String   @unique // unique code used in student password = studentId + uniqueCode
   contactEmail String?
   contactPhone String?
-  plan         String   @default("pro_499") // default plan given to students
+  plan         String   @default("pro_399") // default plan given to students
   seats        Int      @default(0) // total seats purchased
   notes        String?
   createdAt    DateTime @default(now())

@@ -59,7 +59,7 @@ async function ensureDemoUser() {
           email: DEMO_EMAIL,
           name: "Ishwar",
           password: hashed,
-          plan: "business_1999",
+          plan: "business_999",
         },
       });
     }
