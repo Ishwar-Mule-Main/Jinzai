@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useResumeStore } from "@/lib/resume/store";
-import { TEMPLATES } from "@/lib/resume/types";
+import { TEMPLATES, FONT_OPTIONS, FONT_SIZE_OPTIONS, ACCENT_PRESETS } from "@/lib/resume/types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Plus,
   Trash2,
@@ -35,11 +43,15 @@ import {
   Layers,
   Lock,
   Wand2,
+  LayoutGrid,
+  Palette,
+  Type,
+  Check,
 } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
 import { SortableList, SortableItem } from "./sortable";
 import { SkillSuggestions } from "./skill-suggestions";
+import { TemplateCard } from "./template-card";
 
 function PhotoUploader() {
   const data = useResumeStore((s) => s.data);
@@ -62,21 +74,21 @@ function PhotoUploader() {
 
   return (
     <div className="flex items-center gap-3">
-      <div className="w-16 h-16 rounded-lg overflow-hidden border bg-muted flex items-center justify-center shrink-0">
+      <div className="w-16 h-16 rounded-xl overflow-hidden border border-[#2E2E2E] bg-[#141414] flex items-center justify-center shrink-0">
         {data.personalInfo.photo ? (
           <img src={data.personalInfo.photo} alt="profile" className="w-full h-full object-cover" />
         ) : (
-          <ImageIcon className="w-5 h-5 text-muted-foreground" />
+          <ImageIcon className="w-6 h-6 text-[#888898]" />
         )}
       </div>
       <div className="flex flex-col gap-1.5">
         <input ref={fileRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
-        <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-          <Upload className="w-3.5 h-3.5 mr-1.5" /> Upload Photo
+        <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} className="h-8 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full">
+          <Upload className="w-3.5 h-3.5 text-[#FF6200]" /> Upload Photo
         </Button>
         {data.personalInfo.photo && (
-          <Button type="button" variant="ghost" size="sm" onClick={() => updatePersonal({ photo: "" })}>
-            <X className="w-3.5 h-3.5 mr-1.5" /> Remove
+          <Button type="button" variant="ghost" size="sm" onClick={() => updatePersonal({ photo: "" })} className="h-7 text-[11px] text-red-400 hover:text-red-300">
+            <X className="w-3.5 h-3.5 mr-1" /> Remove
           </Button>
         )}
       </div>
@@ -94,210 +106,142 @@ function ItemActions({ onRemove, onUp, onDown, upDisabled, downDisabled }: {
   return (
     <div className="flex gap-1">
       {onUp && (
-        <Button type="button" size="icon" variant="ghost" onClick={onUp} disabled={upDisabled} className="h-7 w-7">
+        <Button type="button" size="icon" variant="ghost" onClick={onUp} disabled={upDisabled} className="h-7 w-7 text-[#888898] hover:text-white">
           <ChevronUp className="w-3.5 h-3.5" />
         </Button>
       )}
       {onDown && (
-        <Button type="button" size="icon" variant="ghost" onClick={onDown} disabled={downDisabled} className="h-7 w-7">
+        <Button type="button" size="icon" variant="ghost" onClick={onDown} disabled={downDisabled} className="h-7 w-7 text-[#888898] hover:text-white">
           <ChevronDown className="w-3.5 h-3.5" />
         </Button>
       )}
-      <Button type="button" size="icon" variant="ghost" onClick={onRemove} className="h-7 w-7 text-destructive hover:text-destructive">
+      <Button type="button" size="icon" variant="ghost" onClick={onRemove} className="h-7 w-7 text-red-400 hover:text-red-300">
         <Trash2 className="w-3.5 h-3.5" />
       </Button>
     </div>
   );
 }
 
-function StringListEditor({
-  items,
-  onChange,
-  placeholder,
-}: {
-  items: string[];
-  onChange: (next: string[]) => void;
-  placeholder: string;
-}) {
-  const [draft, setDraft] = useState("");
-  const add = () => {
-    const v = draft.trim();
-    if (!v) return;
-    onChange([...items, v]);
-    setDraft("");
-  };
+function DesignControlsSection() {
+  const template = useResumeStore((s) => s.template);
+  const setTemplate = useResumeStore((s) => s.setTemplate);
+  const accentColor = useResumeStore((s) => s.accentColor);
+  const setAccentColor = useResumeStore((s) => s.setAccentColor);
+  const fontFamily = useResumeStore((s) => s.fontFamily);
+  const setFontFamily = useResumeStore((s) => s.setFontFamily);
+  const fontSize = useResumeStore((s) => s.fontSize);
+  const setFontSize = useResumeStore((s) => s.setFontSize);
+
+  const currentTemplateObj = TEMPLATES.find((t) => t.id === template) || TEMPLATES[0];
+
   return (
-    <div className="space-y-2">
-      <div className="flex gap-2">
-        <Input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder={placeholder}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              add();
-            }
-          }}
-        />
-        <Button type="button" size="sm" variant="secondary" onClick={add}>
-          <Plus className="w-3.5 h-3.5 mr-1" /> Add
-        </Button>
+    <div className="p-4 rounded-2xl bg-[#141414] border border-[#2E2E2E] space-y-4 mb-4">
+      <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-3">
+        <span className="font-bricolage text-sm font-bold text-white flex items-center gap-2">
+          <Palette className="w-4 h-4 text-[#FF6200]" /> Design, Colors &amp; Typography
+        </span>
+        <Badge className="bg-[#FF6200]/10 text-[#FF6200] border-[#FF6200]/30 text-[9px] font-mono">
+          78 TEMPLATES
+        </Badge>
       </div>
-      {items.length > 0 && (
-        <ul className="space-y-1.5">
-          {items.map((it, i) => (
-            <li key={i} className="flex items-start gap-2 group">
-              <span className="text-xs text-muted-foreground mt-2">{i + 1}.</span>
-              <Input
-                value={it}
-                onChange={(e) => {
-                  const next = [...items];
-                  next[i] = e.target.value;
-                  onChange(next);
-                }}
-                className="text-sm"
-              />
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
-                onClick={() => onChange(items.filter((_, idx) => idx !== i))}
-              >
-                <X className="w-3.5 h-3.5" />
+
+      {/* 1. Change Design Button + Modal */}
+      <div className="space-y-1.5">
+        <Label className="text-xs font-mono text-[#9A9AAB]">ACTIVE TEMPLATE DESIGN</Label>
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#0D0D0D] border border-[#2E2E2E]">
+          <div>
+            <p className="text-xs font-bold text-white">{currentTemplateObj.name}</p>
+            <p className="text-[10px] text-[#888898] font-mono">{currentTemplateObj.tags.join(" • ")}</p>
+          </div>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="sm" className="h-8 px-3 text-xs bg-[#FF6200] hover:bg-[#E55700] text-white font-bold rounded-full gap-1.5 shadow-md shadow-[#FF6200]/20">
+                <LayoutGrid className="w-3.5 h-3.5" /> Change Design
               </Button>
-            </li>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl sm:max-w-5xl w-[95vw] bg-[#141414] border-[#2E2E2E] text-white max-h-[85vh] overflow-y-auto p-6 sm:p-8 rounded-3xl">
+              <DialogHeader>
+                <DialogTitle className="font-bricolage text-xl font-bold text-white">Choose from 78 Master Templates</DialogTitle>
+                <DialogDescription className="text-xs text-[#888898]">
+                  Select any design layout — your resume content stays 100% intact with instant real-time adaptation.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-4">
+                {TEMPLATES.map((t, idx) => (
+                  <TemplateCard key={t.id} id={t} index={idx} onSelect={() => setTemplate(t.id)} />
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {/* 2. Pick Accent Color */}
+      <div className="space-y-1.5">
+        <Label className="text-xs font-mono text-[#9A9AAB]">ACCENT COLOR PALETTE</Label>
+        <div className="flex flex-wrap items-center gap-2">
+          {ACCENT_PRESETS.slice(0, 10).map((hex) => (
+            <button
+              key={hex}
+              onClick={() => setAccentColor(hex)}
+              className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
+                accentColor === hex ? "ring-2 ring-[#FF6200] ring-offset-2 ring-offset-[#141414] border-white" : "border-transparent opacity-80 hover:opacity-100"
+              }`}
+              style={{ backgroundColor: hex }}
+            >
+              {accentColor === hex && <Check className="w-3 h-3 text-white drop-shadow" />}
+            </button>
           ))}
-        </ul>
-      )}
+          <div className="flex items-center gap-1.5 ml-auto">
+            <span className="text-[10px] font-mono text-[#888898]">Hex:</span>
+            <input
+              type="color"
+              value={accentColor}
+              onChange={(e) => setAccentColor(e.target.value)}
+              className="w-7 h-7 rounded-lg border border-[#2E2E2E] bg-transparent cursor-pointer"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Font Family & Font Size Controls */}
+      <div className="grid grid-cols-2 gap-3 pt-1">
+        <div className="space-y-1.5">
+          <Label className="text-xs font-mono text-[#9A9AAB] flex items-center gap-1">
+            <Type className="w-3.5 h-3.5 text-[#FF6200]" /> FONT FAMILY
+          </Label>
+          <select
+            value={fontFamily}
+            onChange={(e) => setFontFamily(e.target.value)}
+            className="w-full h-9 bg-[#0D0D0D] border border-[#2E2E2E] rounded-xl text-xs text-white px-2.5 focus:border-[#FF6200] focus:outline-none"
+          >
+            {FONT_OPTIONS.map((f) => (
+              <option key={f.id} value={f.id} className="bg-[#141414] text-white">
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs font-mono text-[#9A9AAB]">FONT SIZE SCALE</Label>
+          <div className="grid grid-cols-5 gap-1 bg-[#0D0D0D] p-1 rounded-xl border border-[#2E2E2E]">
+            {FONT_SIZE_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => setFontSize(opt.id)}
+                className={`h-7 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                  fontSize === opt.id ? "bg-[#FF6200] text-white shadow-sm" : "text-[#888898] hover:text-white"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
-  );
-}
-
-function AISummaryButton() {
-  const data = useResumeStore((s) => s.data);
-  const setSummary = useResumeStore((s) => s.setSummary);
-  const [loading, setLoading] = useState(false);
-
-  const generate = async () => {
-    if (!data.personalInfo.fullName || !data.personalInfo.jobTitle) {
-      toast.error("Add your name and job title first");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch("/api/ai/summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: data.personalInfo.fullName,
-          jobTitle: data.personalInfo.jobTitle,
-          experience: data.experience,
-          skills: data.skills,
-          tagline: data.personalInfo.tagline,
-        }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      const json = await res.json();
-      setSummary(json.summary);
-      toast.success("Summary generated");
-    } catch (err) {
-      toast.error("Could not generate summary");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Button type="button" variant="outline" size="sm" onClick={generate} disabled={loading}>
-      {loading ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
-      AI Generate
-    </Button>
-  );
-}
-
-function AIExperienceButton({ experienceId }: { experienceId: string }) {
-  const data = useResumeStore((s) => s.data);
-  const updateExperience = useResumeStore((s) => s.updateExperience);
-  const [loading, setLoading] = useState(false);
-  const exp = data.experience.find((e) => e.id === experienceId);
-
-  const generate = async () => {
-    if (!exp) return;
-    if (!exp.position || !exp.company) {
-      toast.error("Add position and company first");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch("/api/ai/bullets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          position: exp.position,
-          company: exp.company,
-          description: exp.description,
-        }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      const json = await res.json();
-      updateExperience(experienceId, { achievements: json.bullets });
-      toast.success("Achievements generated");
-    } catch {
-      toast.error("Could not generate achievements");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Button type="button" variant="outline" size="sm" onClick={generate} disabled={loading}>
-      {loading ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
-      AI Generate
-    </Button>
-  );
-}
-
-function AIRewriteButton({ experienceId }: { experienceId: string }) {
-  const data = useResumeStore((s) => s.data);
-  const updateExperience = useResumeStore((s) => s.updateExperience);
-  const [loading, setLoading] = useState(false);
-  const exp = data.experience.find((e) => e.id === experienceId);
-
-  const rewrite = async () => {
-    if (!exp) return;
-    if (exp.achievements.length === 0) {
-      toast.error("Add some achievements first to rewrite");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch("/api/ai/rewrite-bullets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          position: exp.position,
-          company: exp.company,
-          bullets: exp.achievements,
-        }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      const json = await res.json();
-      updateExperience(experienceId, { achievements: json.bullets });
-      toast.success("Bullets rewritten with impact");
-    } catch {
-      toast.error("Could not rewrite bullets");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Button type="button" variant="ghost" size="sm" onClick={rewrite} disabled={loading || (exp?.achievements.length ?? 0) === 0}>
-      {loading ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5 mr-1.5" />}
-      Rewrite
-    </Button>
   );
 }
 
@@ -310,52 +254,91 @@ function PersonalInfoEditor() {
   const template = useResumeStore((s) => s.template);
   const tpl = TEMPLATES.find((t) => t.id === template);
   const p = data.personalInfo;
+
   return (
     <div className="space-y-4">
       {tpl?.hasPhoto && <PhotoUploader />}
       {contactLocked && (
-        <div className="flex items-center gap-2 p-2.5 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 text-xs text-amber-800 dark:text-amber-200">
-          <Lock className="w-3.5 h-3.5 shrink-0" />
-          <span>Contact details are locked on your plan. They cannot be changed once saved.</span>
+        <div className="flex items-center gap-2 p-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-xs text-amber-300">
+          <Lock className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+          <span>Contact details are locked on your active plan.</span>
         </div>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <Label className="text-xs">Full Name *</Label>
-          <Input value={p.fullName} onChange={(e) => updatePersonal({ fullName: e.target.value })} placeholder="Aanya Sharma" />
+          <Label className="text-xs text-[#9A9AAB]">Full Name</Label>
+          <Input
+            value={p.fullName}
+            onChange={(e) => updatePersonal({ fullName: e.target.value })}
+            placeholder="John Doe"
+            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+          />
         </div>
         <div>
-          <Label className="text-xs">Job Title *</Label>
-          <Input value={p.jobTitle} onChange={(e) => updatePersonal({ jobTitle: e.target.value })} placeholder="Senior Product Designer" />
+          <Label className="text-xs text-[#9A9AAB]">Job Title / Headline</Label>
+          <Input
+            value={p.jobTitle}
+            onChange={(e) => updatePersonal({ jobTitle: e.target.value })}
+            placeholder="Senior Software Engineer"
+            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+          />
         </div>
         <div>
-          <Label className="text-xs flex items-center gap-1">Email {contactLocked && <Lock className="w-2.5 h-2.5 text-amber-500" />}</Label>
-          <Input value={p.email} disabled={contactLocked} onChange={(e) => updatePersonal({ email: e.target.value })} placeholder="you@email.com" className={contactLocked ? "opacity-60 cursor-not-allowed" : ""} />
+          <Label className="text-xs text-[#9A9AAB]">Email</Label>
+          <Input
+            value={p.email}
+            disabled={contactLocked}
+            onChange={(e) => updatePersonal({ email: e.target.value })}
+            placeholder="john@example.com"
+            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+          />
         </div>
         <div>
-          <Label className="text-xs flex items-center gap-1">Phone {contactLocked && <Lock className="w-2.5 h-2.5 text-amber-500" />}</Label>
-          <Input value={p.phone} disabled={contactLocked} onChange={(e) => updatePersonal({ phone: e.target.value })} placeholder="+91 98765 43210" className={contactLocked ? "opacity-60 cursor-not-allowed" : ""} />
+          <Label className="text-xs text-[#9A9AAB]">Phone</Label>
+          <Input
+            value={p.phone}
+            disabled={contactLocked}
+            onChange={(e) => updatePersonal({ phone: e.target.value })}
+            placeholder="+91 98765 43210"
+            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+          />
         </div>
         <div>
-          <Label className="text-xs">Location</Label>
-          <Input value={p.location} onChange={(e) => updatePersonal({ location: e.target.value })} placeholder="Bengaluru, IN" />
+          <Label className="text-xs text-[#9A9AAB]">Location</Label>
+          <Input
+            value={p.location}
+            onChange={(e) => updatePersonal({ location: e.target.value })}
+            placeholder="Bengaluru, India"
+            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+          />
         </div>
         <div>
-          <Label className="text-xs">Website</Label>
-          <Input value={p.website} onChange={(e) => updatePersonal({ website: e.target.value })} placeholder="yoursite.com" />
+          <Label className="text-xs text-[#9A9AAB]">LinkedIn URL</Label>
+          <Input
+            value={p.linkedin}
+            onChange={(e) => updatePersonal({ linkedin: e.target.value })}
+            placeholder="linkedin.com/in/johndoe"
+            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+          />
         </div>
         <div>
-          <Label className="text-xs">LinkedIn</Label>
-          <Input value={p.linkedin} onChange={(e) => updatePersonal({ linkedin: e.target.value })} placeholder="linkedin.com/in/you" />
+          <Label className="text-xs text-[#9A9AAB]">GitHub URL</Label>
+          <Input
+            value={p.github}
+            onChange={(e) => updatePersonal({ github: e.target.value })}
+            placeholder="github.com/johndoe"
+            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+          />
         </div>
         <div>
-          <Label className="text-xs">GitHub</Label>
-          <Input value={p.github} onChange={(e) => updatePersonal({ github: e.target.value })} placeholder="github.com/you" />
+          <Label className="text-xs text-[#9A9AAB]">Portfolio Website</Label>
+          <Input
+            value={p.website}
+            onChange={(e) => updatePersonal({ website: e.target.value })}
+            placeholder="johndoe.dev"
+            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+          />
         </div>
-      </div>
-      <div>
-        <Label className="text-xs">Tagline / Headline</Label>
-        <Input value={p.tagline} onChange={(e) => updatePersonal({ tagline: e.target.value })} placeholder="Designing human-centered products that ship." />
       </div>
     </div>
   );
@@ -364,21 +347,21 @@ function PersonalInfoEditor() {
 // ---------- Summary ----------
 
 function SummaryEditor() {
-  const summary = useResumeStore((s) => s.data.summary);
+  const data = useResumeStore((s) => s.data);
   const setSummary = useResumeStore((s) => s.setSummary);
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label className="text-xs">Professional Summary</Label>
-        <AISummaryButton />
+        <Label className="text-xs text-[#9A9AAB]">Professional Summary</Label>
       </div>
       <Textarea
-        value={summary}
+        value={data.summary}
         onChange={(e) => setSummary(e.target.value)}
-        placeholder="A results-driven professional with..."
         rows={5}
+        placeholder="Brief 2-4 sentence overview of your background, core strengths, and career achievements..."
+        className="bg-[#0D0D0D] border-[#2E2E2E] text-xs text-white focus-visible:ring-[#FF6200] rounded-xl p-3"
       />
-      <p className="text-[11px] text-muted-foreground">{summary.length} characters · aim for 250-500 for impact</p>
     </div>
   );
 }
@@ -386,478 +369,167 @@ function SummaryEditor() {
 // ---------- Experience ----------
 
 function ExperienceEditor() {
-  const experience = useResumeStore((s) => s.data.experience);
-  const add = useResumeStore((s) => s.addExperience);
-  const update = useResumeStore((s) => s.updateExperience);
-  const remove = useResumeStore((s) => s.removeExperience);
-  const reorderSection = useResumeStore((s) => s.reorderSection);
+  const data = useResumeStore((s) => s.data);
+  const addExperience = useResumeStore((s) => s.addExperience);
+  const updateExperience = useResumeStore((s) => s.updateExperience);
+  const removeExperience = useResumeStore((s) => s.removeExperience);
+  const moveExperience = useResumeStore((s) => s.moveExperience);
 
   return (
-    <div className="space-y-3">
-      {experience.length === 0 && (
-        <p className="text-xs text-muted-foreground italic">No experience yet. Click below to add your first role.</p>
-      )}
+    <div className="space-y-4">
       <SortableList
-        items={experience}
-        onReorder={(oldIndex, newIndex) => reorderSection("experience", oldIndex, newIndex)}
-        renderItem={(e) => (
-          <SortableItem id={e.id}>
-            <Accordion type="multiple" className="space-y-2">
-              <AccordionItem value={e.id} className="border rounded-lg px-3">
-                <div className="flex items-center">
-                  <AccordionTrigger className="hover:no-underline flex-1 text-left py-3">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{e.position || "New role"}{e.company ? ` · ${e.company}` : ""}</p>
-                      <p className="text-xs text-muted-foreground">{e.startDate || "Start date"} → {e.current ? "Present" : e.endDate || "End date"}</p>
-                    </div>
-                  </AccordionTrigger>
-                  <ItemActions onRemove={() => remove(e.id)} />
-                </div>
-            <AccordionContent className="space-y-3 pt-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs">Position</Label>
-                  <Input value={e.position} onChange={(ev) => update(e.id, { position: ev.target.value })} placeholder="Senior Product Designer" />
-                </div>
-                <div>
-                  <Label className="text-xs">Company</Label>
-                  <Input value={e.company} onChange={(ev) => update(e.id, { company: ev.target.value })} placeholder="Razorpay" />
-                </div>
-                <div>
-                  <Label className="text-xs">Location</Label>
-                  <Input value={e.location} onChange={(ev) => update(e.id, { location: ev.target.value })} placeholder="Bengaluru, IN" />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label className="text-xs">Start</Label>
-                    <Input type="month" value={e.startDate} onChange={(ev) => update(e.id, { startDate: ev.target.value })} />
-                  </div>
-                  <div>
-                    <Label className="text-xs">End</Label>
-                    <Input type="month" value={e.endDate} disabled={e.current} onChange={(ev) => update(e.id, { endDate: ev.target.value })} />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox id={`cur-${e.id}`} checked={e.current} onCheckedChange={(v) => update(e.id, { current: v === true, endDate: v ? "" : e.endDate })} />
-                <Label htmlFor={`cur-${e.id}`} className="text-xs cursor-pointer">I currently work here</Label>
-              </div>
-              <div>
-                <Label className="text-xs">Description</Label>
-                <Textarea value={e.description} onChange={(ev) => update(e.id, { description: ev.target.value })} rows={2} placeholder="Brief overview of the role and team" />
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <Label className="text-xs">Key Achievements</Label>
-                  <div className="flex gap-1.5">
-                    <AIExperienceButton experienceId={e.id} />
-                    <AIRewriteButton experienceId={e.id} />
-                  </div>
-                </div>
-                <StringListEditor items={e.achievements} onChange={(next) => update(e.id, { achievements: next })} placeholder="Reduced onboarding time by 94%" />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-            </Accordion>
-          </SortableItem>
-        )}
-      />
-      <Button type="button" variant="outline" size="sm" onClick={add}>
-        <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Experience
-      </Button>
-    </div>
-  );
-}
-
-// ---------- Education ----------
-
-function EducationEditor() {
-  const items = useResumeStore((s) => s.data.education);
-  const add = useResumeStore((s) => s.addEducation);
-  const update = useResumeStore((s) => s.updateEducation);
-  const remove = useResumeStore((s) => s.removeEducation);
-  const reorderSection = useResumeStore((s) => s.reorderSection);
-  return (
-    <div className="space-y-3">
-      {items.length === 0 && <p className="text-xs text-muted-foreground italic">No education added yet.</p>}
-      <SortableList
-        items={items}
-        onReorder={(oldIndex, newIndex) => reorderSection("education", oldIndex, newIndex)}
-        renderItem={(ed) => (
-          <SortableItem id={ed.id}>
-            <Accordion type="multiple" className="space-y-2">
-              <AccordionItem value={ed.id} className="border rounded-lg px-3">
-                <div className="flex items-center">
-                  <AccordionTrigger className="hover:no-underline flex-1 text-left py-3">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{ed.degree || "New degree"}{ed.field ? `, ${ed.field}` : ""}</p>
-                      <p className="text-xs text-muted-foreground">{ed.institution || "Institution"}</p>
-                    </div>
-                  </AccordionTrigger>
-                  <ItemActions onRemove={() => remove(ed.id)} />
-                </div>
-                <AccordionContent className="space-y-3 pt-2">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs">Degree</Label>
-                      <Input value={ed.degree} onChange={(e) => update(ed.id, { degree: e.target.value })} placeholder="B.E" />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Field</Label>
-                      <Input value={ed.field} onChange={(e) => update(ed.id, { field: e.target.value })} placeholder="Computer Science" />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Institution</Label>
-                      <Input value={ed.institution} onChange={(e) => update(ed.id, { institution: e.target.value })} placeholder="Anna University" />
-                    </div>
-                    <div>
-                      <Label className="text-xs">GPA / Score</Label>
-                      <Input value={ed.gpa} onChange={(e) => update(ed.id, { gpa: e.target.value })} placeholder="8.9 / 10" />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Start</Label>
-                      <Input type="month" value={ed.startDate} onChange={(e) => update(ed.id, { startDate: e.target.value })} />
-                    </div>
-                    <div>
-                      <Label className="text-xs">End</Label>
-                      <Input type="month" value={ed.endDate} onChange={(e) => update(ed.id, { endDate: e.target.value })} />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs">Notes</Label>
-                    <Textarea value={ed.description} onChange={(e) => update(ed.id, { description: e.target.value })} rows={2} placeholder="Thesis, honors, relevant coursework" />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </SortableItem>
-        )}
-      />
-      <Button type="button" variant="outline" size="sm" onClick={add}>
-        <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Education
-      </Button>
-    </div>
-  );
-}
-
-// ---------- Skills ----------
-
-function SkillsEditor() {
-  const skills = useResumeStore((s) => s.data.skills);
-  const add = useResumeStore((s) => s.addSkillCategory);
-  const update = useResumeStore((s) => s.updateSkillCategory);
-  const remove = useResumeStore((s) => s.removeSkillCategory);
-  const reorderSection = useResumeStore((s) => s.reorderSection);
-  return (
-    <div className="space-y-3">
-      {skills.length === 0 && <p className="text-xs text-muted-foreground italic">No skills added yet.</p>}
-      <SortableList
-        items={skills}
-        onReorder={(oldIndex, newIndex) => reorderSection("skills", oldIndex, newIndex)}
-        renderItem={(s) => (
-          <SortableItem id={s.id}>
-            <div className="border rounded-lg p-3 space-y-2">
-              <div className="flex items-center gap-2">
-                <Input
-                  value={s.category}
-                  onChange={(e) => update(s.id, { category: e.target.value })}
-                  className="font-medium text-sm"
-                  placeholder="Category (e.g. Design Tools)"
+        items={data.experience}
+        onChange={(next) => useResumeStore.getState().updateData((d) => ({ ...d, experience: next }))}
+        renderItem={(exp, index) => (
+          <SortableItem id={exp.id}>
+            <div className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-xs text-white truncate">
+                  {exp.position || "Position"} {exp.company ? `@ ${exp.company}` : ""}
+                </span>
+                <ItemActions
+                  onRemove={() => removeExperience(exp.id)}
+                  onUp={() => moveExperience(exp.id, -1)}
+                  onDown={() => moveExperience(exp.id, 1)}
+                  upDisabled={index === 0}
+                  downDisabled={index === data.experience.length - 1}
                 />
-                <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(s.id)}>
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
               </div>
-              <StringListEditor items={s.items} onChange={(next) => update(s.id, { items: next })} placeholder="Add a skill and press Enter" />
-            </div>
-          </SortableItem>
-        )}
-      />
-      <div className="flex gap-2 flex-wrap">
-        <Button type="button" variant="outline" size="sm" onClick={add}>
-          <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Skill Category
-        </Button>
-        <SkillSuggestions />
-      </div>
-    </div>
-  );
-}
 
-// ---------- Projects ----------
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <Input
+                  value={exp.company}
+                  onChange={(e) => updateExperience(exp.id, { company: e.target.value })}
+                  placeholder="Company"
+                  className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+                />
+                <Input
+                  value={exp.position}
+                  onChange={(e) => updateExperience(exp.id, { position: e.target.value })}
+                  placeholder="Job Title"
+                  className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+                />
+                <Input
+                  value={exp.startDate}
+                  onChange={(e) => updateExperience(exp.id, { startDate: e.target.value })}
+                  placeholder="Start Date (e.g. 2022-01)"
+                  className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+                />
+                <Input
+                  value={exp.endDate}
+                  disabled={exp.current}
+                  onChange={(e) => updateExperience(exp.id, { endDate: e.target.value })}
+                  placeholder="End Date (e.g. Present)"
+                  className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+                />
+              </div>
 
-function ProjectsEditor() {
-  const items = useResumeStore((s) => s.data.projects);
-  const add = useResumeStore((s) => s.addProject);
-  const update = useResumeStore((s) => s.updateProject);
-  const remove = useResumeStore((s) => s.removeProject);
-  const reorderSection = useResumeStore((s) => s.reorderSection);
-  return (
-    <div className="space-y-3">
-      {items.length === 0 && <p className="text-xs text-muted-foreground italic">No projects added yet.</p>}
-      <SortableList
-        items={items}
-        onReorder={(oldIndex, newIndex) => reorderSection("projects", oldIndex, newIndex)}
-        renderItem={(p) => (
-          <SortableItem id={p.id}>
-            <Accordion type="multiple" className="space-y-2">
-              <AccordionItem value={p.id} className="border rounded-lg px-3">
-                <div className="flex items-center">
-                  <AccordionTrigger className="hover:no-underline flex-1 text-left py-3">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{p.name || "New project"}</p>
-                      <p className="text-xs text-muted-foreground">{p.technologies.join(" · ") || "No technologies"}</p>
-                    </div>
-                  </AccordionTrigger>
-                  <ItemActions onRemove={() => remove(p.id)} />
-                </div>
-                <AccordionContent className="space-y-3 pt-2">
-                  <div>
-                    <Label className="text-xs">Project Name</Label>
-                    <Input value={p.name} onChange={(e) => update(p.id, { name: e.target.value })} placeholder="Blade Design System" />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Description</Label>
-                    <Textarea value={p.description} onChange={(e) => update(p.id, { description: e.target.value })} rows={2} placeholder="What does it do and what impact did it have?" />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs">Link</Label>
-                      <Input value={p.link} onChange={(e) => update(p.id, { link: e.target.value })} placeholder="github.com/you/project" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">Start</Label>
-                        <Input type="month" value={p.startDate} onChange={(e) => update(p.id, { startDate: e.target.value })} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">End</Label>
-                        <Input type="month" value={p.endDate} onChange={(e) => update(p.id, { endDate: e.target.value })} />
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs">Technologies</Label>
-                    <StringListEditor items={p.technologies} onChange={(next) => update(p.id, { technologies: next })} placeholder="React, TypeScript..." />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </SortableItem>
-        )}
-      />
-      <Button type="button" variant="outline" size="sm" onClick={add}>
-        <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Project
-      </Button>
-    </div>
-  );
-}
-
-// ---------- Certifications ----------
-
-function CertificationsEditor() {
-  const items = useResumeStore((s) => s.data.certifications);
-  const add = useResumeStore((s) => s.addCertification);
-  const update = useResumeStore((s) => s.updateCertification);
-  const remove = useResumeStore((s) => s.removeCertification);
-  const reorderSection = useResumeStore((s) => s.reorderSection);
-  return (
-    <div className="space-y-3">
-      {items.length === 0 && <p className="text-xs text-muted-foreground italic">No certifications added yet.</p>}
-      <SortableList
-        items={items}
-        onReorder={(oldIndex, newIndex) => reorderSection("certifications", oldIndex, newIndex)}
-        renderItem={(c) => (
-          <SortableItem id={c.id}>
-            <div className="border rounded-lg p-3 space-y-2">
               <div className="flex items-center gap-2">
-                <Input value={c.name} onChange={(e) => update(c.id, { name: e.target.value })} placeholder="Certification name" className="font-medium text-sm" />
-                <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(c.id)}>
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
+                <Checkbox
+                  checked={exp.current}
+                  onCheckedChange={(c) => updateExperience(exp.id, { current: Boolean(c) })}
+                  id={`curr-${exp.id}`}
+                  className="border-[#FF6200] data-[state=checked]:bg-[#FF6200]"
+                />
+                <label htmlFor={`curr-${exp.id}`} className="text-xs text-[#9A9AAB]">
+                  I currently work here
+                </label>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Input value={c.issuer} onChange={(e) => update(c.id, { issuer: e.target.value })} placeholder="Issuing org" />
-                <Input value={c.credentialId} onChange={(e) => update(c.id, { credentialId: e.target.value })} placeholder="Credential ID" />
-                <Input type="month" value={c.date} onChange={(e) => update(c.id, { date: e.target.value })} />
-                <Input type="month" value={c.expiryDate} onChange={(e) => update(c.id, { expiryDate: e.target.value })} placeholder="Expiry (optional)" />
-              </div>
-            </div>
-          </SortableItem>
-        )}
-      />
-      <Button type="button" variant="outline" size="sm" onClick={add}>
-        <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Certification
-      </Button>
-    </div>
-  );
-}
 
-// ---------- Languages ----------
-
-function LanguagesEditor() {
-  const items = useResumeStore((s) => s.data.languages);
-  const add = useResumeStore((s) => s.addLanguage);
-  const update = useResumeStore((s) => s.updateLanguage);
-  const remove = useResumeStore((s) => s.removeLanguage);
-  const reorderSection = useResumeStore((s) => s.reorderSection);
-  const levels = ["Basic", "Conversational", "Fluent", "Professional", "Native"];
-  return (
-    <div className="space-y-3">
-      {items.length === 0 && <p className="text-xs text-muted-foreground italic">No languages added yet.</p>}
-      <SortableList
-        items={items}
-        onReorder={(oldIndex, newIndex) => reorderSection("languages", oldIndex, newIndex)}
-        renderItem={(l) => (
-          <SortableItem id={l.id}>
-            <div className="flex items-center gap-2">
-              <Input value={l.name} onChange={(e) => update(l.id, { name: e.target.value })} placeholder="Language" className="flex-1" />
-              <select
-                value={l.proficiency}
-                onChange={(e) => update(l.id, { proficiency: e.target.value })}
-                className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-              >
-                {levels.map((lv) => (
-                  <option key={lv} value={lv}>{lv}</option>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-[#9A9AAB]">Key Accomplishments &amp; Bullets</Label>
+                {exp.achievements.map((ach, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <Input
+                      value={ach}
+                      onChange={(e) => {
+                        const next = [...exp.achievements];
+                        next[i] = e.target.value;
+                        updateExperience(exp.id, { achievements: next });
+                      }}
+                      className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-red-400 hover:text-red-300 shrink-0"
+                      onClick={() => {
+                        const next = exp.achievements.filter((_, idx) => idx !== i);
+                        updateExperience(exp.id, { achievements: next });
+                      }}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 ))}
-              </select>
-              <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(l.id)}>
-                <Trash2 className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-          </SortableItem>
-        )}
-      />
-      <Button type="button" variant="outline" size="sm" onClick={add}>
-        <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Language
-      </Button>
-    </div>
-  );
-}
-
-// ---------- Custom Sections ----------
-
-function CustomSectionsEditor() {
-  const items = useResumeStore((s) => s.data.customSections);
-  const add = useResumeStore((s) => s.addCustomSection);
-  const update = useResumeStore((s) => s.updateCustomSection);
-  const remove = useResumeStore((s) => s.removeCustomSection);
-  const reorderSection = useResumeStore((s) => s.reorderSection);
-  return (
-    <div className="space-y-3">
-      {items.length === 0 && <p className="text-xs text-muted-foreground italic">Add custom sections like "Awards", "Volunteer", "Interests".</p>}
-      <SortableList
-        items={items}
-        onReorder={(oldIndex, newIndex) => reorderSection("customSections", oldIndex, newIndex)}
-        renderItem={(s) => (
-          <SortableItem id={s.id}>
-            <div className="border rounded-lg p-3 space-y-2">
-              <div className="flex items-center gap-2">
-                <Input value={s.title} onChange={(e) => update(s.id, { title: e.target.value })} placeholder="Section title (e.g. Awards)" className="font-medium text-sm" />
-                <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(s.id)}>
-                  <Trash2 className="w-3.5 h-3.5" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => updateExperience(exp.id, { achievements: [...exp.achievements, ""] })}
+                  className="h-8 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] rounded-full gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5 text-[#FF6200]" /> Add Bullet Point
                 </Button>
               </div>
-              <StringListEditor items={s.items} onChange={(next) => update(s.id, { items: next })} placeholder="Add an item and press Enter" />
             </div>
           </SortableItem>
         )}
       />
-      <Button type="button" variant="outline" size="sm" onClick={add}>
-        <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Custom Section
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={addExperience}
+        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+      >
+        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Work Experience
       </Button>
     </div>
   );
 }
 
-function SectionHeader({ icon: Icon, title, count }: { icon: React.ComponentType<{ className?: string }>; title: string; count?: number }) {
-  return (
-    <div className="flex items-center gap-2 flex-1">
-      <div className="w-7 h-7 rounded-md bg-teal-50 dark:bg-teal-950/40 flex items-center justify-center shrink-0">
-        <Icon className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-      </div>
-      <span className="text-sm font-semibold">{title}</span>
-      {count !== undefined && count > 0 && (
-        <Badge variant="secondary" className="ml-1 text-[10px] h-4 px-1.5 min-w-4 justify-center">{count}</Badge>
-      )}
-    </div>
-  );
-}
+// ---------- Main ResumeEditor Accordion Container ----------
 
 export function ResumeEditor() {
-  const data = useResumeStore((s) => s.data);
   return (
-    <div className="space-y-1">
-      <Accordion type="multiple" defaultValue={["personal"]} className="space-y-2">
-        <AccordionItem value="personal" className="border rounded-lg">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <SectionHeader icon={User} title="Personal Info" />
+    <div className="space-y-4 text-left">
+      {/* Design, Colors & Typography Top Block */}
+      <DesignControlsSection />
+
+      {/* Accordion Sections for Content Editing */}
+      <Accordion type="multiple" defaultValue={["personal", "summary", "experience"]} className="space-y-3">
+        <AccordionItem value="personal" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+          <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+            <span className="flex items-center gap-2">
+              <User className="w-4 h-4 text-[#FF6200]" /> Personal Information
+            </span>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
+          <AccordionContent className="pt-2 pb-4">
             <PersonalInfoEditor />
           </AccordionContent>
         </AccordionItem>
-        <AccordionItem value="summary" className="border rounded-lg">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <SectionHeader icon={AlignLeft} title="Summary" count={data.summary.trim().length > 0 ? 1 : 0} />
+
+        <AccordionItem value="summary" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+          <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+            <span className="flex items-center gap-2">
+              <AlignLeft className="w-4 h-4 text-[#FF6200]" /> Professional Summary
+            </span>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
+          <AccordionContent className="pt-2 pb-4">
             <SummaryEditor />
           </AccordionContent>
         </AccordionItem>
-        <AccordionItem value="experience" className="border rounded-lg">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <SectionHeader icon={Briefcase} title="Experience" count={data.experience.length} />
+
+        <AccordionItem value="experience" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+          <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+            <span className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-[#FF6200]" /> Work Experience
+            </span>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
+          <AccordionContent className="pt-2 pb-4">
             <ExperienceEditor />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="education" className="border rounded-lg">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <SectionHeader icon={GraduationCap} title="Education" count={data.education.length} />
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <EducationEditor />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="skills" className="border rounded-lg">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <SectionHeader icon={Sparkles} title="Skills" count={data.skills.length} />
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <SkillsEditor />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="projects" className="border rounded-lg">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <SectionHeader icon={FolderGit2} title="Projects" count={data.projects.length} />
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <ProjectsEditor />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="certifications" className="border rounded-lg">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <SectionHeader icon={Award} title="Certifications" count={data.certifications.length} />
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <CertificationsEditor />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="languages" className="border rounded-lg">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <SectionHeader icon={Languages} title="Languages" count={data.languages.length} />
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <LanguagesEditor />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="custom" className="border rounded-lg">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <SectionHeader icon={Layers} title="Custom Sections" count={data.customSections.length} />
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <CustomSectionsEditor />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
