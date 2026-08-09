@@ -101,20 +101,7 @@ export const useResumeStore = create<ResumeState>()(
 
       setView: (v) => set({ view: v }),
       setTemplate: (t) => {
-        const tplDefaults: Record<string, { accent: string; font: string }> = {
-          modern: { accent: "#0f766e", font: "inter" },
-          minimal: { accent: "#1f2937", font: "inter" },
-          creative: { accent: "#7c3aed", font: "poppins" },
-          classic: { accent: "#1e3a5f", font: "merriweather" },
-          executive: { accent: "#92400e", font: "playfair" },
-          tech: { accent: "#0ea5e9", font: "jetbrains" },
-          academic: { accent: "#1e3a5f", font: "merriweather" },
-          compact: { accent: "#be123c", font: "inter" },
-        };
-        // For parameterized templates, derive defaults from the spec
-        const spec = SPEC_MAP[t as string];
-        const def = tplDefaults[t] || (spec ? { accent: spec.accent, font: spec.font } : { accent: "#0f766e", font: "inter" });
-        set({ template: t, accentColor: def.accent, fontFamily: def.font });
+        set({ template: t });
       },
       setAccentColor: (c) => set({ accentColor: c }),
       setFontFamily: (f) => set({ fontFamily: f }),
