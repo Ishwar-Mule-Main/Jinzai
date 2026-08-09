@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 // POST /api/signup — Step 1: Register email+name+password, send OTP
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name } = await req.json();
+    const { email, password, name, plan } = await req.json();
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Store signup data temporarily (until OTP verified)
-    setSignupData(normalizedEmail, name || email.split("@")[0], password);
+    setSignupData(normalizedEmail, name || email.split("@")[0], password, plan || "free");
 
     // Generate and send OTP
     const code = generateCode(normalizedEmail);

@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Templates", href: "/templates" },
   { label: "Pricing", href: "/pricing" },
+  { label: "Colleges & Institutions", href: "/institutions" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];

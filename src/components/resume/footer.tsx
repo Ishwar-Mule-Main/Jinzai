@@ -14,7 +14,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <BrandMark showParent className="mb-3" />
             <p className="text-xs text-[#888898] max-w-xs leading-relaxed">
-              Build a resume that gets you hired. 72 templates, AI-powered writing, ATS optimization, and one-click export.
+              Build a resume that gets you hired. 78 templates, AI-powered writing, ATS optimization, and one-click export.
             </p>
           </div>
 

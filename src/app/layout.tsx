@@ -30,11 +30,15 @@ const manrope = Manrope({ variable: "--font-manrope", subsets: ["latin"], weight
 export const metadata: Metadata = {
   title: "Jinzai — 人材 Talent Hub | Build a resume that gets you hired",
   description:
-    "Jinzai (人材) is a premier AI-powered resume builder and job seeker hub by Domain Expansion. 72 templates, AI rewriting, ATS optimization, web profiles, and one-click export.",
+    "Jinzai (人材) is a premier AI-powered resume builder and job seeker hub by Domain Expansion. 78 templates, AI rewriting, ATS optimization, web profiles, and one-click export.",
   keywords: ["resume builder", "CV maker", "resume templates", "ATS resume", "AI resume", "Jinzai", "人材", "Domain Expansion", "job seeker hub", "free resume builder"],
   authors: [{ name: "Domain Expansion" }],
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
   openGraph: {
     title: "Jinzai — 人材 Talent Hub",

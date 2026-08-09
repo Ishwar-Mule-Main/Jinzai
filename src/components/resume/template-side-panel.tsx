@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useResumeStore } from "@/lib/resume/store";
 import { TEMPLATES } from "@/lib/resume/types";
-import { TemplateThumbnail } from "./template-thumbnail";
 import {
   Sheet,
   SheetContent,
@@ -14,9 +13,9 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { PanelRightOpen, Search, Check } from "lucide-react";
+import { PanelRightOpen, Search } from "lucide-react";
 import { toast } from "sonner";
+import { TemplateCard } from "./template-card";
 
 const CATEGORIES = ["All", "Sidebar", "Banner", "Single", "Serif", "Minimal", "ATS", "Photo", "Numbered", "Creative"] as const;
 
@@ -88,32 +87,14 @@ export function TemplateSidePanel() {
         </div>
 
         {/* Template grid */}
-        <div className="grid grid-cols-2 gap-3 p-4">
-          {filtered.map((t) => (
-            <button
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4">
+          {filtered.map((t, idx) => (
+            <TemplateCard
               key={t.id}
-              onClick={() => selectTemplate(t.id, t.name)}
-              className={`text-left rounded-xl border-2 overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5 ${
-                template === t.id ? "border-teal-500 ring-2 ring-teal-500/20" : "border-border"
-              }`}
-            >
-              <div className="aspect-[3/4] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 overflow-hidden relative">
-                <TemplateThumbnail templateId={t.id} className="w-full h-full" />
-                {template === t.id && (
-                  <div className="absolute top-1.5 right-1.5 bg-teal-500 text-white rounded-full w-5 h-5 flex items-center justify-center shadow">
-                    <Check className="w-3 h-3" />
-                  </div>
-                )}
-              </div>
-              <div className="p-2">
-                <p className="text-[11px] font-semibold truncate">{t.name}</p>
-                <div className="flex flex-wrap gap-0.5 mt-0.5">
-                  {t.tags.slice(0, 2).map((tag) => (
-                    <span key={tag} className="text-[8px] px-1 py-0 rounded bg-muted text-muted-foreground">{tag}</span>
-                  ))}
-                </div>
-              </div>
-            </button>
+              id={t}
+              index={idx}
+              onSelect={() => selectTemplate(t.id, t.name)}
+            />
           ))}
         </div>
 

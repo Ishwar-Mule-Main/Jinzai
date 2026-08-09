@@ -264,11 +264,11 @@ export default function DashboardPage() {
         )}
 
         {/* ── Welcome Banner ── */}
-        <section className="relative rounded-3xl bg-[#141414] border border-[#2E2E2E] p-6 sm:p-8 overflow-hidden shadow-2xl">
+        <section className="relative rounded-3xl bg-[#141414] border border-[#2E2E2E] p-6 sm:p-8 overflow-hidden shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="absolute top-0 right-0 w-72 sm:w-96 h-72 sm:h-96 bg-[#FF6200]/10 rounded-full blur-[120px] pointer-events-none" />
           <div className="relative z-10 space-y-3">
             <Badge className="bg-[#FF6200] text-white text-[10px] uppercase font-semibold">
-              {planConfig.name} Plan
+              {planConfig.name}
             </Badge>
             <h1 className="font-bricolage text-2xl sm:text-4xl font-bold text-white leading-tight">
               Hey{user?.email ? `, ${user.email.split("@")[0]}` : ""}! 👋 Ready to build your resume?
@@ -283,6 +283,13 @@ export default function DashboardPage() {
               )}
             </p>
           </div>
+
+          {/* Prominent Go to Editor Button */}
+          <Link href="/editor" className="relative z-10 shrink-0 w-full md:w-auto">
+            <Button className="w-full md:w-auto h-12 px-8 bg-[#FF6200] hover:bg-[#E55700] text-white font-bold rounded-full shadow-xl shadow-[#FF6200]/30 hover:shadow-[#FF6200]/50 text-sm gap-2 transition-all">
+              <Edit3 className="w-4 h-4" /> Go to Editor →
+            </Button>
+          </Link>
         </section>
 
         {/* ── How It Works (shown only when user has 0 resumes) ── */}

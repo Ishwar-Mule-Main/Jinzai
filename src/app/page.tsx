@@ -1,155 +1,102 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useCurrentUser } from "@/lib/resume/use-current-user";
-import { useResumeStore } from "@/lib/resume/store";
-import { TEMPLATES } from "@/lib/resume/types";
 import { PublicNav } from "@/components/resume/public-nav";
 import { PublicFooter } from "@/components/resume/public-footer";
+import { TemplateCard } from "@/components/resume/template-card";
 import { AuthDialog, type AuthMode } from "@/components/resume/auth-dialogs";
 import { ImportResumeDialog } from "@/components/resume/import-resume-dialog";
-import { PricingDialog } from "@/components/resume/pricing-dialog";
-import { SupportDialog } from "@/components/resume/support-dialog";
-import { TemplateThumbnail } from "@/components/resume/template-thumbnail";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Sparkles,
   FileText,
   Upload,
   Wand2,
-  Crown,
-  Search,
-  LayoutGrid,
   Check,
-  ShieldCheck,
-  Zap,
-  Star,
-  ChevronDown,
-  ArrowRight,
+  Search,
+  SlidersHorizontal,
   Target,
   Gauge,
   Mail,
+  Building2,
+  ShieldCheck,
+  Star,
+  ChevronDown,
   UserPlus,
-  LogIn,
-  Layers,
-  Award,
-  CheckCircle2,
+  Crown,
+  Smartphone,
+  GraduationCap,
 } from "lucide-react";
+import { TEMPLATES } from "@/lib/resume/types";
+import { useCurrentUser } from "@/lib/resume/use-current-user";
+import { useResumeStore } from "@/lib/resume/store";
 import { getSampleProfile } from "@/lib/resume/sample-profiles";
-import { ResumeRenderer } from "@/components/resume/resume-renderer";
-
-const TEMPLATE_CATEGORIES = ["All", "Sidebar", "Banner", "Single", "Serif", "Minimal", "ATS", "Photo", "Numbered", "Creative"] as const;
-
-function TemplateCard({ id, index, user, onAuthRequired }: { id: (typeof TEMPLATES)[number]; index: number; user: any; onAuthRequired: () => void }) {
-  const router = useRouter();
-  const setTemplate = useResumeStore((s) => s.setTemplate);
-  const setView = useResumeStore((s) => s.setView);
-  const sampleData = getSampleProfile(index);
-
-  const handleUseTemplate = () => {
-    setTemplate(id.id);
-    setView("editor");
-    router.push("/editor");
-  };
-
-  return (
-    <Card className="overflow-hidden group hover:shadow-2xl hover:shadow-[#FF6200]/15 transition-all duration-300 hover:-translate-y-1.5 border-[#2E2E2E] hover:border-[#FF6200]/50 bg-[#141414] rounded-2xl flex flex-col justify-between">
-      <div className="bg-white overflow-hidden relative border-b border-[#2E2E2E]" style={{ height: "300px" }}>
-        {/* LIVE resume preview scaled to fit card */}
-        <div className="origin-top-left absolute top-0 left-0 pointer-events-none" style={{ transform: "scale(0.38)", width: "260%", minHeight: "800px" }}>
-          <ResumeRenderer data={sampleData} accent={id.accentDefault} font={id.fontDefault} template={id.id} />
-        </div>
-        {/* Hover overlay with button */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-5 px-4 gap-2">
-          <Button size="sm" onClick={handleUseTemplate} className="w-full h-10 gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/30 text-xs">
-            <FileText className="w-4 h-4" /> Use {id.name}
-          </Button>
-        </div>
-        {/* Badges */}
-        <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end z-10">
-          {id.premium && (
-            <Badge className="bg-[#FF6200] text-white border-0 gap-1 text-[8px] font-mono shadow-md px-2 py-0.5">
-              <Crown className="w-2.5 h-2.5" /> PRO
-            </Badge>
-          )}
-        </div>
-      </div>
-      <div className="p-4">
-        <h3 className="font-bricolage font-bold text-base text-white mb-1">{id.name}</h3>
-        <p className="text-xs text-[#888898] line-clamp-2 mb-3 leading-relaxed">{id.description}</p>
-        <div className="flex flex-wrap gap-1">
-          {id.tags.slice(0, 3).map((t) => (
-            <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-[#1A1A1A] border border-[#2E2E2E] text-[#888898] font-mono">
-              {t}
-            </span>
-          ))}
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function StatCard({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="text-center p-5 rounded-2xl bg-[#141414] border border-[#2E2E2E]">
-      <p className="text-3xl sm:text-4xl font-bold font-bricolage text-gradient-orange">{value}</p>
-      <p className="text-xs font-mono text-[#888898] mt-1">{label}</p>
-    </div>
-  );
-}
 
 export default function HomePage() {
   const router = useRouter();
   const { user } = useCurrentUser();
-  const [authMode, setAuthMode] = useState<AuthMode>(null);
-  const [filter, setFilter] = useState<string>("All");
-  const [query, setQuery] = useState("");
+  const [authMode, setAuthMode] = useState<AuthMode | null>(null);
+
+  // Template Search & Filter state
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
 
   const loadSample = useResumeStore((s) => s.loadSample);
   const clearAll = useResumeStore((s) => s.clearAll);
-  const setTemplate = useResumeStore((s) => s.setTemplate);
-  const setView = useResumeStore((s) => s.setView);
-  const setContactLocked = useResumeStore((s) => s.setContactLocked);
 
+  // Handle building new resume
   const handleStartBuilding = () => {
-    clearAll();
-    setContactLocked(false);
-    setTemplate("modern");
-    setView("editor");
-    router.push("/editor");
+    if (!user) {
+      setAuthMode("signup");
+    } else {
+      clearAll();
+      router.push("/editor");
+    }
   };
 
+  // Handle sample load
   const handleTrySample = () => {
-    loadSample();
-    setContactLocked(false);
-    setView("editor");
+    loadSample(getSampleProfile("software"));
     router.push("/editor");
   };
 
-  const filteredTemplates = TEMPLATES.map((t, originalIndex) => ({ t, originalIndex })).filter(({ t }) => {
-    const matchesFilter = filter === "All" || t.tags.some((tag) => tag.toLowerCase().includes(filter.toLowerCase())) || t.name.toLowerCase().includes(filter.toLowerCase());
-    const matchesQuery = !query || t.name.toLowerCase().includes(query.toLowerCase()) || t.description.toLowerCase().includes(query.toLowerCase());
-    return matchesFilter && matchesQuery;
-  });
+  // Filter templates
+  const filteredTemplates = useMemo(() => {
+    return TEMPLATES.map((t, index) => ({ t, originalIndex: index })).filter(({ t }) => {
+      const matchesSearch =
+        search === "" ||
+        t.name.toLowerCase().includes(search.toLowerCase()) ||
+        t.description.toLowerCase().includes(search.toLowerCase()) ||
+        t.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()));
+
+      let matchesCategory = true;
+      if (activeCategory === "ats") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("ats"));
+      if (activeCategory === "entry") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("entry") || tag.toLowerCase().includes("college") || tag.toLowerCase().includes("academic"));
+      if (activeCategory === "tech") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("tech") || tag.toLowerCase().includes("developer"));
+      if (activeCategory === "creative") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("creative") || tag.toLowerCase().includes("bold"));
+      if (activeCategory === "executive") fontMatches: matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("executive") || tag.tags.includes("Serif"));
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [search, activeCategory]);
 
   return (
     <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col font-sans selection:bg-[#FF6200] selection:text-white">
-
-      {/* ── Public Top Nav ── */}
+      {/* Navbar */}
       <PublicNav onLogin={() => setAuthMode("login")} onSignup={() => setAuthMode("signup")} />
 
-      {/* ── Hero Banner ── */}
+      {/* ── Hero Section ── */}
       <section className="relative pt-16 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#FF6200]/10 rounded-full blur-[160px] pointer-events-none" />
 
         <div className="max-w-5xl mx-auto text-center space-y-6 relative z-10">
           <Badge className="bg-[#1A1A1A] border-[#2E2E2E] text-[#FF6200] px-4 py-1.5 rounded-full font-mono text-xs gap-2 inline-flex shadow-lg shadow-[#FF6200]/10">
-            <Sparkles className="w-4 h-4" /> Domain Expansion AI Resume Builder v3.0
+            <Sparkles className="w-4 h-4" /> Domain Expansion AI Resume Builder
           </Badge>
 
           <h1 className="font-bricolage text-4xl sm:text-7xl font-bold tracking-tight text-white leading-[1.05]">
@@ -157,7 +104,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-[#888898] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-            <strong className="text-white">Jinzai</strong> (人材) pairs GPT-4o AI intelligence with 78 ATS-certified templates to craft high-impact resumes, cover letters, and live web profiles in under 3 minutes.
+            <strong className="text-white">Jinzai</strong> (人材) pairs LLMs / AI / GPTs intelligence with 78 ATS-certified templates to craft high-impact resumes, cover letters, and live web profiles in under 3 minutes.
           </p>
 
           {/* Quick CTAs */}
@@ -187,53 +134,52 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Metrics Strip ── */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full mb-16">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <StatCard value={String(TEMPLATES.length)} label="Master Templates" />
-          <StatCard value="100%" label="Vector ATS Ready" />
-          <StatCard value="20x" label="Callback Rate" />
-          <StatCard value="< 3m" label="Build Time" />
-        </div>
-      </section>
-
-      {/* ── Template Gallery Section ── */}
-      <section id="templates" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#2E2E2E] pb-6">
+      {/* ── Interactive Templates Gallery ── */}
+      <section id="templates" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full space-y-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <Badge className="bg-[#1A1A1A] border-[#2E2E2E] text-[#FF6200] text-xs font-mono mb-2">78 DESIGNS AVAILABLE</Badge>
-            <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Choose a Master Template</h2>
-            <p className="text-sm text-[#888898] mt-1">Each template auto-adapts to your content and exports crisp vector ATS PDFs.</p>
+            <Badge className="bg-[#FF6200]/10 text-[#FF6200] border-[#FF6200]/30 text-xs font-mono mb-2">78 MASTER TEMPLATES</Badge>
+            <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Choose Your Professional Design</h2>
+            <p className="text-sm text-[#888898]">Hover any card to use template immediately or filter by category.</p>
           </div>
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#888898]" />
+
+          {/* Search bar */}
+          <div className="relative w-full md:w-72">
+            <Search className="w-4 h-4 text-[#888898] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by name or style…"
-              className="pl-10 h-10 text-xs bg-[#141414] border-[#2E2E2E] focus:border-[#FF6200] text-white rounded-xl"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search templates..."
+              className="pl-10 h-10 bg-[#141414] border-[#2E2E2E] focus:border-[#FF6200] text-white text-xs rounded-full"
             />
           </div>
         </div>
 
-        {/* Categories */}
-        <div className="flex flex-wrap gap-2">
-          {TEMPLATE_CATEGORIES.map((cat) => (
+        {/* Category Filter Pills */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-[#2E2E2E] pb-4">
+          {[
+            { id: "all", label: "All 78 Templates" },
+            { id: "ats", label: "100% ATS Friendly" },
+            { id: "entry", label: "College / Freshers" },
+            { id: "tech", label: "Tech / Developers" },
+            { id: "executive", label: "Executive / Senior" },
+            { id: "creative", label: "Creative & Bold" },
+          ].map((cat) => (
             <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`px-4 py-2 rounded-full text-xs font-mono border transition-all ${
-                filter === cat
-                  ? "bg-[#FF6200] text-white border-[#FF6200] font-bold shadow-lg shadow-[#FF6200]/20"
-                  : "bg-[#141414] text-[#888898] border-[#2E2E2E] hover:border-[#FF6200]/50 hover:text-white"
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${
+                activeCategory === cat.id
+                  ? "bg-[#FF6200] text-white font-bold shadow-md shadow-[#FF6200]/20"
+                  : "bg-[#141414] border border-[#2E2E2E] text-[#888898] hover:text-white hover:border-[#FF6200]/40"
               }`}
             >
-              {cat}
+              {cat.label}
             </button>
           ))}
         </div>
 
-        {/* Template Grid */}
+        {/* Uniform Grid of Equal Shape Template Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-2">
           {filteredTemplates.map(({ t, originalIndex }) => (
             <TemplateCard key={t.id} id={t} index={originalIndex} user={user} onAuthRequired={() => setAuthMode("signup")} />
@@ -245,11 +191,11 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full space-y-10 border-t border-[#2E2E2E] mt-10">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
           <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Everything You Need to Get Hired</h2>
-          <p className="text-sm text-[#888898]">GPT-4o AI writing assistance, ATS keyword matching, and 78 recruiter-approved templates.</p>
+          <p className="text-sm text-[#888898]">LLMs / AI / GPTs writing assistance, ATS keyword matching, and 78 recruiter-approved templates.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { title: "GPT-4o AI Rewriter", desc: "Transforms basic work bullet points into high-impact quantified achievements with action verbs.", icon: Sparkles },
+            { title: "LLMs / AI / GPTs Rewriter", desc: "Transforms basic work bullet points into high-impact quantified achievements with action verbs.", icon: Sparkles },
             { title: "Resume Quality Score", desc: "Instant A–F rating across quantification, action verbs, formatting, and completeness.", icon: Gauge },
             { title: "ATS Keyword Matcher", desc: "Paste any target job description to get match scores and missing keyword suggestions.", icon: Target },
             { title: "Tailored Cover Letters", desc: "Generate role-specific cover letters in formal, modern, or concise tone with one click.", icon: Mail },
@@ -269,18 +215,19 @@ export default function HomePage() {
       <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full space-y-10 border-t border-[#2E2E2E]">
         <div className="text-center space-y-2">
           <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Transparent &amp; Simple Pricing</h2>
-          <p className="text-sm text-[#888898]">Build free. Upgrade when you are ready to download your PDF.</p>
+          <p className="text-sm text-[#888898]">Build free. Upgrade when you are ready to download your vector PDF.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {[
-            { name: "Trial Plan", price: "₹99", period: "2 days access", features: ["1 resume export", "Vector PDF download", "Access to 52 templates", "Basic AI rewriter"], highlight: false, planId: "trial_99" },
-            { name: "Pro Plan", price: "₹499", period: "/month", features: ["Up to 5 saved resumes", "Vector PDF export", "GPT-4o AI rewriter", "ATS keyword matcher", "Cover letter generator"], highlight: true, planId: "pro_499" },
-            { name: "Business Plan", price: "₹1,999", period: "/month", features: ["Unlimited resumes", "All 78 templates", "Priority support", "Multi-page A4 export", "Public share links"], highlight: false, planId: "business_1999" },
+            { name: "Single Export Pass", price: "₹99", period: "per export", features: ["1 Resume PDF Export", "Access all 78 templates", "Vector A4 PDF download", "❌ No AI/ATS Tools"], highlight: false },
+            { name: "Pro Plan", price: "₹399", period: "/month", features: ["5 Resume Exports", "LLMs / AI / GPTs Rewriter", "ATS Score & Match Analysis", "AI Cover Letter Generator", "All 78 templates"], highlight: true },
+            { name: "Business Plan", price: "₹999", period: "/month", features: ["50 Resume Exports", "LLMs / AI / GPTs Rewriter", "ATS Score & Match Analysis", "Priority Support", "No contact lock"], highlight: false },
+            { name: "Institution Plan", price: "₹4,999", period: "/month", features: ["300 Student Resumes", "Placement Cell Portal", "All AI & ATS Features", "College Branding"], highlight: false },
           ].map((plan) => (
             <Card key={plan.name} className={`rounded-2xl p-6 bg-[#141414] border flex flex-col justify-between transition-all ${plan.highlight ? "border-[#FF6200] ring-2 ring-[#FF6200]/20 shadow-xl shadow-[#FF6200]/10" : "border-[#2E2E2E]"}`}>
               <div>
                 {plan.highlight && (
-                  <Badge className="bg-[#FF6200] text-white text-[9px] font-mono mb-3 px-2 py-0.5">MOST POPULAR</Badge>
+                  <Badge className="bg-[#FF6200] text-white text-[9px] font-mono mb-3 px-2 py-0.5 uppercase font-bold">MOST POPULAR</Badge>
                 )}
                 <p className="font-bricolage font-bold text-lg text-white mb-1">{plan.name}</p>
                 <p className="text-3xl font-bold text-white mb-1">{plan.price}<span className="text-xs font-normal text-[#888898] ml-1">{plan.period}</span></p>
@@ -344,7 +291,7 @@ export default function HomePage() {
         <div className="space-y-3">
           {[
             { q: "Is Jinzai free to start?", a: "Yes! You can browse all 78 templates and create your resume for free. Upgrade when you are ready to download your vector PDF." },
-            { q: "How does the GPT-4o AI scanning & writing work?", a: "Our AI scans raw resume text or uploaded files (.pdf, .docx, .json, .md, .txt), parses all information, and populates all prebuilt sections automatically." },
+            { q: "How does the LLMs / AI / GPTs scanning & writing work?", a: "Our AI scans raw resume text or uploaded files (.pdf, .docx, .json, .md, .txt), parses all information, and populates all prebuilt sections automatically." },
             { q: "Are the exported PDFs 100% ATS friendly?", a: "Yes! All PDF exports use selectable vector text layers. ATS scanners (Taleo, Greenhouse, Workday) extract 100% of all text cleanly." },
             { q: "Can I import my existing resume?", a: "Yes! Simply click 'Upload & Auto-Fill', choose your file, and AI will parse all sections into structured editor fields." },
           ].map((faq, i) => (

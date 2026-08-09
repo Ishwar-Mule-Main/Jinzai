@@ -5,11 +5,9 @@ import type { Metadata } from "next";
 import { PublicNav } from "@/components/resume/public-nav";
 import { PublicFooter } from "@/components/resume/public-footer";
 import { TEMPLATES } from "@/lib/resume/types";
-import { TemplateThumbnail } from "@/components/resume/template-thumbnail";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { TemplateCard } from "@/components/resume/template-card";
 import { Input } from "@/components/ui/input";
-import { Search, Crown, ImageIcon, FileText } from "lucide-react";
+import { Search } from "lucide-react";
 
 const CATEGORIES = ["All", "Sidebar", "Banner", "Single", "Serif", "Minimal", "ATS", "Photo", "Numbered", "Creative", "Premium"] as const;
 
@@ -36,12 +34,12 @@ export default function TemplatesPage() {
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         {/* Header */}
         <div className="text-center mb-10">
-          <p className="text-xs font-mono text-[#FF6200] mb-2 uppercase tracking-widest">72 professional designs</p>
+          <p className="text-xs font-mono text-[#FF6200] mb-2 uppercase tracking-widest">78 professional designs</p>
           <h1 className="font-bricolage text-4xl sm:text-6xl font-bold tracking-tight text-white mb-3">
             Resume <span className="text-gradient-orange">Templates</span>
           </h1>
           <p className="text-[#888898] max-w-xl mx-auto text-sm sm:text-base">
-            Browse all 72 templates. Each auto-adapts to your content. Free templates for everyone, premium designs for paid plans.
+            Browse all 78 templates. Each auto-adapts to your content. Free templates for everyone, premium designs for paid plans.
           </p>
         </div>
 
@@ -75,34 +73,9 @@ export default function TemplatesPage() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {mounted && filtered.map((t) => (
-            <div key={t.id} className="bg-[#141414] rounded-2xl border border-[#2E2E2E] hover:border-[#FF6200]/50 overflow-hidden hover:shadow-2xl hover:shadow-[#FF6200]/10 transition-all duration-300 hover:-translate-y-1 group">
-              <div className="bg-white overflow-hidden relative border-b border-[#2E2E2E]" style={{ height: "300px" }}>
-                <TemplateThumbnail templateId={t.id} className="w-full h-full" />
-                <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end z-10">
-                  {t.premium && (
-                    <Badge className="bg-[#FF6200] text-white border-0 gap-1 text-[8px] font-mono shadow-md px-2 py-0.5">
-                      <Crown className="w-2.5 h-2.5" /> PRO
-                    </Badge>
-                  )}
-                  {t.hasPhoto && (
-                    <Badge className="bg-black/80 text-white border border-white/10 gap-1 text-[9px] font-mono backdrop-blur">
-                      <ImageIcon className="w-2.5 h-2.5" /> Photo
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              <div className="p-4">
-                <h3 className="font-bricolage font-bold text-base text-white mb-1">{t.name}</h3>
-                <p className="text-xs text-[#888898] line-clamp-2 mb-3 leading-relaxed">{t.description}</p>
-                <div className="flex flex-wrap gap-1">
-                  {t.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[#1A1A1A] border border-[#2E2E2E] text-[#888898]">{tag}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {mounted && filtered.map((t, idx) => (
+            <TemplateCard key={t.id} id={t} index={idx} />
           ))}
         </div>
       </main>

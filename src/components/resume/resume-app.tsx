@@ -20,6 +20,7 @@ import { CompareTemplatesDialog } from "./compare-templates";
 import { TemplateSidePanel } from "./template-side-panel";
 import { RoleExamplesDialog, OnboardingTour } from "./role-examples-dialog";
 import { ImportResumeDialog } from "./import-resume-dialog";
+import { AiCopilotPanel } from "./ai-copilot-panel";
 import { SupportDialog } from "./support-dialog";
 import { NotificationBell } from "./notification-bell";
 import { ZoomControls } from "./zoom-controls";
@@ -77,63 +78,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+import { TemplateCard } from "./template-card";
+
 // ---------- Dashboard ----------
-
-function TemplateCard({ id, index, user, onAuthRequired }: { id: (typeof TEMPLATES)[number]; index: number; user: { plan: string } | null; onAuthRequired: () => void }) {
-  const setTemplate = useResumeStore((s) => s.setTemplate);
-  const setView = useResumeStore((s) => s.setView);
-  const sampleData = getSampleProfile(index);
-
-  const useTemplate = () => {
-    if (!user) {
-      onAuthRequired();
-      return;
-    }
-    setTemplate(id.id);
-    setView("editor");
-  };
-
-  return (
-    <Card className="overflow-hidden group hover:shadow-2xl hover:shadow-[#FF6200]/10 transition-all duration-300 hover:-translate-y-1.5 border-[#2E2E2E] hover:border-[#FF6200]/50 bg-[#141414] rounded-2xl">
-      <div className="bg-white overflow-hidden relative border-b border-[#2E2E2E]" style={{ height: "320px" }}>
-        {/* LIVE resume preview with sample data — scaled to fit card width */}
-        <div className="origin-top-left absolute top-0 left-0 pointer-events-none" style={{ transform: "scale(0.40)", width: "250%", minHeight: "800px" }}>
-          <ResumeRenderer data={sampleData} accent={id.accentDefault} font={id.fontDefault} template={id.id} />
-        </div>
-        {/* Hover actions */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-5 gap-2">
-          <Button size="sm" onClick={useTemplate} className="h-9 gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/30 px-5">
-            <FileText className="w-4 h-4" /> Use Template
-          </Button>
-        </div>
-        {/* Badges */}
-        <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end z-10">
-          {id.premium && (
-            <Badge className="bg-[#FF6200] text-white border-0 gap-1 text-[8px] font-mono shadow-md px-2 py-0.5">
-              <Crown className="w-2.5 h-2.5" /> PRO
-            </Badge>
-          )}
-          {id.hasPhoto && (
-            <Badge className="bg-black/80 text-white border border-white/10 gap-1 text-[9px] font-mono backdrop-blur">
-              <ImageIcon className="w-2.5 h-2.5" /> Photo
-            </Badge>
-          )}
-        </div>
-      </div>
-      <div className="p-5">
-        <h3 className="font-bricolage font-bold text-base mb-1 text-white">{id.name}</h3>
-        <p className="text-xs text-[#888898] line-clamp-2 mb-3.5 leading-relaxed">{id.description}</p>
-        <div className="flex flex-wrap gap-1.5">
-          {id.tags.map((t) => (
-            <span key={t} className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#1A1A1A] border border-[#2E2E2E] text-[#888898] font-mono">
-              {t}
-            </span>
-          ))}
-        </div>
-      </div>
-    </Card>
-  );
-}
 
 function StatCard({ value, label }: { value: string; label: string }) {
   return (
@@ -340,7 +287,7 @@ function Dashboard() {
             Transform Your Career Story into <span className="text-gradient-orange">Unstoppable Opportunity</span>
           </h1>
           <p className="text-[#888898] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-            <strong className="text-white">Jinzai</strong> (人材) pairs GPT-4o-mini AI intelligence with 72 ATS-certified templates to craft high-impact resumes, cover letters, and live web profiles in under 3 minutes.
+            <strong className="text-white">Jinzai</strong> (人材) pairs LLMs / AI / GPTs intelligence with 78 ATS-certified templates to craft high-impact resumes, cover letters, and live web profiles in under 3 minutes.
           </p>
         </div>
 
@@ -384,11 +331,11 @@ function Dashboard() {
         <div className="pt-8">
           <div className="text-center mb-10 space-y-2">
             <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Everything You Need to Land Top Offers</h2>
-            <p className="text-sm text-[#888898] max-w-xl mx-auto">GPT-4o-mini AI writing assistance, ATS keyword matching, and 72 recruiter-approved templates.</p>
+            <p className="text-sm text-[#888898] max-w-xl mx-auto">LLMs / AI / GPTs writing assistance, ATS keyword matching, and 78 recruiter-approved templates.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: "GPT-4o-mini AI Rewriter", desc: "Transforms weak job descriptions into quantified bullet points with action verbs.", icon: Sparkles },
+              { title: "LLMs / AI / GPTs Rewriter", desc: "Transforms weak job descriptions into quantified bullet points with action verbs.", icon: Sparkles },
               { title: "Resume Quality Score", desc: "Instant A–F grade across 8 dimensions — quantification, action verbs, and completeness.", icon: Gauge },
               { title: "ATS Keyword Matcher", desc: "Paste target job descriptions to get match scores and missing keyword recommendations.", icon: Target },
               { title: "Tailored Cover Letters", desc: "Generate role-specific, compelling cover letters in formal, modern, or concise tones.", icon: Mail },
@@ -410,73 +357,35 @@ function Dashboard() {
             <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Transparent & Flexible Pricing</h2>
             <p className="text-sm text-[#888898]">Start free. Upgrade when you are ready to export your vector ATS PDF.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {[
-              { name: "Trial", price: "₹99", period: "2 days", features: ["1 resume export", "Vector PDF & DOCX export", "Access to 52 templates"], highlight: false },
-              { name: "Pro Plan", price: "₹499", period: "/month", features: ["Up to 5 resumes", "Vector PDF & DOCX export", "GPT-4o-mini AI rewriter", "ATS score & match analysis"], highlight: true },
-              { name: "Business Plan", price: "₹1,999", period: "/month", features: ["Unlimited resumes", "All 72 templates", "Priority support", "Multi-page A4 export"], highlight: false },
+              { name: "Single Export Pass", price: "₹99", period: "per export", features: ["1 resume PDF export", "Access all 78 templates", "Vector PDF download", "❌ No AI/ATS Tools"], highlight: false },
+              { name: "Pro Plan", price: "₹399", period: "/month", features: ["Up to 5 resumes", "LLMs / AI / GPTs rewriter", "ATS score & match analysis", "AI Cover Letter Generator"], highlight: true },
+              { name: "Business Plan", price: "₹999", period: "/month", features: ["Up to 50 resumes", "All 78 templates", "Priority support", "No contact lock"], highlight: false },
+              { name: "Institution Plan", price: "₹4,999", period: "/month", features: ["300 Student Resumes", "Placement Cell Portal", "All AI & ATS Features", "College Branding"], highlight: false },
             ].map((plan) => (
-              <Card key={plan.name} className={`rounded-2xl p-6 bg-[#141414] border transition-all ${plan.highlight ? "border-[#FF6200] ring-2 ring-[#FF6200]/20 shadow-xl shadow-[#FF6200]/10" : "border-[#2E2E2E]"}`}>
-                {plan.highlight && (
-                  <Badge className="bg-[#FF6200] text-white text-[9px] font-mono mb-3 px-2 py-0.5">MOST POPULAR</Badge>
-                )}
-                <p className="font-bricolage font-bold text-lg text-white mb-1">{plan.name}</p>
-                <p className="text-3xl font-bold text-white mb-1">{plan.price}<span className="text-xs font-normal text-[#888898]">{plan.period}</span></p>
-                <ul className="space-y-2 mt-4 text-xs text-[#888898]">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-[#FF6200]" /> {f}
-                    </li>
-                  ))}
-                </ul>
+              <Card key={plan.name} className={`rounded-2xl p-6 bg-[#141414] border flex flex-col justify-between transition-all ${plan.highlight ? "border-[#FF6200] ring-2 ring-[#FF6200]/20 shadow-xl shadow-[#FF6200]/10" : "border-[#2E2E2E]"}`}>
+                <div>
+                  {plan.highlight && (
+                    <Badge className="bg-[#FF6200] text-white text-[9px] font-mono mb-3 px-2 py-0.5 uppercase font-bold">MOST POPULAR</Badge>
+                  )}
+                  <p className="font-bricolage font-bold text-lg text-white mb-1">{plan.name}</p>
+                  <p className="text-3xl font-bold text-white mb-1">{plan.price}<span className="text-xs font-normal text-[#888898] ml-1">{plan.period}</span></p>
+                  <ul className="space-y-2 mt-4 text-xs text-[#888898]">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-[#FF6200]" /> {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="pt-6">
+                  <Button onClick={handleStartBuilding} className={`w-full h-11 rounded-full font-semibold text-sm gap-2 ${plan.highlight ? "bg-[#FF6200] hover:bg-[#E55700] text-white shadow-lg shadow-[#FF6200]/20" : "bg-transparent border border-[#2E2E2E] hover:border-[#FF6200] text-white hover:bg-[#1A1A1A]"}`}>
+                    Start Building
+                  </Button>
+                </div>
               </Card>
             ))}
-          </div>
-          <div className="text-center pt-2">
-            {user ? (
-              <PricingDialog currentPlan={user.plan} onSubscribed={refresh} trigger={
-                <Button className="h-11 px-8 rounded-full bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold gap-2 shadow-lg shadow-[#FF6200]/20">
-                  <Crown className="w-4 h-4" /> View Full Pricing & Upgrades
-                </Button>
-              } />
-            ) : (
-              <Button onClick={() => setAuthMode("signup")} className="h-11 px-8 rounded-full bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold gap-2 shadow-lg shadow-[#FF6200]/20">
-                <UserPlus className="w-4 h-4" /> Create Free Account
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Trust Banner */}
-        <div className="rounded-3xl border border-[#2E2E2E] bg-[#141414] p-8 sm:p-10 shadow-2xl">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center sm:text-left">
-            <div className="flex items-center gap-4 justify-center sm:justify-start">
-              <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center text-[#FF6200] shrink-0">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white">100% Vector ATS Ready</p>
-                <p className="text-xs text-[#888898] mt-0.5">Selectable text layers Taleo and Workday parse cleanly.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 justify-center sm:justify-start">
-              <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center text-[#FF6200] shrink-0">
-                <Zap className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white">Real-Time Live Adaptation</p>
-                <p className="text-xs text-[#888898] mt-0.5">Instant design rebalancing as you add content.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 justify-center sm:justify-start">
-              <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center text-[#FF6200] shrink-0">
-                <Download className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white">Direct Vector Export</p>
-                <p className="text-xs text-[#888898] mt-0.5">Export high-precision PDF and Word (.docx) documents.</p>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -488,9 +397,9 @@ function Dashboard() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { name: "Rahul Verma", role: "Software Engineer at Google", quote: "I got 3 interview calls within a week of using Jinzai. The GPT-4o-mini rewriter highlighted my achievements with exact numbers.", avatar: "R" },
+              { name: "Rahul Verma", role: "Software Engineer at Google", quote: "I got 3 interview calls within a week of using Jinzai. The AI rewriter highlighted my achievements with exact numbers.", avatar: "R" },
               { name: "Ananya Krishnan", role: "Product Manager at Swiggy", quote: "The ATS keyword matcher helped me optimize my resume for exactly what recruiters were looking for. Landed my PM role!", avatar: "A" },
-              { name: "Vikram Singh", role: "Data Scientist at Amazon", quote: "72 master templates meant I could find the perfect design. The vector PDF export passed Taleo ATS without a hitch.", avatar: "V" },
+              { name: "Vikram Singh", role: "Data Scientist at Amazon", quote: "78 master templates meant I could find the perfect design. The vector PDF export passed Taleo ATS without a hitch.", avatar: "V" },
             ].map((t) => (
               <Card key={t.name} className="p-6 rounded-2xl bg-[#141414] border-[#2E2E2E] space-y-3">
                 <div className="flex items-center gap-3">
@@ -521,8 +430,8 @@ function Dashboard() {
           </div>
           <div className="max-w-3xl mx-auto space-y-3">
             {[
-              { q: "Is Jinzai free to start?", a: "Yes! You can browse all 72 templates and create your resume for free. To export high-precision vector PDFs or Word (.docx) documents, upgrade to a paid plan starting at just ₹99." },
-              { q: "How does the GPT-4o-mini AI scanning & writing work?", a: "Our AI scans raw resume text or uploaded files (.pdf, .docx, .json, .md, .txt), parses all information, and populates all prebuilt sections automatically. It also rewrites weak bullets into quantified impact statements." },
+              { q: "Is Jinzai free to start?", a: "Yes! You can browse all 78 templates and create your resume for free. To export high-precision vector PDFs or Word (.docx) documents, upgrade to a paid plan starting at just ₹99." },
+              { q: "How does the LLMs / AI / GPTs scanning & writing work?", a: "Our AI scans raw resume text or uploaded files (.pdf, .docx, .json, .md, .txt), parses all information, and populates all prebuilt sections automatically. It also rewrites weak bullets into quantified impact statements." },
               { q: "Are the exported PDFs 100% ATS friendly?", a: "Yes! All PDF exports use selectable vector text layers. ATS scanners (Taleo, Greenhouse, Workday, Jobscan) extract 100% of all text without OCR or formatting errors." },
               { q: "Can I import my old resume?", a: "Yes! Simply click 'Upload & AI Scan' or 'Import Resume', choose your file, and AI will parse all sections into structured editor fields." },
               { q: "Is my data secure?", a: "Absolutely. Passwords are bcrypt-hashed, all data is transmitted over HTTPS, and user content is encrypted with zero third-party data sharing." },
@@ -964,15 +873,18 @@ function EditorView() {
         <div className={`border-r bg-muted/20 print:hidden overflow-y-auto max-h-[calc(100vh-113px)] lg:max-h-[calc(100vh-113px)] ${mobileView === "preview" ? "hidden lg:block" : "block"}`}>
           <Tabs defaultValue="content" className="w-full">
             <div className="px-4 pt-3 sticky top-0 bg-muted/20 backdrop-blur z-10 pb-2">
-              <TabsList className="grid grid-cols-3 w-full">
-                <TabsTrigger value="content" className="text-xs gap-1.5">
+              <TabsList className="grid grid-cols-4 w-full">
+                <TabsTrigger value="content" className="text-xs gap-1 px-1">
                   <FileText className="w-3.5 h-3.5" /> Content
                 </TabsTrigger>
-                <TabsTrigger value="design" className="text-xs gap-1.5">
+                <TabsTrigger value="design" className="text-xs gap-1 px-1">
                   <Settings2 className="w-3.5 h-3.5" /> Design
                 </TabsTrigger>
-                <TabsTrigger value="templates" className="text-xs gap-1.5">
+                <TabsTrigger value="templates" className="text-xs gap-1 px-1">
                   <LayoutGrid className="w-3.5 h-3.5" /> Templates
+                </TabsTrigger>
+                <TabsTrigger value="copilot" className="text-xs gap-1 px-1 text-teal-600 dark:text-teal-400 font-bold">
+                  <Sparkles className="w-3.5 h-3.5" /> Copilot
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -982,6 +894,9 @@ function EditorView() {
               <div className="mt-4 pt-4 border-t">
                 <ImportResumeDialog />
               </div>
+            </TabsContent>
+            <TabsContent value="copilot" className="p-4 mt-0">
+              <AiCopilotPanel />
             </TabsContent>
             <TabsContent value="design" className="p-4 mt-0 space-y-4">
               <div className="rounded-xl border p-4 bg-card">

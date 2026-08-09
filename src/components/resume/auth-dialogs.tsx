@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Loader2, Mail, Lock, Chrome, KeyRound, LogOut, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { useResumeStore } from "@/lib/resume/store";
 
 export type AuthMode = "login" | "signup" | null;
 
@@ -35,7 +36,8 @@ export function AuthDialog({
   const [loginMethod, setLoginMethod] = useState<"password" | "google" | "code">("password");
 
   // Signup OTP state
-  const [signupStep, setSignupStep] = useState<"details" | "otp">("details");
+  const [signupStep, setSignupStep] = useState<"plan" | "details" | "otp">("plan");
+  const [selectedPlan, setSelectedPlan] = useState<string>("pro_399");
   const [otpCode, setOtpCode] = useState("");
 
   const open = initialMode !== null;
@@ -45,15 +47,14 @@ export function AuthDialog({
   }, [initialMode]);
 
   useEffect(() => {
-    if (!open) {
-      setEmail("");
-      setPassword("");
-      setName("");
-      setOtpCode("");
-      setSignupStep("details");
-      setLoginMethod("password");
-    }
-  }, [open]);
+    setEmail("");
+    setPassword("");
+    setName("");
+    setOtpCode("");
+    setSignupStep("plan");
+    setSelectedPlan("pro_399");
+    setLoginMethod("password");
+  }, [open, activeMode, initialMode]);
 
   // ===== LOGIN: Password =====
   const handleLogin = async () => {
@@ -269,6 +270,7 @@ export function AuthDialog({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
+                  autoComplete="off"
                   placeholder="you@email.com"
                   className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm h-11"
                 />
@@ -279,6 +281,7 @@ export function AuthDialog({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
+                  autoComplete="new-password"
                   placeholder="Enter your password"
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
                   className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm h-11"
@@ -355,8 +358,53 @@ export function AuthDialog({
         {/* ===== SIGNUP MODE ===== */}
         {activeMode === "signup" && (
           <div className="space-y-3">
-            {signupStep === "details" ? (
+            {signupStep === "plan" ? (
               <>
+                <div className="text-center pb-2">
+                  <p className="text-sm font-semibold text-white">Step 1 of 2: Select Your Plan</p>
+                  <p className="text-xs text-[#888898] mt-0.5">Choose your starting plan. You can upgrade or change anytime.</p>
+                </div>
+
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                  {[
+                    { id: "free", name: "Free Plan", price: "₹0", sub: "1 Resume preview (No Export)" },
+                    { id: "single_99", name: "Single Export Pass", price: "₹99", sub: "1 Resume PDF Export (No AI/ATS)" },
+                    { id: "pro_399", name: "Pro Plan (Popular)", price: "₹399/mo", sub: "5 Resumes + ALL AI & ATS Features" },
+                    { id: "business_999", name: "Business Plan", price: "₹999/mo", sub: "50 Resumes + ALL AI & ATS Features" },
+                    { id: "institution_4999", name: "Institution Plan", price: "₹4,999/mo", sub: "300 Student Resumes + ALL Features" },
+                  ].map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setSelectedPlan(p.id)}
+                      className={`w-full text-left p-3 rounded-xl border flex items-center justify-between transition-all ${
+                        selectedPlan === p.id
+                          ? "border-[#FF6200] bg-[#FF6200]/10 ring-1 ring-[#FF6200]"
+                          : "border-[#2E2E2E] bg-[#1A1A1A] hover:border-[#FF6200]/40"
+                      }`}
+                    >
+                      <div>
+                        <p className="text-xs font-bold text-white">{p.name}</p>
+                        <p className="text-[10px] text-[#888898] mt-0.5">{p.sub}</p>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-[#FF6200] shrink-0 ml-2">{p.price}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <Button
+                  onClick={() => setSignupStep("details")}
+                  className="w-full h-11 gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40 transition-all duration-300 mt-2"
+                >
+                  Continue with Selected Plan →
+                </Button>
+              </>
+            ) : signupStep === "details" ? (
+              <>
+                <div className="flex items-center justify-between text-xs text-[#888898] pb-1">
+                  <span>Selected: <strong className="text-white">{selectedPlan}</strong></span>
+                  <button onClick={() => setSignupStep("plan")} className="text-[#FF6200] hover:underline">Change plan</button>
+                </div>
                 {/* Google signup — top option */}
                 <Button
                   onClick={handleGoogle}
@@ -376,6 +424,7 @@ export function AuthDialog({
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    autoComplete="off"
                     placeholder="e.g. Rahul Sharma"
                     className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm h-11"
                   />
@@ -386,6 +435,7 @@ export function AuthDialog({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     type="email"
+                    autoComplete="off"
                     placeholder="you@email.com"
                     className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm h-11"
                   />
@@ -396,6 +446,7 @@ export function AuthDialog({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     type="password"
+                    autoComplete="new-password"
                     placeholder="Choose a password"
                     onKeyDown={(e) => e.key === "Enter" && handleSignupSubmit()}
                     className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm h-11"
@@ -460,11 +511,15 @@ export function AuthDialog({
 
 export function LogoutButton({ onLogout }: { onLogout?: () => void }) {
   const [loading, setLoading] = useState(false);
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setLoading(true);
 
     try {
       sessionStorage.setItem("jinzai-logged-out", "1");
+      localStorage.removeItem("resumeforge-store");
+      localStorage.removeItem("admin-token");
+      useResumeStore.getState().clearAll();
+      useResumeStore.getState().setSavedId(null);
     } catch {
       // ignore
     }
@@ -477,8 +532,7 @@ export function LogoutButton({ onLogout }: { onLogout?: () => void }) {
       document.cookie = "next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     } catch {}
 
-    signOut({ redirect: false }).catch(() => {});
-    window.location.href = "/";
+    await signOut({ callbackUrl: "/", redirect: true });
   };
 
   return (

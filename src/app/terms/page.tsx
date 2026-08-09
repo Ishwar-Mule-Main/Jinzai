@@ -46,7 +46,7 @@ export default function TermsPage() {
       <p>Resume content is protected — right-click, copy, and save-as-image are disabled on the resume preview area. This protects both your content and our template designs.</p>
 
       <h2 className="text-lg font-bold mt-6 mb-2">8. AI-Generated Content</h2>
-      <p>AI features are powered by OpenRouter API. AI-generated content (summaries, bullets, cover letters) should be reviewed by you before use. Domain Expansion is not responsible for the accuracy of AI-generated content.</p>
+      <p>AI features are powered by LLMs / AI / GPTs intelligence. AI-generated content (summaries, bullets, cover letters) should be reviewed by you before use. Domain Expansion is not responsible for the accuracy of AI-generated content.</p>
 
       <h2 className="text-lg font-bold mt-6 mb-2">9. Limitation of Liability</h2>
       <p>Domain Expansion and Jinzai are not liable for any job application outcomes, loss of data, or business interruption. Our tools are provided "as is" without guarantees of employment or specific results. Maximum liability is limited to the amount paid in the preceding 3 months.</p>

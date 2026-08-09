@@ -34,6 +34,7 @@ interface ResumeState {
   loadSample: () => void;
   clearAll: () => void;
   setData: (d: ResumeData) => void;
+  mergeData: (d: ResumeData, sectionsToMerge?: string[]) => void;
   updateData: (updater: (d: ResumeData) => ResumeData) => void;
   updatePersonal: (patch: Partial<ResumeData["personalInfo"]>) => void;
   setSummary: (s: string) => void;
@@ -133,6 +134,120 @@ export const useResumeStore = create<ResumeState>()(
         set({ savedId: null, title: "Untitled Resume" });
       },
       setData: (d) => pushHistory(set, get, ensureResumeIds(d)),
+      mergeData: (scanned, sectionsToMerge) => {
+        const current = structuredClone(get().data);
+        const sections = sectionsToMerge || ["personalInfo", "summary", "experience", "education", "skills", "projects", "certifications", "languages", "customSections"];
+
+        if (sections.includes("personalInfo") && scanned.personalInfo) {
+          const p = scanned.personalInfo;
+          current.personalInfo = {
+            fullName: p.fullName || current.personalInfo.fullName,
+            jobTitle: p.jobTitle || current.personalInfo.jobTitle,
+            email: p.email || current.personalInfo.email,
+            phone: p.phone || current.personalInfo.phone,
+            location: p.location || current.personalInfo.location,
+            website: p.website || current.personalInfo.website,
+            linkedin: p.linkedin || current.personalInfo.linkedin,
+            github: p.github || current.personalInfo.github,
+            photo: p.photo || current.personalInfo.photo,
+            tagline: p.tagline || current.personalInfo.tagline,
+          };
+        }
+
+        if (sections.includes("summary") && scanned.summary) {
+          current.summary = current.summary ? `${current.summary}\n\n${scanned.summary}` : scanned.summary;
+        }
+
+        if (sections.includes("experience") && Array.isArray(scanned.experience)) {
+          for (const exp of scanned.experience) {
+            if (exp.company || exp.position) {
+              current.experience.push({
+                ...exp,
+                id: exp.id || uid(),
+              });
+            }
+          }
+        }
+
+        if (sections.includes("education") && Array.isArray(scanned.education)) {
+          for (const ed of scanned.education) {
+            if (ed.institution || ed.degree) {
+              current.education.push({
+                ...ed,
+                id: ed.id || uid(),
+              });
+            }
+          }
+        }
+
+        if (sections.includes("skills") && Array.isArray(scanned.skills)) {
+          for (const sk of scanned.skills) {
+            if (sk.category && sk.items?.length) {
+              const existingCat = current.skills.find((s) => s.category.toLowerCase() === sk.category.toLowerCase());
+              if (existingCat) {
+                existingCat.items = Array.from(new Set([...existingCat.items, ...sk.items]));
+              } else {
+                current.skills.push({
+                  id: sk.id || uid(),
+                  category: sk.category,
+                  items: sk.items,
+                });
+              }
+            }
+          }
+        }
+
+        if (sections.includes("projects") && Array.isArray(scanned.projects)) {
+          for (const pr of scanned.projects) {
+            if (pr.name) {
+              current.projects.push({
+                ...pr,
+                id: pr.id || uid(),
+              });
+            }
+          }
+        }
+
+        if (sections.includes("certifications") && Array.isArray(scanned.certifications)) {
+          for (const c of scanned.certifications) {
+            if (c.name) {
+              current.certifications.push({
+                ...c,
+                id: c.id || uid(),
+              });
+            }
+          }
+        }
+
+        if (sections.includes("languages") && Array.isArray(scanned.languages)) {
+          for (const l of scanned.languages) {
+            if (l.name) {
+              const exists = current.languages.some((existing) => existing.name.toLowerCase() === l.name.toLowerCase());
+              if (!exists) {
+                current.languages.push({
+                  id: l.id || uid(),
+                  name: l.name,
+                  proficiency: l.proficiency || "Conversational",
+                });
+              }
+            }
+          }
+        }
+
+        if (sections.includes("customSections") && Array.isArray(scanned.customSections)) {
+          for (const cs of scanned.customSections) {
+            if (cs.title && cs.items?.length) {
+              current.customSections.push({
+                id: cs.id || uid(),
+                title: cs.title,
+                items: cs.items,
+              });
+            }
+          }
+        }
+
+        pushHistory(set, get, ensureResumeIds(current));
+      },
       updateData: (updater) => {
         const next = updater(structuredClone(get().data));
         pushHistory(set, get, next);

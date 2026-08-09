@@ -103,7 +103,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
       <>
         <p className="mb-3">Jinzai is a product of <strong>Domain Expansion Technologies</strong>, a technology company based in Bengaluru, India. We build tools that empower individuals to present their professional best.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">Our Mission</h3>
-        <p className="mb-3">We believe everyone deserves a professional resume. Our platform makes it easy to create beautiful, ATS-friendly resumes that get you noticed by recruiters. With 52 templates, AI-powered writing tools, and one-click export, Jinzai is the complete resume building solution.</p>
+        <p className="mb-3">We believe everyone deserves a professional resume. Our platform makes it easy to create beautiful, ATS-friendly resumes that get you noticed by recruiters. With 78 templates, AI-powered writing tools, and one-click export, Jinzai is the complete resume building solution.</p>
         <h3 className="font-semibold text-sm mb-2 mt-4">Domain Expansion</h3>
         <p className="text-sm mb-2">Domain Expansion Technologies is the parent company of Jinzai. We are committed to building innovative products that solve real problems for job seekers and professionals.</p>
         <div className="rounded-lg border p-3 bg-muted/30 mt-2">
@@ -116,7 +116,7 @@ const LEGAL_CONTENT: Record<Exclude<LegalPage, null>, { title: string; body: Rea
           </p>
         </div>
         <h3 className="font-semibold text-sm mb-2 mt-4">Built With</h3>
-        <p className="text-sm">Next.js 16, TypeScript, Tailwind CSS, Prisma, OpenRouter API (Claude 3.7 Sonnet), and z-ai-web-dev-sdk for AI features.</p>
+        <p className="text-sm">Next.js 16, TypeScript, Tailwind CSS, Prisma, and LLMs / AI / GPTs intelligence engine.</p>
       </>
     ),
   },

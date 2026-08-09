@@ -96,7 +96,7 @@ export function RoleExamplesDialog({ trigger }: { trigger?: React.ReactNode }) {
 const TOUR_STEPS = [
   {
     title: "Welcome to Jinzai! 👋",
-    body: "Build a professional resume in minutes with 52 templates, AI writing tools, and one-click export. Let's get you started.",
+    body: "Build a professional resume in minutes with 78 templates, AI writing tools, and one-click export. Let's get you started.",
     icon: "🚀",
   },
   {

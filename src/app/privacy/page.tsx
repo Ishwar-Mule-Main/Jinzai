@@ -72,7 +72,7 @@ export default function PrivacyPage() {
       </ul>
 
       <h2 className="text-lg font-bold mt-6 mb-2">10. Cookies</h2>
-      <p>We use essential cookies for authentication and session management. We do not use tracking cookies for advertising. AI processing may use third-party APIs (OpenRouter) which have their own privacy policies.</p>
+      <p>We use essential cookies for authentication and session management. We do not use tracking cookies for advertising. AI processing is powered by LLMs / AI / GPTs intelligence with enterprise privacy protection.</p>
 
       <h2 className="text-lg font-bold mt-6 mb-2">11. International Data Transfers</h2>
       <p>Your data may be processed in countries other than your own (including India, USA, and EU). We ensure appropriate safeguards are in place for such transfers in compliance with applicable data protection laws.</p>

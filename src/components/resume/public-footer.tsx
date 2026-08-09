@@ -14,7 +14,7 @@ export function PublicFooter() {
           <div className="col-span-2">
             <BrandMark showParent className="mb-3" />
             <p className="text-xs text-[#888898] max-w-xs leading-relaxed">
-              人材 — Talent Hub by Domain Expansion. Build high-conversion resumes that get you hired. 72 templates, AI-powered writing, ATS optimization, and web profiles.
+              人材 — Talent Hub by Domain Expansion. Build high-conversion resumes that get you hired. 78 templates, AI-powered writing, ATS optimization, and web profiles.
             </p>
           </div>
 

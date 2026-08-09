@@ -65,7 +65,7 @@ export function PaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md bg-[#141414] border border-[#2E2E2E] text-white">
+      <DialogContent className="max-w-lg sm:max-w-xl w-[92vw] max-h-[90vh] overflow-y-auto bg-[#141414] border border-[#2E2E2E] text-white p-6 sm:p-8">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2.5 text-white font-semibold">
             <div className="w-8 h-8 rounded-lg bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center">
@@ -138,7 +138,7 @@ export function PaymentDialog({
                 <span className="text-2xl font-bold text-[#FF6200]">₹{planConfig.price}</span>
               </div>
               <p className="text-xs text-[#5A5A6A] mt-1">
-                {plan === "trial_99" ? "One-time payment for 2-day trial access" : "Monthly plan — cancel anytime"}
+                {plan === "single_99" || plan === "trial_99" ? "One-time payment per resume export pass" : "Monthly subscription — cancel anytime"}
               </p>
             </div>
 

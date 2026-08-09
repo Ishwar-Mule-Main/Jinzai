@@ -46,7 +46,7 @@ export async function sendOTPEmail(to: string, code: string, name?: string) {
       <td align="center">
         <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #d3cec6;">
           <tr>
-            <td style="background:#0d9488;padding:32px 40px;text-align:center;">
+            <td style="background:#FF6200;padding:32px 40px;text-align:center;">
               <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:600;letter-spacing:-0.5px;">Jinzai 人材</h1>
               <p style="margin:4px 0 0;color:#ffffff;opacity:0.8;font-size:12px;">Talent Hub · Domain Expansion</p>
             </td>
@@ -61,7 +61,7 @@ export async function sendOTPEmail(to: string, code: string, name?: string) {
               <div style="text-align:center;margin:32px 0;">
                 <div style="display:inline-block;background:#f5f1ec;border:1px solid #d3cec6;border-radius:12px;padding:20px 40px;">
                   <p style="margin:0 0 8px;color:#7b7b78;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Your verification code</p>
-                  <p style="margin:0;font-size:36px;font-weight:600;color:#0d9488;letter-spacing:8px;font-family:'Courier New',monospace;">${code}</p>
+                  <p style="margin:0;font-size:36px;font-weight:600;color:#FF6200;letter-spacing:8px;font-family:'Courier New',monospace;">${code}</p>
                 </div>
               </div>
               <p style="margin:0 0 16px;color:#626260;font-size:13px;line-height:1.6;">
@@ -104,7 +104,7 @@ export async function sendWelcomeEmail(to: string, name?: string) {
       <td align="center">
         <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #d3cec6;">
           <tr>
-            <td style="background:#0d9488;padding:32px 40px;text-align:center;">
+            <td style="background:#FF6200;padding:32px 40px;text-align:center;">
               <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:600;">Welcome to Jinzai 人材</h1>
             </td>
           </tr>
@@ -116,7 +116,7 @@ export async function sendWelcomeEmail(to: string, name?: string) {
               </p>
               <div style="background:#f5f1ec;border-radius:12px;padding:20px;margin:24px 0;">
                 <p style="margin:0 0 8px;color:#111111;font-size:14px;font-weight:600;">Quick start:</p>
-                <p style="margin:0 0 4px;color:#626260;font-size:13px;">1. Choose from 72 templates</p>
+                <p style="margin:0 0 4px;color:#626260;font-size:13px;">1. Choose from 78 templates</p>
                 <p style="margin:0 0 4px;color:#626260;font-size:13px;">2. Upload your old resume or build from scratch</p>
                 <p style="margin:0;color:#626260;font-size:13px;">3. Export to PDF when ready</p>
               </div>

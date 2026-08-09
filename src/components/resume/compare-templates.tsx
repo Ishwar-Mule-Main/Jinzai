@@ -29,7 +29,7 @@ export function CompareTemplatesDialog() {
           <Columns3 className="w-3.5 h-3.5" /> Compare
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto p-6 sm:p-8">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Columns3 className="w-5 h-5 text-teal-600" /> Compare Templates

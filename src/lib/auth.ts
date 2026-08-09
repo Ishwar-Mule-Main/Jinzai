@@ -20,12 +20,13 @@ export function generateCode(email: string): string {
   return code;
 }
 
-export function setSignupData(email: string, name: string, password: string) {
+export function setSignupData(email: string, name: string, password: string, plan: string = "free") {
   codeStore.set(email.toLowerCase(), {
     code: codeStore.get(email.toLowerCase())?.code || "",
     expires: codeStore.get(email.toLowerCase())?.expires || 0,
     name,
     password,
+    plan,
   });
 }
 
@@ -153,7 +154,7 @@ export const authOptions: NextAuthOptions = {
               email: credentials.email.toLowerCase(),
               name: signupData.name,
               password: hashed,
-              plan: "free",
+              plan: (signupData as any).plan || "free",
             },
           });
           clearSignupData(credentials.email);

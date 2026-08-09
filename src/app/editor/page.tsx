@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/lib/resume/use-current-user";
 import { useResumeStore } from "@/lib/resume/store";
 import { getPlanConfig, isPaidPlan } from "@/lib/resume/plans";
-import { TemplateThumbnail } from "@/components/resume/template-thumbnail";
+import { TemplateCard } from "@/components/resume/template-card";
 import { ResumeRenderer } from "@/components/resume/resume-renderer";
 import { ResumeEditor } from "@/components/resume/resume-editor";
 import { A4MultiPageWrapper } from "@/components/resume/a4-multi-page-wrapper";
 import { ZoomControls } from "@/components/resume/zoom-controls";
 import { ResumeScoreDialog, AtsDialog, CoverLetterDialog } from "@/components/resume/ai-dialogs";
 import { PricingDialog } from "@/components/resume/pricing-dialog";
+import { PdfPreviewDialog } from "@/components/resume/pdf-preview-dialog";
 import { SupportDialog } from "@/components/resume/support-dialog";
 import { BrandMark } from "@/components/resume/brand-mark";
 import { LogoutButton } from "@/components/resume/auth-dialogs";
@@ -64,6 +65,7 @@ export default function EditorPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [pricingOpen, setPricingOpen] = useState(false);
+  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
 
   // Mobile tab: "edit" or "preview"
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
@@ -126,20 +128,7 @@ export default function EditorPage() {
       setPricingOpen(true);
       return;
     }
-    if (!resumeRef.current) {
-      toast.error("Preview not ready yet — please wait a moment.");
-      return;
-    }
-    setExporting(true);
-    const toastId = toast.loading("Preparing your PDF download…");
-    try {
-      await downloadPdfDirectly(resumeRef.current, title);
-      toast.success("Your PDF is downloading!", { id: toastId });
-    } catch {
-      toast.error("Download failed. Please try again.", { id: toastId });
-    } finally {
-      setExporting(false);
-    }
+    setPdfPreviewOpen(true);
   };
 
   return (
@@ -209,34 +198,16 @@ export default function EditorPage() {
                   <span className="hidden sm:inline">Change Design</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl bg-[#141414] border-[#2E2E2E] text-white max-h-[85vh] overflow-y-auto">
+              <DialogContent className="max-w-4xl sm:max-w-5xl w-[95vw] bg-[#141414] border-[#2E2E2E] text-white max-h-[85vh] overflow-y-auto p-6 sm:p-8">
                 <DialogHeader>
                   <DialogTitle className="font-bricolage text-xl font-bold">Choose a Design</DialogTitle>
                   <DialogDescription className="text-sm text-[#888898]">
                     Pick any style you like — your information stays exactly the same, only the look changes.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
-                  {TEMPLATES.map((t) => (
-                    <button
-                      key={t.id}
-                      onClick={() => setTemplate(t.id)}
-                      className={`p-2 rounded-xl border text-left transition-all ${
-                        template === t.id
-                          ? "border-[#FF6200] bg-[#FF6200]/10 ring-2 ring-[#FF6200]/20"
-                          : "border-[#2E2E2E] bg-[#0B0B0C] hover:border-[#FF6200]/40"
-                      }`}
-                    >
-                      <div className="aspect-[3/4] rounded-lg overflow-hidden mb-2 relative">
-                        <TemplateThumbnail templateId={t.id} className="w-full h-full object-cover" />
-                        {template === t.id && (
-                          <div className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-[#FF6200] flex items-center justify-center">
-                            <Check className="w-3.5 h-3.5 text-white" />
-                          </div>
-                        )}
-                      </div>
-                      <p className="font-bricolage text-xs font-bold text-white truncate">{t.name}</p>
-                    </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-4">
+                  {TEMPLATES.map((t, idx) => (
+                    <TemplateCard key={t.id} id={t} index={idx} onSelect={() => setTemplate(t.id)} />
                   ))}
                 </div>
               </DialogContent>
@@ -431,6 +402,16 @@ export default function EditorPage() {
         onSubscribed={refresh}
         open={pricingOpen}
         onOpenChange={setPricingOpen}
+      />
+
+      {/* PDF Export Preview Dialog */}
+      <PdfPreviewDialog
+        open={pdfPreviewOpen}
+        onOpenChange={setPdfPreviewOpen}
+        data={data}
+        accent={accentColor}
+        font={fontFamily}
+        template={template}
       />
     </div>
   );

@@ -18,10 +18,15 @@ import { Mail, Loader2, Sparkles, Copy, Download, Target, FileSearch, CheckCircl
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useCurrentUser } from "@/lib/resume/use-current-user";
+import { hasAiAccess, hasAtsAccess } from "@/lib/resume/plans";
+import { PricingDialog } from "./pricing-dialog";
 
 // ---------- Cover Letter Generator ----------
 
 export function CoverLetterDialog() {
+  const { user } = useCurrentUser();
+  const aiAllowed = user ? hasAiAccess(user.plan) : false;
   const data = useResumeStore((s) => s.data);
   const [open, setOpen] = useState(false);
   const [jd, setJd] = useState("");
@@ -30,6 +35,10 @@ export function CoverLetterDialog() {
   const [loading, setLoading] = useState(false);
 
   const generate = async () => {
+    if (!aiAllowed) {
+      toast.error("AI tools are locked on your current plan. Upgrade to Pro or Business plan!");
+      return;
+    }
     setLoading(true);
     setLetter("");
     try {
@@ -198,6 +207,8 @@ interface AtsResult {
 }
 
 export function AtsDialog() {
+  const { user } = useCurrentUser();
+  const atsAllowed = user ? hasAtsAccess(user.plan) : false;
   const data = useResumeStore((s) => s.data);
   const [open, setOpen] = useState(false);
   const [jd, setJd] = useState("");
@@ -205,6 +216,10 @@ export function AtsDialog() {
   const [result, setResult] = useState<AtsResult | null>(null);
 
   const analyze = async () => {
+    if (!atsAllowed) {
+      toast.error("ATS Check requires Pro or Business plan!");
+      return;
+    }
     if (jd.trim().length < 50) {
       toast.error("Please paste a more complete job description");
       return;
@@ -359,12 +374,18 @@ interface ScoreResult {
 }
 
 export function ResumeScoreDialog() {
+  const { user } = useCurrentUser();
+  const atsAllowed = user ? hasAtsAccess(user.plan) : false;
   const data = useResumeStore((s) => s.data);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScoreResult | null>(null);
 
   const analyze = async () => {
+    if (!atsAllowed) {
+      toast.error("Resume ATS Score requires Pro or Business plan!");
+      return;
+    }
     setLoading(true);
     setResult(null);
     try {
