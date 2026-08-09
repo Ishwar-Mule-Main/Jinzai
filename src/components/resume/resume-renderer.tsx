@@ -16,7 +16,7 @@ export function ResumeRenderer({ data, accent, font, fontSize, template }: Rende
   const fontClass = getFontClass(font);
   const common = { data, accent };
 
-  // Get font size scale
+  // Get font size scale (xs: 0.85, s: 0.9, m: 1.0, l: 1.1, xl: 1.2)
   const sizeConfig = FONT_SIZE_OPTIONS.find((s) => s.id === (fontSize || "m")) || FONT_SIZE_OPTIONS[2];
   const scale = sizeConfig.scale;
 
@@ -52,6 +52,9 @@ export function ResumeRenderer({ data, accent, font, fontSize, template }: Rende
       className={`resume-page ${fontClass}`}
       style={{
         minHeight: "100%",
+        transform: scale !== 1 ? `scale(${scale})` : undefined,
+        transformOrigin: "top left",
+        width: scale !== 1 ? `${100 / scale}%` : "100%",
         fontSize: `${14 * scale}px`,
         lineHeight: 1.5,
       }}

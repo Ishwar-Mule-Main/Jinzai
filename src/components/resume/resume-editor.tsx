@@ -49,6 +49,7 @@ import {
   Check,
   FileText,
   SlidersHorizontal,
+  FolderPlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SortableList, SortableItem } from "./sortable";
@@ -761,6 +762,120 @@ function LanguagesEditor() {
   );
 }
 
+// ---------- SECTION 9: CUSTOM SECTIONS ----------
+function CustomSectionsEditor() {
+  const data = useResumeStore((s) => s.data);
+  const addCustomSection = useResumeStore((s) => s.addCustomSection);
+  const updateCustomSection = useResumeStore((s) => s.updateCustomSection);
+  const removeCustomSection = useResumeStore((s) => s.removeCustomSection);
+
+  return (
+    <div className="space-y-4">
+      {data.customSections?.map((sec) => (
+        <div key={sec.id} className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <Input
+              value={sec.title}
+              onChange={(e) => updateCustomSection(sec.id, { title: e.target.value })}
+              placeholder="Custom Section Header (e.g. Publications / Volunteer / Awards)"
+              className="bg-[#141414] border-[#2E2E2E] text-xs font-bold text-white rounded-xl"
+            />
+            <ItemActions onRemove={() => removeCustomSection(sec.id)} />
+          </div>
+
+          <div className="space-y-2">
+            {sec.items?.map((item, i) => (
+              <div key={item.id || i} className="p-2.5 rounded-xl bg-[#141414] border border-[#2E2E2E] space-y-2">
+                <div className="flex justify-between items-center gap-2">
+                  <Input
+                    value={item.title}
+                    onChange={(e) => {
+                      const next = [...sec.items];
+                      next[i] = { ...next[i], title: e.target.value };
+                      updateCustomSection(sec.id, { items: next });
+                    }}
+                    placeholder="Item Title (e.g. Award Name / Publication)"
+                    className="bg-[#0D0D0D] border-[#2E2E2E] text-xs text-white rounded-xl"
+                  />
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 text-red-400 hover:text-red-300 shrink-0"
+                    onClick={() => {
+                      const next = sec.items.filter((_, idx) => idx !== i);
+                      updateCustomSection(sec.id, { items: next });
+                    }}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    value={item.subtitle || ""}
+                    onChange={(e) => {
+                      const next = [...sec.items];
+                      next[i] = { ...next[i], subtitle: e.target.value };
+                      updateCustomSection(sec.id, { items: next });
+                    }}
+                    placeholder="Subtitle / Publisher (Optional)"
+                    className="bg-[#0D0D0D] border-[#2E2E2E] text-xs text-white rounded-xl"
+                  />
+                  <Input
+                    value={item.date || ""}
+                    onChange={(e) => {
+                      const next = [...sec.items];
+                      next[i] = { ...next[i], date: e.target.value };
+                      updateCustomSection(sec.id, { items: next });
+                    }}
+                    placeholder="Date / Year (Optional)"
+                    className="bg-[#0D0D0D] border-[#2E2E2E] text-xs text-white rounded-xl"
+                  />
+                </div>
+
+                <Textarea
+                  value={item.description || ""}
+                  onChange={(e) => {
+                    const next = [...sec.items];
+                    next[i] = { ...next[i], description: e.target.value };
+                    updateCustomSection(sec.id, { items: next });
+                  }}
+                  rows={2}
+                  placeholder="Details, abstract, or bullet points..."
+                  className="bg-[#0D0D0D] border-[#2E2E2E] text-xs text-white rounded-xl p-2.5 resize-none"
+                />
+              </div>
+            ))}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const newItem = { id: `item-${Date.now()}`, title: "", subtitle: "", date: "", description: "" };
+                updateCustomSection(sec.id, { items: [...(sec.items || []), newItem] });
+              }}
+              className="h-8 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] rounded-full gap-1"
+            >
+              <Plus className="w-3.5 h-3.5 text-[#FF6200]" /> Add Custom Item
+            </Button>
+          </div>
+        </div>
+      ))}
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={addCustomSection}
+        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+      >
+        <Plus className="w-4 h-4 text-[#FF6200]" /> Add New Custom Section
+      </Button>
+    </div>
+  );
+}
+
 // ---------- MAIN CONTAINER WITH TABS ----------
 export function ResumeEditor() {
   const [editorTab, setEditorTab] = useState<"content" | "design">("content");
@@ -876,6 +991,17 @@ export function ResumeEditor() {
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-4">
               <LanguagesEditor />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="custom" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+            <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+              <span className="flex items-center gap-2">
+                <FolderPlus className="w-4 h-4 text-[#FF6200]" /> Custom Sections (Volunteer, Awards, etc.)
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-4">
+              <CustomSectionsEditor />
             </AccordionContent>
           </AccordionItem>
         </Accordion>
