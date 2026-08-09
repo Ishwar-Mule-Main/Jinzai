@@ -944,26 +944,43 @@ function MinimalSwissLayout({ data, spec }: { data: ResumeData; spec: TemplateSp
 }
 
 // ── MAIN PARAMETERIZED TEMPLATE SWITCHER ──
-export function ParameterizedTemplate({ data, spec }: { data: ResumeData; spec: TemplateSpec }) {
-  const archetype: VisualArchetype = spec.visualArchetype || "minimal-swiss";
+export function ParameterizedTemplate({
+  data,
+  spec,
+  accent,
+  font,
+  fontSize,
+}: {
+  data: ResumeData;
+  spec: TemplateSpec;
+  accent?: string;
+  font?: string;
+  fontSize?: string;
+}) {
+  const effectiveSpec: TemplateSpec = {
+    ...spec,
+    accent: accent || spec.accent,
+    font: font || spec.font,
+  };
+  const archetype: VisualArchetype = effectiveSpec.visualArchetype || "minimal-swiss";
 
   switch (archetype) {
     case "timeline":
-      return <TimelineLayout data={data} spec={spec} />;
+      return <TimelineLayout data={data} spec={effectiveSpec} />;
     case "card-blocks":
-      return <CardBlocksLayout data={data} spec={spec} />;
+      return <CardBlocksLayout data={data} spec={effectiveSpec} />;
     case "editorial":
-      return <EditorialLayout data={data} spec={spec} />;
+      return <EditorialLayout data={data} spec={effectiveSpec} />;
     case "tech-terminal":
-      return <TechTerminalLayout data={data} spec={spec} />;
+      return <TechTerminalLayout data={data} spec={effectiveSpec} />;
     case "dark-executive":
-      return <DarkExecutiveLayout data={data} spec={spec} />;
+      return <DarkExecutiveLayout data={data} spec={effectiveSpec} />;
     case "banner-gradient":
-      return <BannerGradientLayout data={data} spec={spec} />;
+      return <BannerGradientLayout data={data} spec={effectiveSpec} />;
     case "sidebar-modern":
-      return <SidebarModernLayout data={data} spec={spec} />;
+      return <SidebarModernLayout data={data} spec={effectiveSpec} />;
     case "minimal-swiss":
     default:
-      return <MinimalSwissLayout data={data} spec={spec} />;
+      return <MinimalSwissLayout data={data} spec={effectiveSpec} />;
   }
 }

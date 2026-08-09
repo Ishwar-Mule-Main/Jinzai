@@ -30,10 +30,8 @@ import {
   Crown,
   Eye,
   Pencil,
-  Info,
   CheckCircle2,
   GripVertical,
-  HelpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -42,12 +40,15 @@ export default function EditorPage() {
   const { user, refresh } = useCurrentUser();
   const resumeRef = useRef<HTMLDivElement>(null);
 
-  // States
+  // Layout States
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [pricingOpen, setPricingOpen] = useState(false);
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
+
+  // Zoom State (connected to ZoomControls & A4MultiPageWrapper)
+  const [zoom, setZoom] = useState(1);
 
   // Draggable Left Panel Width state (default 460px, min 320px, max 680px)
   const [leftPanelWidth, setLeftPanelWidth] = useState(460);
@@ -67,7 +68,6 @@ export default function EditorPage() {
   const savedId = useResumeStore((s) => s.savedId);
   const setSavedId = useResumeStore((s) => s.setSavedId);
 
-  const planConfig = user ? getPlanConfig(user.plan) : getPlanConfig("free");
   const canExport = user ? isPaidPlan(user.plan) : false;
 
   // Auto-save on data change (debounced 2s)
@@ -140,7 +140,7 @@ export default function EditorPage() {
 
   const handleExportPDF = async () => {
     if (!canExport) {
-      toast.info("Downloading requires an active plan. Purchase a plan to export high-precision PDFs!");
+      toast.info("Downloading requires an active plan. Purchase a plan to export vector PDFs!");
       setPricingOpen(true);
       return;
     }
@@ -148,13 +148,13 @@ export default function EditorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col font-sans selection:bg-[#FF6200] selection:text-white">
+    <div className="h-screen w-screen bg-[#0D0D0D] text-white flex flex-col font-sans overflow-hidden selection:bg-[#FF6200] selection:text-white">
       
       {/* ── Top Announcement Banner for Free Users ── */}
       {!canExport && (
-        <div className="bg-gradient-to-r from-[#FF6200]/20 via-[#141414] to-[#141414] border-b border-[#FF6200]/40 px-4 py-2 flex items-center justify-between gap-3 text-xs z-50">
+        <div className="bg-gradient-to-r from-[#FF6200]/20 via-[#141414] to-[#141414] border-b border-[#FF6200]/40 px-4 py-1.5 flex items-center justify-between gap-3 text-xs shrink-0 z-50">
           <div className="flex items-center gap-2">
-            <Crown className="w-4 h-4 text-[#FF6200] shrink-0" />
+            <Crown className="w-3.5 h-3.5 text-[#FF6200] shrink-0" />
             <span>
               <strong className="text-white font-semibold">Free Account Notice:</strong> You are editing on a Free Account. Purchase a plan to export vector PDFs &amp; unlock all 78 templates.
             </span>
@@ -162,16 +162,16 @@ export default function EditorPage() {
           <Button
             size="sm"
             onClick={() => setPricingOpen(true)}
-            className="h-7 px-3 bg-[#FF6200] hover:bg-[#E55700] text-white font-bold rounded-full text-[11px] shrink-0 gap-1 shadow-md shadow-[#FF6200]/20"
+            className="h-6 px-3 bg-[#FF6200] hover:bg-[#E55700] text-white font-bold rounded-full text-[10px] shrink-0 gap-1 shadow-md shadow-[#FF6200]/20"
           >
-            <Crown className="w-3.5 h-3.5" /> Purchase Plan &amp; Download PDF
+            <Crown className="w-3 h-3" /> Purchase Plan &amp; Download PDF
           </Button>
         </div>
       )}
 
-      {/* ── Main Clean Top Header (Removed Change Design, Pick Color, Score, ATS, Cover Letter buttons) ── */}
-      <header className="sticky top-0 z-40 bg-[#0D0D0D]/95 backdrop-blur-xl border-b border-[#2E2E2E]">
-        <div className="max-w-[1800px] mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2">
+      {/* ── Clean Top Header (No header buttons for Change Design, Pick Color, Score, ATS, Cover Letter) ── */}
+      <header className="bg-[#0D0D0D]/95 backdrop-blur-xl border-b border-[#2E2E2E] shrink-0 z-40">
+        <div className="max-w-[1800px] mx-auto px-3 sm:px-4 h-14 flex items-center justify-between gap-2">
           
           {/* Left: Back to Dashboard + Resume Title */}
           <div className="flex items-center gap-2 min-w-0">
@@ -204,11 +204,8 @@ export default function EditorPage() {
 
           {/* Right Toolbar */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            
-            {/* Support Dialog */}
             <SupportDialog />
 
-            {/* AI Drawer Toggle (for tablet/mobile screens) */}
             <Button
               variant="outline"
               size="sm"
@@ -219,7 +216,6 @@ export default function EditorPage() {
               <span className="hidden sm:inline">AI Intelligence</span>
             </Button>
 
-            {/* Save Button */}
             <Button
               onClick={() => handleSave(false)}
               disabled={saving}
@@ -231,7 +227,6 @@ export default function EditorPage() {
               Save
             </Button>
 
-            {/* Upgrade CTA */}
             {!canExport && (
               <Button
                 onClick={() => setPricingOpen(true)}
@@ -243,7 +238,6 @@ export default function EditorPage() {
               </Button>
             )}
 
-            {/* Export / Download PDF */}
             <Button
               onClick={handleExportPDF}
               size="sm"
@@ -256,8 +250,8 @@ export default function EditorPage() {
         </div>
       </header>
 
-      {/* ── Mobile Tab Navigation Switcher ── */}
-      <div className="md:hidden sticky top-14 z-30 bg-[#0D0D0D] border-b border-[#2E2E2E] px-4 py-2">
+      {/* ── Mobile Navigation Tabs ── */}
+      <div className="md:hidden bg-[#0D0D0D] border-b border-[#2E2E2E] px-4 py-2 shrink-0">
         <div className="grid grid-cols-3 gap-1 p-1 bg-[#141414] border border-[#2E2E2E] rounded-full text-xs">
           <button
             onClick={() => setMobileTab("edit")}
@@ -286,37 +280,37 @@ export default function EditorPage() {
         </div>
       </div>
 
-      {/* ── Main Workspace Body (3 Columns with Left Drag Resizer) ── */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+      {/* ── Fixed Workspace Height Container with Independent Scrolling Columns ── */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative min-h-0">
         
-        {/* COLUMN 1: Resizable Left Panel (Form & Design Controls) */}
+        {/* COLUMN 1: Left Form & Design Panel (Independent Vertical Scroll) */}
         <div
           style={{ width: `${leftPanelWidth}px` }}
-          className={`bg-[#0D0D0D] border-r border-[#2E2E2E] overflow-y-auto p-4 sm:p-5 shrink-0 transition-all ${
+          className={`bg-[#0D0D0D] border-r border-[#2E2E2E] overflow-y-auto p-4 sm:p-5 h-full shrink-0 ${
             mobileTab === "edit" ? "block w-full md:w-auto" : "hidden md:block"
           }`}
         >
           <ResumeEditor />
         </div>
 
-        {/* DRAG RESIZER BAR between Column 1 and Column 2 */}
+        {/* DRAG RESIZER BAR */}
         <div
           onMouseDown={startResizing}
-          className="hidden md:flex w-2 bg-[#141414] hover:bg-[#FF6200] cursor-col-resize items-center justify-center border-r border-[#2E2E2E] group transition-colors select-none z-10"
+          className="hidden md:flex w-2 bg-[#141414] hover:bg-[#FF6200] cursor-col-resize items-center justify-center border-r border-[#2E2E2E] group transition-colors select-none z-10 h-full"
           title="Drag sidewise to expand or reduce left panel width"
         >
           <GripVertical className="w-3 h-3 text-[#888898] group-hover:text-white" />
         </div>
 
-        {/* COLUMN 2: Middle Well-Fitted Screen with Zoom Controls & A4 Live Preview */}
+        {/* COLUMN 2: Center Fixed Preview Screen (Independent Vertical Scroll for Live A4) */}
         <div
-          className={`flex-1 bg-[#111111] overflow-y-auto p-4 sm:p-6 flex flex-col items-center justify-start space-y-5 ${
+          className={`flex-1 bg-[#111111] overflow-y-auto h-full p-4 sm:p-6 flex flex-col items-center justify-start space-y-5 ${
             mobileTab === "preview" ? "flex" : "hidden md:flex"
           }`}
         >
           {/* Zoom Controls Bar */}
-          <div className="w-full flex items-center justify-between gap-4 max-w-[210mm] bg-[#141414] border border-[#2E2E2E] p-2.5 rounded-2xl">
-            <ZoomControls />
+          <div className="w-full flex items-center justify-between gap-4 max-w-[210mm] bg-[#141414] border border-[#2E2E2E] p-2.5 rounded-2xl shrink-0">
+            <ZoomControls zoom={zoom} setZoom={setZoom} />
             {!canExport && (
               <Button
                 size="sm"
@@ -328,17 +322,17 @@ export default function EditorPage() {
             )}
           </div>
 
-          {/* Live A4 Render Canvas */}
-          <div className="w-full flex justify-center overflow-x-auto pb-12" style={{ minHeight: "550px" }}>
-            <A4MultiPageWrapper>
+          {/* Live A4 Render Canvas with Zoom Scale */}
+          <div className="w-full flex justify-center overflow-x-auto pb-12 pt-2">
+            <A4MultiPageWrapper zoom={zoom}>
               <div ref={resumeRef} className="resume-protected w-[210mm] bg-white text-black shadow-2xl rounded-sm">
-                <ResumeRenderer data={data} accent={accentColor} font={fontFamily} template={template} />
+                <ResumeRenderer data={data} accent={accentColor} font={fontFamily} fontSize={fontSize} template={template} />
               </div>
             </A4MultiPageWrapper>
           </div>
         </div>
 
-        {/* COLUMN 3: Right AI Intelligence & Content Optimizer Panel */}
+        {/* COLUMN 3: Right AI Intelligence Panel (Independent Vertical Scroll) */}
         <div
           className={`w-full xl:w-[360px] 2xl:w-[380px] shrink-0 h-full overflow-y-auto ${
             mobileTab === "ai" ? "block" : "hidden xl:block"
@@ -348,7 +342,7 @@ export default function EditorPage() {
         </div>
       </div>
 
-      {/* AI Drawer Modal for Tablet/Small Desktop */}
+      {/* AI Drawer Modal for Tablet/Small Screens */}
       <Dialog open={aiPanelOpen} onOpenChange={setAiPanelOpen}>
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto bg-[#141414] border-[#2E2E2E] text-white p-4 rounded-3xl">
           <DialogHeader>

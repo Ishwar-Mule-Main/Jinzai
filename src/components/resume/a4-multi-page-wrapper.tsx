@@ -6,6 +6,7 @@ import { Layers, FileText } from "lucide-react";
 interface A4MultiPageWrapperProps {
   children: ReactNode;
   containerRef?: React.RefObject<HTMLDivElement | null>;
+  zoom?: number;
   onContextMenu?: (e: React.MouseEvent) => void;
   onCopy?: (e: React.MouseEvent) => void;
 }
@@ -13,6 +14,7 @@ interface A4MultiPageWrapperProps {
 export function A4MultiPageWrapper({
   children,
   containerRef,
+  zoom = 1,
   onContextMenu,
   onCopy,
 }: A4MultiPageWrapperProps) {
@@ -37,7 +39,7 @@ export function A4MultiPageWrapper({
   }, []);
 
   return (
-    <div className="relative flex flex-col items-center w-full">
+    <div className="relative flex flex-col items-center w-full transition-transform duration-200" style={{ transform: `scale(${zoom})`, transformOrigin: "top center" }}>
       {/* Page Count Badge Bar */}
       <div className="mb-4 print:hidden flex items-center justify-between gap-3 px-4 py-1.5 bg-[#141414] border border-[#2E2E2E] rounded-full text-xs font-mono text-[#888898] shadow-lg">
         <div className="flex items-center gap-2">

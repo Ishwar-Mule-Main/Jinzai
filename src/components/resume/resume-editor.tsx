@@ -39,7 +39,7 @@ import {
   GraduationCap,
   FolderGit2,
   Award,
-  Languages,
+  Languages as LanguagesIcon,
   Layers,
   Lock,
   Wand2,
@@ -47,6 +47,8 @@ import {
   Palette,
   Type,
   Check,
+  FileText,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SortableList, SortableItem } from "./sortable";
@@ -73,8 +75,8 @@ function PhotoUploader() {
   };
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="w-16 h-16 rounded-xl overflow-hidden border border-[#2E2E2E] bg-[#141414] flex items-center justify-center shrink-0">
+    <div className="flex items-center gap-3 mb-4">
+      <div className="w-16 h-16 rounded-2xl overflow-hidden border border-[#2E2E2E] bg-[#141414] flex items-center justify-center shrink-0">
         {data.personalInfo.photo ? (
           <img src={data.personalInfo.photo} alt="profile" className="w-full h-full object-cover" />
         ) : (
@@ -122,7 +124,9 @@ function ItemActions({ onRemove, onUp, onDown, upDisabled, downDisabled }: {
   );
 }
 
-function DesignControlsSection() {
+// ---------- DESIGN TAB CONTROLS ----------
+
+function DesignTabContent() {
   const template = useResumeStore((s) => s.template);
   const setTemplate = useResumeStore((s) => s.setTemplate);
   const accentColor = useResumeStore((s) => s.accentColor);
@@ -135,20 +139,16 @@ function DesignControlsSection() {
   const currentTemplateObj = TEMPLATES.find((t) => t.id === template) || TEMPLATES[0];
 
   return (
-    <div className="p-4 rounded-2xl bg-[#141414] border border-[#2E2E2E] space-y-4 mb-4">
-      <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-3">
-        <span className="font-bricolage text-sm font-bold text-white flex items-center gap-2">
-          <Palette className="w-4 h-4 text-[#FF6200]" /> Design, Colors &amp; Typography
-        </span>
-        <Badge className="bg-[#FF6200]/10 text-[#FF6200] border-[#FF6200]/30 text-[9px] font-mono">
-          78 TEMPLATES
-        </Badge>
-      </div>
-
-      {/* 1. Change Design Button + Modal */}
-      <div className="space-y-1.5">
-        <Label className="text-xs font-mono text-[#9A9AAB]">ACTIVE TEMPLATE DESIGN</Label>
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#0D0D0D] border border-[#2E2E2E]">
+    <div className="space-y-5">
+      {/* 1. Template Design Picker */}
+      <div className="p-4 rounded-2xl bg-[#141414] border border-[#2E2E2E] space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-mono text-[#9A9AAB]">ACTIVE TEMPLATE DESIGN</Label>
+          <Badge className="bg-[#FF6200]/10 text-[#FF6200] border-[#FF6200]/30 text-[9px] font-mono">
+            78 TEMPLATES
+          </Badge>
+        </div>
+        <div className="flex items-center justify-between p-3 rounded-xl bg-[#0D0D0D] border border-[#2E2E2E]">
           <div>
             <p className="text-xs font-bold text-white">{currentTemplateObj.name}</p>
             <p className="text-[10px] text-[#888898] font-mono">{currentTemplateObj.tags.join(" • ")}</p>
@@ -177,44 +177,44 @@ function DesignControlsSection() {
         </div>
       </div>
 
-      {/* 2. Pick Accent Color */}
-      <div className="space-y-1.5">
+      {/* 2. Color Palette & Custom Hex Picker */}
+      <div className="p-4 rounded-2xl bg-[#141414] border border-[#2E2E2E] space-y-3">
         <Label className="text-xs font-mono text-[#9A9AAB]">ACCENT COLOR PALETTE</Label>
         <div className="flex flex-wrap items-center gap-2">
-          {ACCENT_PRESETS.slice(0, 10).map((hex) => (
+          {ACCENT_PRESETS.map((hex) => (
             <button
               key={hex}
               onClick={() => setAccentColor(hex)}
-              className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
-                accentColor === hex ? "ring-2 ring-[#FF6200] ring-offset-2 ring-offset-[#141414] border-white" : "border-transparent opacity-80 hover:opacity-100"
+              className={`w-7 h-7 rounded-full border flex items-center justify-center transition-all ${
+                accentColor === hex ? "ring-2 ring-[#FF6200] ring-offset-2 ring-offset-[#141414] border-white scale-110" : "border-transparent opacity-80 hover:opacity-100"
               }`}
               style={{ backgroundColor: hex }}
             >
-              {accentColor === hex && <Check className="w-3 h-3 text-white drop-shadow" />}
+              {accentColor === hex && <Check className="w-3.5 h-3.5 text-white drop-shadow" />}
             </button>
           ))}
           <div className="flex items-center gap-1.5 ml-auto">
-            <span className="text-[10px] font-mono text-[#888898]">Hex:</span>
+            <span className="text-[10px] font-mono text-[#888898]">Custom Hex:</span>
             <input
               type="color"
               value={accentColor}
               onChange={(e) => setAccentColor(e.target.value)}
-              className="w-7 h-7 rounded-lg border border-[#2E2E2E] bg-transparent cursor-pointer"
+              className="w-8 h-8 rounded-xl border border-[#2E2E2E] bg-transparent cursor-pointer"
             />
           </div>
         </div>
       </div>
 
-      {/* 3. Font Family & Font Size Controls */}
-      <div className="grid grid-cols-2 gap-3 pt-1">
+      {/* 3. Typography & Font Size Controls */}
+      <div className="p-4 rounded-2xl bg-[#141414] border border-[#2E2E2E] space-y-4">
         <div className="space-y-1.5">
-          <Label className="text-xs font-mono text-[#9A9AAB] flex items-center gap-1">
-            <Type className="w-3.5 h-3.5 text-[#FF6200]" /> FONT FAMILY
+          <Label className="text-xs font-mono text-[#9A9AAB] flex items-center gap-1.5">
+            <Type className="w-3.5 h-3.5 text-[#FF6200]" /> FONT FAMILY SELECTION
           </Label>
           <select
             value={fontFamily}
             onChange={(e) => setFontFamily(e.target.value)}
-            className="w-full h-9 bg-[#0D0D0D] border border-[#2E2E2E] rounded-xl text-xs text-white px-2.5 focus:border-[#FF6200] focus:outline-none"
+            className="w-full h-10 bg-[#0D0D0D] border border-[#2E2E2E] rounded-xl text-xs text-white px-3 focus:border-[#FF6200] focus:outline-none"
           >
             {FONT_OPTIONS.map((f) => (
               <option key={f.id} value={f.id} className="bg-[#141414] text-white">
@@ -225,14 +225,14 @@ function DesignControlsSection() {
         </div>
 
         <div className="space-y-1.5">
-          <Label className="text-xs font-mono text-[#9A9AAB]">FONT SIZE SCALE</Label>
-          <div className="grid grid-cols-5 gap-1 bg-[#0D0D0D] p-1 rounded-xl border border-[#2E2E2E]">
+          <Label className="text-xs font-mono text-[#9A9AAB]">FONT SIZE SCALE ADJUSTMENT</Label>
+          <div className="grid grid-cols-5 gap-1.5 bg-[#0D0D0D] p-1.5 rounded-xl border border-[#2E2E2E]">
             {FONT_SIZE_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
                 onClick={() => setFontSize(opt.id)}
-                className={`h-7 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                  fontSize === opt.id ? "bg-[#FF6200] text-white shadow-sm" : "text-[#888898] hover:text-white"
+                className={`h-8 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                  fontSize === opt.id ? "bg-[#FF6200] text-white shadow-md shadow-[#FF6200]/20" : "text-[#888898] hover:text-white"
                 }`}
               >
                 {opt.label}
@@ -245,8 +245,7 @@ function DesignControlsSection() {
   );
 }
 
-// ---------- Personal Info ----------
-
+// ---------- SECTION 1: PERSONAL INFO ----------
 function PersonalInfoEditor() {
   const data = useResumeStore((s) => s.data);
   const updatePersonal = useResumeStore((s) => s.updatePersonal);
@@ -275,7 +274,7 @@ function PersonalInfoEditor() {
           />
         </div>
         <div>
-          <Label className="text-xs text-[#9A9AAB]">Job Title / Headline</Label>
+          <Label className="text-xs text-[#9A9AAB]">Job Title / Tagline</Label>
           <Input
             value={p.jobTitle}
             onChange={(e) => updatePersonal({ jobTitle: e.target.value })}
@@ -344,17 +343,13 @@ function PersonalInfoEditor() {
   );
 }
 
-// ---------- Summary ----------
-
+// ---------- SECTION 2: SUMMARY ----------
 function SummaryEditor() {
   const data = useResumeStore((s) => s.data);
   const setSummary = useResumeStore((s) => s.setSummary);
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <Label className="text-xs text-[#9A9AAB]">Professional Summary</Label>
-      </div>
       <Textarea
         value={data.summary}
         onChange={(e) => setSummary(e.target.value)}
@@ -366,8 +361,7 @@ function SummaryEditor() {
   );
 }
 
-// ---------- Experience ----------
-
+// ---------- SECTION 3: WORK EXPERIENCE ----------
 function ExperienceEditor() {
   const data = useResumeStore((s) => s.data);
   const addExperience = useResumeStore((s) => s.addExperience);
@@ -400,7 +394,7 @@ function ExperienceEditor() {
                 <Input
                   value={exp.company}
                   onChange={(e) => updateExperience(exp.id, { company: e.target.value })}
-                  placeholder="Company"
+                  placeholder="Company Name"
                   className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
                 />
                 <Input
@@ -437,7 +431,7 @@ function ExperienceEditor() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs text-[#9A9AAB]">Key Accomplishments &amp; Bullets</Label>
+                <Label className="text-xs text-[#9A9AAB]">Key Achievements &amp; Bullet Points</Label>
                 {exp.achievements.map((ach, i) => (
                   <div key={i} className="flex gap-2 items-center">
                     <Input
@@ -490,49 +484,405 @@ function ExperienceEditor() {
   );
 }
 
-// ---------- Main ResumeEditor Accordion Container ----------
+// ---------- SECTION 4: EDUCATION ----------
+function EducationEditor() {
+  const data = useResumeStore((s) => s.data);
+  const addEducation = useResumeStore((s) => s.addEducation);
+  const updateEducation = useResumeStore((s) => s.updateEducation);
+  const removeEducation = useResumeStore((s) => s.removeEducation);
 
+  return (
+    <div className="space-y-4">
+      {data.education.map((edu) => (
+        <div key={edu.id} className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-bold text-xs text-white truncate">
+              {edu.degree || "Degree"} {edu.institution ? `@ ${edu.institution}` : ""}
+            </span>
+            <ItemActions onRemove={() => removeEducation(edu.id)} />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <Input
+              value={edu.institution}
+              onChange={(e) => updateEducation(edu.id, { institution: e.target.value })}
+              placeholder="University / Institution"
+              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            />
+            <Input
+              value={edu.degree}
+              onChange={(e) => updateEducation(edu.id, { degree: e.target.value })}
+              placeholder="Degree (e.g. B.Tech)"
+              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            />
+            <Input
+              value={edu.field}
+              onChange={(e) => updateEducation(edu.id, { field: e.target.value })}
+              placeholder="Field of Study / Major"
+              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            />
+            <Input
+              value={edu.gpa}
+              onChange={(e) => updateEducation(edu.id, { gpa: e.target.value })}
+              placeholder="GPA / Percentage"
+              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            />
+            <Input
+              value={edu.startDate}
+              onChange={(e) => updateEducation(edu.id, { startDate: e.target.value })}
+              placeholder="Start Date (2018-08)"
+              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            />
+            <Input
+              value={edu.endDate}
+              onChange={(e) => updateEducation(edu.id, { endDate: e.target.value })}
+              placeholder="End Date (2022-05)"
+              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            />
+          </div>
+        </div>
+      ))}
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={addEducation}
+        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+      >
+        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Education Entry
+      </Button>
+    </div>
+  );
+}
+
+// ---------- SECTION 5: SKILLS ----------
+function SkillsEditor() {
+  const data = useResumeStore((s) => s.data);
+  const addSkillCategory = useResumeStore((s) => s.addSkillCategory);
+  const updateSkillCategory = useResumeStore((s) => s.updateSkillCategory);
+  const removeSkillCategory = useResumeStore((s) => s.removeSkillCategory);
+
+  return (
+    <div className="space-y-4">
+      {data.skills.map((cat) => (
+        <div key={cat.id} className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <Input
+              value={cat.category}
+              onChange={(e) => updateSkillCategory(cat.id, { category: e.target.value })}
+              placeholder="Category Name (e.g. Programming Languages)"
+              className="bg-[#141414] border-[#2E2E2E] text-xs font-bold text-white rounded-xl"
+            />
+            <ItemActions onRemove={() => removeSkillCategory(cat.id)} />
+          </div>
+
+          <SkillSuggestions
+            category={cat.category}
+            existing={cat.items}
+            onSelect={(skill) => {
+              if (!cat.items.includes(skill)) {
+                updateSkillCategory(cat.id, { items: [...cat.items, skill] });
+              }
+            }}
+          />
+
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {cat.items.map((skill, i) => (
+              <Badge key={i} className="bg-[#FF6200]/10 text-[#FF6200] border-[#FF6200]/30 text-xs gap-1 py-1 px-2.5">
+                {skill}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = cat.items.filter((_, idx) => idx !== i);
+                    updateSkillCategory(cat.id, { items: next });
+                  }}
+                  className="hover:text-red-400 ml-1"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={addSkillCategory}
+        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+      >
+        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Skill Category
+      </Button>
+    </div>
+  );
+}
+
+// ---------- SECTION 6: PROJECTS ----------
+function ProjectsEditor() {
+  const data = useResumeStore((s) => s.data);
+  const addProject = useResumeStore((s) => s.addProject);
+  const updateProject = useResumeStore((s) => s.updateProject);
+  const removeProject = useResumeStore((s) => s.removeProject);
+
+  return (
+    <div className="space-y-4">
+      {data.projects.map((proj) => (
+        <div key={proj.id} className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-bold text-xs text-white truncate">{proj.name || "Project Title"}</span>
+            <ItemActions onRemove={() => removeProject(proj.id)} />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <Input
+              value={proj.name}
+              onChange={(e) => updateProject(proj.id, { name: e.target.value })}
+              placeholder="Project Name"
+              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            />
+            <Input
+              value={proj.link}
+              onChange={(e) => updateProject(proj.id, { link: e.target.value })}
+              placeholder="Project Link / GitHub"
+              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            />
+          </div>
+
+          <Textarea
+            value={proj.description}
+            onChange={(e) => updateProject(proj.id, { description: e.target.value })}
+            rows={3}
+            placeholder="Project details & key features..."
+            className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl p-2.5"
+          />
+        </div>
+      ))}
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={addProject}
+        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+      >
+        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Project Entry
+      </Button>
+    </div>
+  );
+}
+
+// ---------- SECTION 7: CERTIFICATIONS ----------
+function CertificationsEditor() {
+  const data = useResumeStore((s) => s.data);
+  const addCertification = useResumeStore((s) => s.addCertification);
+  const updateCertification = useResumeStore((s) => s.updateCertification);
+  const removeCertification = useResumeStore((s) => s.removeCertification);
+
+  return (
+    <div className="space-y-4">
+      {data.certifications.map((cert) => (
+        <div key={cert.id} className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-bold text-xs text-white truncate">{cert.name || "Certification"}</span>
+            <ItemActions onRemove={() => removeCertification(cert.id)} />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <Input
+              value={cert.name}
+              onChange={(e) => updateCertification(cert.id, { name: e.target.value })}
+              placeholder="Certification Name"
+              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            />
+            <Input
+              value={cert.issuer}
+              onChange={(e) => updateCertification(cert.id, { issuer: e.target.value })}
+              placeholder="Issuer (e.g. AWS)"
+              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            />
+            <Input
+              value={cert.date}
+              onChange={(e) => updateCertification(cert.id, { date: e.target.value })}
+              placeholder="Date (e.g. 2023-05)"
+              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            />
+          </div>
+        </div>
+      ))}
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={addCertification}
+        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+      >
+        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Certification Entry
+      </Button>
+    </div>
+  );
+}
+
+// ---------- SECTION 8: LANGUAGES ----------
+function LanguagesEditor() {
+  const data = useResumeStore((s) => s.data);
+  const addLanguage = useResumeStore((s) => s.addLanguage);
+  const updateLanguage = useResumeStore((s) => s.updateLanguage);
+  const removeLanguage = useResumeStore((s) => s.removeLanguage);
+
+  return (
+    <div className="space-y-4">
+      {data.languages.map((lang) => (
+        <div key={lang.id} className="p-3 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] flex items-center gap-2">
+          <Input
+            value={lang.name}
+            onChange={(e) => updateLanguage(lang.id, { name: e.target.value })}
+            placeholder="Language (e.g. English)"
+            className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+          />
+          <Input
+            value={lang.proficiency}
+            onChange={(e) => updateLanguage(lang.id, { proficiency: e.target.value })}
+            placeholder="Proficiency (e.g. Native / Fluent)"
+            className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+          />
+          <ItemActions onRemove={() => removeLanguage(lang.id)} />
+        </div>
+      ))}
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={addLanguage}
+        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+      >
+        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Language
+      </Button>
+    </div>
+  );
+}
+
+// ---------- MAIN CONTAINER WITH TABS ----------
 export function ResumeEditor() {
+  const [editorTab, setEditorTab] = useState<"content" | "design">("content");
+
   return (
     <div className="space-y-4 text-left">
-      {/* Design, Colors & Typography Top Block */}
-      <DesignControlsSection />
+      
+      {/* Top Tab Switcher: Content vs Design */}
+      <div className="grid grid-cols-2 gap-1 p-1 bg-[#141414] border border-[#2E2E2E] rounded-full text-xs font-semibold">
+        <button
+          onClick={() => setEditorTab("content")}
+          className={`py-2 px-3 rounded-full flex items-center justify-center gap-2 transition-all ${
+            editorTab === "content" ? "bg-[#FF6200] text-white shadow-md shadow-[#FF6200]/20 font-bold" : "text-[#888898] hover:text-white"
+          }`}
+        >
+          <FileText className="w-3.5 h-3.5" /> 1. Resume Content
+        </button>
+        <button
+          onClick={() => setEditorTab("design")}
+          className={`py-2 px-3 rounded-full flex items-center justify-center gap-2 transition-all ${
+            editorTab === "design" ? "bg-[#FF6200] text-white shadow-md shadow-[#FF6200]/20 font-bold" : "text-[#888898] hover:text-white"
+          }`}
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5" /> 2. Design &amp; Fonts
+        </button>
+      </div>
 
-      {/* Accordion Sections for Content Editing */}
-      <Accordion type="multiple" defaultValue={["personal", "summary", "experience"]} className="space-y-3">
-        <AccordionItem value="personal" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
-          <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
-            <span className="flex items-center gap-2">
-              <User className="w-4 h-4 text-[#FF6200]" /> Personal Information
-            </span>
-          </AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4">
-            <PersonalInfoEditor />
-          </AccordionContent>
-        </AccordionItem>
+      {/* TAB 1: CONTENT EDITOR (9 FULL SECTIONS) */}
+      {editorTab === "content" && (
+        <Accordion type="multiple" defaultValue={["personal", "summary", "experience", "skills"]} className="space-y-3">
+          <AccordionItem value="personal" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+            <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+              <span className="flex items-center gap-2">
+                <User className="w-4 h-4 text-[#FF6200]" /> Personal Information
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-4">
+              <PersonalInfoEditor />
+            </AccordionContent>
+          </AccordionItem>
 
-        <AccordionItem value="summary" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
-          <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
-            <span className="flex items-center gap-2">
-              <AlignLeft className="w-4 h-4 text-[#FF6200]" /> Professional Summary
-            </span>
-          </AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4">
-            <SummaryEditor />
-          </AccordionContent>
-        </AccordionItem>
+          <AccordionItem value="summary" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+            <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+              <span className="flex items-center gap-2">
+                <AlignLeft className="w-4 h-4 text-[#FF6200]" /> Professional Summary
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-4">
+              <SummaryEditor />
+            </AccordionContent>
+          </AccordionItem>
 
-        <AccordionItem value="experience" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
-          <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
-            <span className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-[#FF6200]" /> Work Experience
-            </span>
-          </AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4">
-            <ExperienceEditor />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+          <AccordionItem value="experience" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+            <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+              <span className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-[#FF6200]" /> Work Experience
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-4">
+              <ExperienceEditor />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="education" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+            <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+              <span className="flex items-center gap-2">
+                <GraduationCap className="w-4 h-4 text-[#FF6200]" /> Education &amp; Credentials
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-4">
+              <EducationEditor />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="skills" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+            <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+              <span className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#FF6200]" /> Technical &amp; Core Skills
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-4">
+              <SkillsEditor />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="projects" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+            <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+              <span className="flex items-center gap-2">
+                <FolderGit2 className="w-4 h-4 text-[#FF6200]" /> Featured Projects
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-4">
+              <ProjectsEditor />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="certifications" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+            <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+              <span className="flex items-center gap-2">
+                <Award className="w-4 h-4 text-[#FF6200]" /> Certifications &amp; Licenses
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-4">
+              <CertificationsEditor />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="languages" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+            <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
+              <span className="flex items-center gap-2">
+                <LanguagesIcon className="w-4 h-4 text-[#FF6200]" /> Languages
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-4">
+              <LanguagesEditor />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
+
+      {/* TAB 2: DESIGN & STYLING */}
+      {editorTab === "design" && <DesignTabContent />}
     </div>
   );
 }

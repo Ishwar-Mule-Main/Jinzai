@@ -41,7 +41,7 @@ export function ResumeRenderer({ data, accent, font, fontSize, template }: Rende
       default:
         // Parameterized templates
         if (!ORIGINAL_IDS.has(template) && SPEC_MAP[template]) {
-          return <ParameterizedTemplate data={data} spec={SPEC_MAP[template]} />;
+          return <ParameterizedTemplate data={data} spec={SPEC_MAP[template]} accent={accent} font={font} fontSize={fontSize} />;
         }
         return <ModernTemplate {...common} />;
     }
