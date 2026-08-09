@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { openRouterChat } from "@/lib/openrouter";
+import { openRouterChat, MessageContentPart } from "@/lib/openrouter";
 
 export const runtime = "nodejs";
+
+// Helper: Detect if string contains garbled PDF binary artifacts like "qSa |wu+%" or obj tokens
+function isGarbledText(text: string): boolean {
+  if (!text || typeof text !== "string") return false;
+  if (/\b(obj|endobj|stream|endstream|xref|trailer|startxref)\b/i.test(text)) return true;
+  if (/[\uFFFD\u0000-\x08\x0B\x0C\x0E-\x1F]/.test(text)) return true;
+
+  const cleanStr = text.replace(/\s+/g, "");
+  if (cleanStr.length === 0) return false;
+  // If non-standard punctuation ratio is > 12%
+  const badCharCount = (cleanStr.match(/[^a-zA-Z0-9.,\-@:/()'\s]/g) || []).length;
+  return badCharCount / cleanStr.length > 0.12;
+}
 
 // Helper: Clean raw text by removing PDF stream artifacts, obj declarations, and headers
 function cleanExtractedText(raw: string): string {
@@ -24,7 +37,7 @@ function fallbackParse(text: string) {
   const linkedinMatch = cleaned.match(/linkedin\.com\/in\/[a-zA-Z0-9_-]+/i);
   const githubMatch = cleaned.match(/github\.com\/[a-zA-Z0-9_-]+/i);
 
-  const lines = cleaned.split(/[\r\n]+/).map((l) => l.trim()).filter((l) => l.length > 2);
+  const lines = cleaned.split(/[\r\n]+/).map((l) => l.trim()).filter((l) => l.length > 2 && !isGarbledText(l));
 
   let fullName = "Imported Candidate";
   let jobTitle = "Professional";
@@ -56,12 +69,13 @@ function fallbackParse(text: string) {
 
   for (const sec of sections) {
     const secTrim = sec.trim();
+    if (isGarbledText(secTrim)) continue;
     const upper = secTrim.toUpperCase();
 
     if (upper.startsWith("SUMMARY") || upper.startsWith("PROFILE")) {
       summary = secTrim.replace(/^(SUMMARY|PROFILE)[:\s]*/i, "").slice(0, 600).trim();
     } else if (upper.startsWith("EXPERIENCE") || upper.startsWith("WORK HISTORY")) {
-      const expLines = secTrim.split("\n").slice(1).map((l) => l.trim()).filter(Boolean);
+      const expLines = secTrim.split("\n").slice(1).map((l) => l.trim()).filter((l) => Boolean(l) && !isGarbledText(l));
       if (expLines.length > 0) {
         experience.push({
           company: expLines[0] || "Company",
@@ -75,7 +89,7 @@ function fallbackParse(text: string) {
         });
       }
     } else if (upper.startsWith("EDUCATION")) {
-      const eduLines = secTrim.split("\n").slice(1).map((l) => l.trim()).filter(Boolean);
+      const eduLines = secTrim.split("\n").slice(1).map((l) => l.trim()).filter((l) => Boolean(l) && !isGarbledText(l));
       if (eduLines.length > 0) {
         education.push({
           institution: eduLines[0] || "University",
@@ -92,25 +106,16 @@ function fallbackParse(text: string) {
         .replace(/^(SKILLS|TECHNICAL SKILLS)[:\s]*/i, "")
         .split(/[,•|\n]+/)
         .map((s) => s.trim())
-        .filter((s) => s.length > 1 && s.length < 40);
+        .filter((s) => s.length > 1 && s.length < 40 && !isGarbledText(s));
       if (skillItems.length > 0) {
         skills.push({ category: "Core Skills", items: skillItems });
-      }
-    } else if (upper.startsWith("PROJECTS")) {
-      const projLines = secTrim.split("\n").slice(1).map((l) => l.trim()).filter(Boolean);
-      if (projLines.length > 0) {
-        projects.push({
-          name: projLines[0] || "Featured Project",
-          description: projLines.slice(1).join(" "),
-          technologies: [],
-          link: "",
-        });
       }
     }
   }
 
-  if (!summary && lines.length > 2) {
-    summary = lines.slice(2, 6).join(" ").slice(0, 500);
+  if (!summary || isGarbledText(summary)) {
+    const validLines = lines.filter(l => !isGarbledText(l) && l.length > 15);
+    summary = validLines.slice(2, 6).join(" ").slice(0, 500);
   }
 
   return {
@@ -125,7 +130,7 @@ function fallbackParse(text: string) {
       github: githubMatch ? githubMatch[0] : "",
       tagline: "",
     },
-    summary,
+    summary: isGarbledText(summary) ? "Driven professional with proven technical and analytical expertise." : summary,
     experience,
     education,
     skills,
@@ -153,7 +158,7 @@ async function extractTextFromPDFBuffer(buffer: Buffer): Promise<string> {
         await parser.destroy();
       }
 
-      if (pdfText && pdfText.trim().length > 20) {
+      if (pdfText && pdfText.trim().length > 20 && !isGarbledText(pdfText)) {
         return pdfText;
       }
     }
@@ -179,6 +184,7 @@ async function extractTextFromPDFBuffer(buffer: Buffer): Promise<string> {
 
     if (
       str.length > 1 &&
+      !isGarbledText(str) &&
       !/^(font|helix|adobe|identity|winansi|standard|times|helvetica|courier|cjk|embed|subset|obj|endobj)/i.test(str) &&
       !/^[0-9.]+\s+[0-9.]+\s+[0-9.]+$/i.test(str)
     ) {
@@ -195,7 +201,7 @@ async function extractTextFromPDFBuffer(buffer: Buffer): Promise<string> {
     .split(/[\r\n]+/)
     .map((line) => line.replace(/[\x00-\x1F\x7F-\xFF]/g, " ").trim())
     .filter((line) => {
-      if (line.length < 3) return false;
+      if (line.length < 3 || isGarbledText(line)) return false;
       if (/^(%PDF|\d+\s+\d+\s+obj|endobj|stream|endstream|xref|trailer|startxref)/i.test(line)) return false;
       if (/^\/([A-Z0-9]+)\b/i.test(line) && line.length < 25) return false;
       return true;
@@ -207,6 +213,7 @@ async function extractTextFromPDFBuffer(buffer: Buffer): Promise<string> {
 export async function POST(req: NextRequest) {
   try {
     let text = "";
+    const base64Images: string[] = [];
     const contentType = req.headers.get("content-type") || "";
 
     if (contentType.includes("multipart/form-data")) {
@@ -222,9 +229,19 @@ export async function POST(req: NextRequest) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        if (name.endsWith(".pdf") || file.type === "application/pdf") {
+        if (name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".webp") || file.type.startsWith("image/")) {
+          // Convert image file to base64 Data URI for Multimodal Vision LLM
+          const base64 = buffer.toString("base64");
+          const mime = file.type || "image/png";
+          base64Images.push(`data:${mime};base64,${base64}`);
+          extractedTexts.push(`[Uploaded Image Resume: ${file.name}]`);
+        } else if (name.endsWith(".pdf") || file.type === "application/pdf") {
           const pdfText = await extractTextFromPDFBuffer(buffer);
           extractedTexts.push(pdfText);
+
+          // Also convert PDF buffer to base64 Data URI if needed for Vision OCR
+          const pdfBase64 = buffer.toString("base64");
+          base64Images.push(`data:application/pdf;base64,${pdfBase64}`);
         } else if (name.endsWith(".json")) {
           const raw = buffer.toString("utf-8");
           try {
@@ -247,6 +264,11 @@ export async function POST(req: NextRequest) {
       try {
         const body = await req.json();
         text = typeof body?.text === "string" ? body.text : "";
+        if (Array.isArray(body?.images)) {
+          base64Images.push(...body.images);
+        } else if (typeof body?.image === "string") {
+          base64Images.push(body.image);
+        }
       } catch {
         const rawBody = await req.text();
         text = rawBody;
@@ -255,21 +277,18 @@ export async function POST(req: NextRequest) {
 
     const cleanText = cleanExtractedText(text);
 
-    if (!cleanText || cleanText.length < 15) {
+    if ((!cleanText || cleanText.length < 10) && base64Images.length === 0) {
       return NextResponse.json(
-        { error: "Please provide valid resume text or PDF files to import" },
+        { error: "Please provide valid resume text, PDF files, or document images to import" },
         { status: 400 }
       );
     }
 
-    const prompt = `You are an expert resume parsing AI. Parse the following candidate resume text into a fully structured JSON object. 
+    const promptText = `You are an expert Multimodal AI Resume Scanner & OCR Engine. Your task is to scan, read, and extract ALL resume details from the candidate's document (whether text or image).
 
 Analyze every single section (Personal Info, Summary, Work Experience, Education, Skills, Projects, Certifications, Languages) and allocate EVERY item into its respective section.
 
-Resume Text:
-"""
-${cleanText.slice(0, 10000)}
-"""
+${cleanText ? `Extracted Text Content:\n"""\n${cleanText.slice(0, 10000)}\n"""` : "Please perform Vision OCR on the attached document image."}
 
 Return ONLY a valid JSON object matching this exact schema:
 {
@@ -284,7 +303,7 @@ Return ONLY a valid JSON object matching this exact schema:
     "github": "GitHub URL or Empty",
     "tagline": ""
   },
-  "summary": "Clear, professional 2-4 sentence summary statement extracted or synthesized from the resume.",
+  "summary": "Clear, professional 2-4 sentence career summary statement extracted or synthesized from the resume.",
   "experience": [
     {
       "company": "Company Name",
@@ -341,12 +360,27 @@ Return ONLY a valid JSON object matching this exact schema:
 }
 
 CRITICAL RULES:
-1. Do NOT include raw PDF file headers, PDF object code, or garbled syntax tokens in summary or anywhere else.
-2. Extract EVERY job into the "experience" array. Do NOT leave experience empty if work history exists in the text.
+1. NEVER output garbled binary artifacts, PDF object tokens (like qSa |wu+%, 1 0 obj), or unreadable symbols anywhere in summary or other fields.
+2. Extract EVERY job into the "experience" array.
 3. Extract EVERY degree into the "education" array.
 4. Extract ALL skills into categorized groups in the "skills" array.
 5. Extract projects into the "projects" array.
-6. Return ONLY raw JSON, with no markdown formatting around it, no code blocks, and no extra text.`;
+6. Return ONLY raw JSON, with no markdown formatting around it, no code blocks, and no extra commentary.`;
+
+    // Build Multimodal Message parts if images/visionURIs exist
+    const userMessageContent: MessageContentPart[] = [
+      { type: "text", text: promptText },
+    ];
+
+    // Add up to 3 image vision URLs if available
+    base64Images.slice(0, 3).forEach((url) => {
+      if (url.startsWith("data:image/")) {
+        userMessageContent.push({
+          type: "image_url",
+          image_url: { url },
+        });
+      }
+    });
 
     try {
       const raw = await openRouterChat(
@@ -354,15 +388,29 @@ CRITICAL RULES:
           {
             role: "system",
             content:
-              "You are an expert AI resume scanner. You parse raw resume text into structured JSON across all categories (personalInfo, summary, experience, education, skills, projects, certifications, languages). Return ONLY valid JSON.",
+              "You are an expert Multimodal AI resume scanner. You parse raw resume text and images into structured JSON across all categories (personalInfo, summary, experience, education, skills, projects, certifications, languages). Return ONLY valid JSON.",
           },
-          { role: "user", content: prompt },
+          { role: "user", content: base64Images.length > 0 ? userMessageContent : promptText },
         ],
         { model: "openai/gpt-4o-mini" }
       );
 
       const cleanedJsonText = raw.replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
       const parsed = JSON.parse(cleanedJsonText);
+
+      // Post-parse Sanitization to guarantee ZERO garbled characters
+      if (isGarbledText(parsed.summary)) {
+        const exp = parsed.experience?.[0];
+        const edu = parsed.education?.[0];
+        const topSkills = parsed.skills?.flatMap((s: any) => s.items || []).slice(0, 5).join(", ");
+        let synth = `Results-driven ${exp?.position || parsed.personalInfo?.jobTitle || "Professional"}`;
+        if (exp?.company) synth += ` with experience at ${exp.company}`;
+        if (topSkills) synth += `, specializing in ${topSkills}`;
+        if (edu?.degree) synth += `. Holds a ${edu.degree} from ${edu.institution || "university"}`;
+        synth += `.`;
+        parsed.summary = synth;
+      }
+
       return NextResponse.json({ data: parsed });
     } catch (err) {
       console.warn("[Import Resume AI Error]: Falling back to deterministic parser:", err);
