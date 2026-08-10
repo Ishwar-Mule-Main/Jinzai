@@ -77,7 +77,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Revenue calculations
-    const planPrices: Record<string, number> = { trial_99: 99, pro_499: 499, business_1999: 1999 };
+    const planPrices: Record<string, number> = {
+      single_99: 99,
+      trial_99: 99,
+      pro_399: 399,
+      pro_499: 399,
+      business_999: 999,
+      business_1999: 999,
+      institution_4999: 4999,
+    };
     let ledgerRevenue = 0;
     const revenueByPlan: Record<string, number> = {};
     for (const t of transactions) {
