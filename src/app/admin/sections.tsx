@@ -1037,6 +1037,14 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
   const [creatingStudent, setCreatingStudent] = useState(false);
   const [createdStudentResult, setCreatedStudentResult] = useState<any>(null);
 
+  // Bulk creation states
+  const [creationMode, setCreationMode] = useState<"single" | "bulk_range" | "bulk_text">("single");
+  const [startRoll, setStartRoll] = useState("");
+  const [endRoll, setEndRoll] = useState("");
+  const [batchPrefix, setBatchPrefix] = useState("Student");
+  const [bulkText, setBulkText] = useState("");
+  const [createdBulkResults, setCreatedBulkResults] = useState<any[]>([]);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -1113,6 +1121,76 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
     }
   };
 
+  const addBulkStudents = async () => {
+    if (!selectedOrg) return;
+    let list: { studentId: string; name: string }[] = [];
+
+    if (creationMode === "bulk_range") {
+      const s = parseInt(startRoll, 10);
+      const e = parseInt(endRoll, 10);
+      if (isNaN(s) || isNaN(e) || e < s) {
+        toast.error("Please enter a valid start and end roll number range (e.g. 23001 to 23050)");
+        return;
+      }
+      if (e - s > 300) {
+        toast.error("Max 300 accounts per bulk batch");
+        return;
+      }
+      for (let i = s; i <= e; i++) {
+        list.push({ studentId: String(i), name: `${batchPrefix} ${i}` });
+      }
+    } else if (creationMode === "bulk_text") {
+      const lines = bulkText.split("\n").map((l) => l.trim()).filter(Boolean);
+      if (lines.length === 0) {
+        toast.error("Paste student IDs (one per line)");
+        return;
+      }
+      for (const line of lines) {
+        const parts = line.split(",").map((p) => p.trim());
+        const id = parts[0];
+        const name = parts[1] || `Student ${id}`;
+        if (id) list.push({ studentId: id, name });
+      }
+    }
+
+    setCreatingStudent(true);
+    try {
+      const res = await fetch(`/api/admin/organizations/${selectedOrg.id}/students`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders(token) },
+        body: JSON.stringify({ students: list }),
+      });
+      if (!res.ok) {
+        const j = await res.json();
+        throw new Error(j.error || "Failed");
+      }
+      const j = await res.json();
+      setCreatedBulkResults(j.students || []);
+      toast.success(`Successfully issued credentials for ${j.created || 0} students!`);
+      setStartRoll(""); setEndRoll(""); setBulkText("");
+      load();
+      onCreated();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setCreatingStudent(false);
+    }
+  };
+
+  const downloadRosterCsv = () => {
+    if (createdBulkResults.length === 0) return;
+    const header = "Student Roll ID,Name,Email,Password,Portal Link\n";
+    const rows = createdBulkResults
+      .map((r) => `"${r.studentId}","${r.name}","${r.email}","${r.password}","http://localhost:3000/portal/${selectedOrg.uniqueCode}"`)
+      .join("\n");
+    const blob = new Blob([header + rows], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${selectedOrg.name}_Student_Credentials.csv`;
+    a.click();
+  };
+
   const deleteOrg = async (id: string) => {
     if (!confirm("Delete this organization? Student accounts will be unlinked.")) return;
     try {
@@ -1168,6 +1246,17 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
                   </div>
                 </div>
                 <Badge className={`border-0 text-[9px] ${planBadge(o.plan)}`}>{planLabel(o.plan)}</Badge>
+              </div>
+              <div className="mb-3 p-2 rounded-xl bg-[#0D0D0D] border border-[#2E2E2E] flex items-center justify-between text-[11px]">
+                <span className="text-[#888898] font-mono truncate">Portal: /portal/{o.uniqueCode}</span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 text-[10px] text-violet-400 hover:text-violet-300 gap-1 p-1"
+                  onClick={() => window.open(`/portal/${o.uniqueCode}`, "_blank")}
+                >
+                  <ExternalLink className="w-3 h-3" /> Open Portal
+                </Button>
               </div>
               <div className="flex gap-2">
                 <Button onClick={() => { setSelectedOrg(o); setShowStudents(true); }} size="sm" className="flex-1 gap-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-full text-xs font-bold">
@@ -1243,39 +1332,140 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
             </DialogHeader>
 
             <div className="space-y-4 pt-2">
-              <div className="p-3.5 rounded-2xl bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
-                <p className="text-xs font-bold text-white">Create Single Student Credential</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <Input
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value)}
-                    placeholder="Student Roll No (e.g. 23001)"
-                    className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
-                  />
-                  <Input
-                    value={studentName}
-                    onChange={(e) => setStudentName(e.target.value)}
-                    placeholder="Full Name"
-                    className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
-                  />
-                  <Input
-                    value={studentEmail}
-                    onChange={(e) => setStudentEmail(e.target.value)}
-                    placeholder="Custom Email (Optional)"
-                    className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
-                  />
-                </div>
-                <Button onClick={addStudent} disabled={creatingStudent} className="w-full h-9 text-xs bg-violet-600 hover:bg-violet-700 text-white rounded-full font-bold gap-1.5">
-                  {creatingStudent ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-3.5 h-3.5" />} Issue Student Login Credentials
-                </Button>
+              {/* Creation Mode Switcher */}
+              <div className="grid grid-cols-3 gap-1 p-1 bg-[#0D0D0D] border border-[#2E2E2E] rounded-full text-xs font-semibold">
+                <button
+                  onClick={() => setCreationMode("single")}
+                  className={`py-1.5 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all ${
+                    creationMode === "single" ? "bg-violet-600 text-white font-bold" : "text-[#888898] hover:text-white"
+                  }`}
+                >
+                  <User className="w-3.5 h-3.5" /> Single Student
+                </button>
+                <button
+                  onClick={() => setCreationMode("bulk_range")}
+                  className={`py-1.5 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all ${
+                    creationMode === "bulk_range" ? "bg-violet-600 text-white font-bold" : "text-[#888898] hover:text-white"
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> Roll No Range
+                </button>
+                <button
+                  onClick={() => setCreationMode("bulk_text")}
+                  className={`py-1.5 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all ${
+                    creationMode === "bulk_text" ? "bg-violet-600 text-white font-bold" : "text-[#888898] hover:text-white"
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" /> Paste List (CSV)
+                </button>
               </div>
 
+              {/* Mode 1: Single Student */}
+              {creationMode === "single" && (
+                <div className="p-3.5 rounded-2xl bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
+                  <p className="text-xs font-bold text-white">Issue Single Student Credential</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Input
+                      value={studentId}
+                      onChange={(e) => setStudentId(e.target.value)}
+                      placeholder="Student Roll No (e.g. 23001)"
+                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                    />
+                    <Input
+                      value={studentName}
+                      onChange={(e) => setStudentName(e.target.value)}
+                      placeholder="Full Name"
+                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                    />
+                    <Input
+                      value={studentEmail}
+                      onChange={(e) => setStudentEmail(e.target.value)}
+                      placeholder="Custom Email (Optional)"
+                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                    />
+                  </div>
+                  <Button onClick={addStudent} disabled={creatingStudent} className="w-full h-9 text-xs bg-violet-600 hover:bg-violet-700 text-white rounded-full font-bold gap-1.5">
+                    {creatingStudent ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-3.5 h-3.5" />} Issue Student Credentials
+                  </Button>
+                </div>
+              )}
+
+              {/* Mode 2: Bulk Roll Range */}
+              {creationMode === "bulk_range" && (
+                <div className="p-3.5 rounded-2xl bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
+                  <p className="text-xs font-bold text-white">Generate Bulk Accounts by Roll Number Range</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Input
+                      value={startRoll}
+                      onChange={(e) => setStartRoll(e.target.value)}
+                      placeholder="Start Roll No (e.g. 23001)"
+                      type="number"
+                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                    />
+                    <Input
+                      value={endRoll}
+                      onChange={(e) => setEndRoll(e.target.value)}
+                      placeholder="End Roll No (e.g. 23050)"
+                      type="number"
+                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                    />
+                    <Input
+                      value={batchPrefix}
+                      onChange={(e) => setBatchPrefix(e.target.value)}
+                      placeholder="Name Prefix (e.g. Student)"
+                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                    />
+                  </div>
+                  <Button onClick={addBulkStudents} disabled={creatingStudent} className="w-full h-9 text-xs bg-violet-600 hover:bg-violet-700 text-white rounded-full font-bold gap-1.5">
+                    {creatingStudent ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />} Generate Bulk Student Logins
+                  </Button>
+                </div>
+              )}
+
+              {/* Mode 3: Bulk Paste CSV List */}
+              {creationMode === "bulk_text" && (
+                <div className="p-3.5 rounded-2xl bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
+                  <p className="text-xs font-bold text-white">Paste Roll Numbers / CSV List (one per line)</p>
+                  <Textarea
+                    value={bulkText}
+                    onChange={(e) => setBulkText(e.target.value)}
+                    placeholder={`23001, Rahul Sharma\n23002, Priya Patel\n23003, Amit Kumar`}
+                    rows={4}
+                    className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl font-mono"
+                  />
+                  <Button onClick={addBulkStudents} disabled={creatingStudent} className="w-full h-9 text-xs bg-violet-600 hover:bg-violet-700 text-white rounded-full font-bold gap-1.5">
+                    {creatingStudent ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-3.5 h-3.5" />} Issue Bulk Accounts from List
+                  </Button>
+                </div>
+              )}
+
+              {/* Single Result */}
               {createdStudentResult && (
                 <div className="p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-800/40 space-y-1.5 text-xs">
                   <p className="font-bold text-emerald-300">✅ Student Account Successfully Created!</p>
                   <p className="text-slate-200">Email: <code className="text-emerald-400 font-mono">{createdStudentResult.email}</code></p>
                   <p className="text-slate-200">Password: <code className="text-emerald-400 font-mono">{createdStudentResult.password}</code></p>
-                  <p className="text-[10px] text-slate-400 pt-1 font-mono">The student can now log in at homepage login modal using these credentials!</p>
+                  <p className="text-[10px] text-slate-400 pt-1 font-mono">Portal URL: http://localhost:3000/portal/{selectedOrg.uniqueCode}</p>
+                </div>
+              )}
+
+              {/* Bulk Results + CSV Export Button */}
+              {createdBulkResults.length > 0 && (
+                <div className="p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-800/40 space-y-3 text-xs">
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold text-emerald-300">✅ {createdBulkResults.length} Student Credentials Generated!</p>
+                    <Button onClick={downloadRosterCsv} size="sm" className="h-7 text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-1">
+                      <Copy className="w-3 h-3" /> Download Roster CSV
+                    </Button>
+                  </div>
+                  <div className="max-h-40 overflow-y-auto divide-y divide-emerald-900/30 text-[11px] font-mono">
+                    {createdBulkResults.slice(0, 50).map((r, idx) => (
+                      <div key={idx} className="py-1.5 flex justify-between">
+                        <span className="text-slate-200">{r.studentId} ({r.name})</span>
+                        <span className="text-emerald-400">Pass: {r.password}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

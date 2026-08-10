@@ -57,10 +57,11 @@ export interface AdminResume {
 }
 
 export const PLAN_OPTIONS = [
-  { id: "free", name: "Free", price: 0, durationDays: null as number | null },
-  { id: "trial_99", name: "Trial", price: 99, durationDays: 2 },
-  { id: "pro_499", name: "Pro", price: 499, durationDays: 30 },
-  { id: "business_1999", name: "Business", price: 1999, durationDays: 30 },
+  { id: "free", name: "Free Plan", price: 0, durationDays: null as number | null },
+  { id: "single_99", name: "Single Export Pass", price: 99, durationDays: null as number | null },
+  { id: "pro_399", name: "Pro Plan", price: 399, durationDays: 30 },
+  { id: "business_999", name: "Business Plan", price: 999, durationDays: 30 },
+  { id: "institution_4999", name: "Institution Plan", price: 4999, durationDays: 30 },
 ];
 
 export function handleAuthError(res: Response): boolean {
@@ -75,15 +76,29 @@ export function handleAuthError(res: Response): boolean {
 export function planBadge(plan: string): string {
   switch (plan) {
     case "free": return "bg-white/5 text-[#888898] border border-[#2E2E2E]";
+    case "single_99":
     case "trial_99": return "bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30";
+    case "pro_399":
     case "pro_499": return "bg-[#FF6200]/10 text-[#FF6200] border border-[#FF6200]/30";
+    case "business_999":
     case "business_1999": return "bg-[#A855F7]/10 text-[#A855F7] border border-[#A855F7]/30";
+    case "institution_4999": return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
     default: return "bg-white/5 text-[#888898] border border-[#2E2E2E]";
   }
 }
 
 export function planLabel(plan: string): string {
-  return plan.replace("_", " ₹");
+  switch (plan) {
+    case "free": return "Free (₹0)";
+    case "single_99":
+    case "trial_99": return "Single Export (₹99)";
+    case "pro_399":
+    case "pro_499": return "Pro Plan (₹399/mo)";
+    case "business_999":
+    case "business_1999": return "Business (₹999/mo)";
+    case "institution_4999": return "Institution (₹4,999/mo)";
+    default: return plan.replace("_", " ₹");
+  }
 }
 
 export function StatCard({ icon: Icon, label, value, sub, color, onClick }: {

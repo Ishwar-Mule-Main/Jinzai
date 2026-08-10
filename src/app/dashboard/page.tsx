@@ -263,6 +263,33 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* ── Institutional Student Placement Cell Banner ── */}
+        {user?.role === "student" && (
+          <div className="rounded-2xl bg-gradient-to-r from-violet-950/40 via-[#141414] to-[#141414] border-2 border-violet-600/40 p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+            <div className="flex items-center gap-3 text-left">
+              <div className="w-10 h-10 rounded-2xl bg-violet-600/10 border border-violet-500/30 flex items-center justify-center shrink-0">
+                <GraduationCap className="w-5 h-5 text-violet-400" />
+              </div>
+              <div>
+                <Badge className="bg-violet-900/50 text-violet-300 border-0 text-[10px] uppercase font-mono mb-0.5">
+                  Campus Placement Cell Student Portal
+                </Badge>
+                <h4 className="text-sm font-bold text-white">
+                  {user.organization?.name || "College Placement Cell"} Student Roster
+                </h4>
+                <p className="text-xs text-[#888898]">
+                  Full ₹399/mo Pro features unlocked — 78 templates, vector PDF downloads &amp; AI ATS tools.
+                </p>
+              </div>
+            </div>
+            <Link href="/editor">
+              <Button className="bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-full text-xs h-9 px-5 gap-1.5 shadow-md shrink-0">
+                <Edit3 className="w-3.5 h-3.5" /> Launch AI Editor →
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {/* ── Welcome Banner ── */}
         <section className="relative rounded-3xl bg-[#141414] border border-[#2E2E2E] p-6 sm:p-8 overflow-hidden shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="absolute top-0 right-0 w-72 sm:w-96 h-72 sm:h-96 bg-[#FF6200]/10 rounded-full blur-[120px] pointer-events-none" />
