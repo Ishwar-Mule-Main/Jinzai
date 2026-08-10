@@ -21,6 +21,8 @@ import {
   User,
   KeyRound,
   LayoutGrid,
+  Mail,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PublicNav } from "@/components/resume/public-nav";
@@ -34,10 +36,18 @@ export default function InstitutionPortalPage({ params }: { params: Promise<{ co
   const [loadingOrg, setLoadingOrg] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  // Form states
+  // Tab state
+  const [activeTab, setActiveTab] = useState<"student" | "admin">("student");
+
+  // Student form state
   const [studentId, setStudentId] = useState("");
-  const [password, setPassword] = useState("");
-  const [loadingLogin, setLoadingLogin] = useState(false);
+  const [studentPassword, setStudentPassword] = useState("");
+  const [loadingStudentLogin, setLoadingStudentLogin] = useState(false);
+
+  // Admin form state
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [loadingAdminLogin, setLoadingAdminLogin] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +61,7 @@ export default function InstitutionPortalPage({ params }: { params: Promise<{ co
       .then((data) => {
         if (!cancelled) {
           setOrg(data.organization);
+          setAdminEmail(data.organization.contactEmail || "");
           setNotFound(false);
         }
       })
@@ -67,21 +78,20 @@ export default function InstitutionPortalPage({ params }: { params: Promise<{ co
   }, [code]);
 
   const handleStudentLogin = async () => {
-    if (!studentId || !password) {
+    if (!studentId || !studentPassword) {
       toast.error("Please enter your Student Roll No / ID and password");
       return;
     }
 
-    setLoadingLogin(true);
+    setLoadingStudentLogin(true);
     try {
-      // Determine email: if studentId contains '@', use directly; else append @orgCode.edu
       const email = studentId.includes("@")
         ? studentId.trim().toLowerCase()
         : `${studentId.trim()}@${org?.uniqueCode?.toLowerCase()}.edu`.toLowerCase();
 
       const res = await signIn("credentials", {
         email,
-        password,
+        password: studentPassword,
         redirect: false,
       });
 
@@ -94,7 +104,34 @@ export default function InstitutionPortalPage({ params }: { params: Promise<{ co
     } catch {
       toast.error("Login failed. Please check your credentials.");
     } finally {
-      setLoadingLogin(false);
+      setLoadingStudentLogin(false);
+    }
+  };
+
+  const handleAdminLogin = async () => {
+    if (!adminEmail || !adminPassword) {
+      toast.error("Please enter your Institutional Email and Admin Password");
+      return;
+    }
+
+    setLoadingAdminLogin(true);
+    try {
+      const res = await signIn("credentials", {
+        email: adminEmail.trim().toLowerCase(),
+        password: adminPassword,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        toast.error("Invalid institutional admin credentials.");
+      } else {
+        toast.success(`Welcome back, Placement Cell Officer!`);
+        router.push(`/portal/${code}/dashboard`);
+      }
+    } catch {
+      toast.error("Login failed. Please check your credentials.");
+    } finally {
+      setLoadingAdminLogin(false);
     }
   };
 
@@ -149,60 +186,134 @@ export default function InstitutionPortalPage({ params }: { params: Promise<{ co
         </p>
       </section>
 
-      {/* ── Student Portal Login Box ── */}
+      {/* ── Login Container ── */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-md mx-auto w-full flex-1 flex flex-col justify-center">
         <Card className="p-6 sm:p-8 bg-[#141414] border-2 border-violet-600/40 rounded-3xl shadow-2xl shadow-violet-950/30 text-left space-y-5">
-          <div className="text-center space-y-1.5">
-            <div className="w-12 h-12 rounded-2xl bg-violet-600/10 border border-violet-500/30 flex items-center justify-center mx-auto mb-2">
-              <GraduationCap className="w-6 h-6 text-violet-400" />
-            </div>
-            <h2 className="font-bricolage text-xl font-bold text-white">Student Portal Sign In</h2>
-            <p className="text-xs text-[#888898]">Enter your Student Roll No / ID and Password issued by your placement cell</p>
-          </div>
-
-          <div className="space-y-4 pt-1">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-[#888898] flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-violet-400" /> Student Roll No / ID / Email
-              </Label>
-              <Input
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                placeholder={`e.g. 23001 or 23001@${org.uniqueCode.toLowerCase()}.edu`}
-                className="bg-[#0D0D0D] border-[#2E2E2E] focus:border-violet-500 text-white placeholder:text-[#5A5A6A] rounded-xl text-xs h-11"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs text-[#888898] flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-violet-400" /> Password
-              </Label>
-              <Input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                type="password"
-                placeholder={`e.g. 23001${org.uniqueCode}`}
-                onKeyDown={(e) => e.key === "Enter" && handleStudentLogin()}
-                className="bg-[#0D0D0D] border-[#2E2E2E] focus:border-violet-500 text-white placeholder:text-[#5A5A6A] rounded-xl text-xs h-11"
-              />
-            </div>
-
-            <Button
-              onClick={handleStudentLogin}
-              disabled={loadingLogin}
-              className="w-full h-11 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold rounded-full shadow-lg shadow-violet-600/20 text-xs gap-2 transition-all mt-2"
+          
+          {/* Tab Switcher */}
+          <div className="grid grid-cols-2 gap-1 p-1 bg-[#0D0D0D] border border-[#2E2E2E] rounded-full text-xs font-semibold">
+            <button
+              onClick={() => setActiveTab("student")}
+              className={`py-2 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all ${
+                activeTab === "student" ? "bg-violet-600 text-white font-bold shadow-md" : "text-[#888898] hover:text-white"
+              }`}
             >
-              {loadingLogin ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
-              Launch Student Dashboard &amp; AI Editor →
-            </Button>
+              <GraduationCap className="w-4 h-4" /> Student Login
+            </button>
+            <button
+              onClick={() => setActiveTab("admin")}
+              className={`py-2 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all ${
+                activeTab === "admin" ? "bg-violet-600 text-white font-bold shadow-md" : "text-[#888898] hover:text-white"
+              }`}
+            >
+              <Building2 className="w-4 h-4" /> Officer / Admin Login
+            </button>
           </div>
 
-          <div className="p-3 bg-violet-950/20 border border-violet-800/30 rounded-2xl text-[11px] text-[#888898] space-y-1">
-            <p className="font-bold text-violet-300 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-violet-400" /> Full Pro Features Unlocked
-            </p>
-            <p>Your student account includes 78 templates, live color/font controls, ATS scanner, and vector PDF exports.</p>
-          </div>
+          {/* Tab 1: Student Login */}
+          {activeTab === "student" && (
+            <div className="space-y-4 pt-1">
+              <div className="text-center space-y-1">
+                <h2 className="font-bricolage text-lg font-bold text-white">Student Portal Sign In</h2>
+                <p className="text-xs text-[#888898]">Enter your Student Roll No / ID and password issued by your placement cell</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs text-[#888898] flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-violet-400" /> Student Roll No / ID
+                </Label>
+                <Input
+                  value={studentId}
+                  onChange={(e) => setStudentId(e.target.value)}
+                  placeholder={`e.g. 23001 or 23001@${org.uniqueCode.toLowerCase()}.edu`}
+                  className="bg-[#0D0D0D] border-[#2E2E2E] focus:border-violet-500 text-white placeholder:text-[#5A5A6A] rounded-xl text-xs h-11"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs text-[#888898] flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-violet-400" /> Student Password
+                </Label>
+                <Input
+                  value={studentPassword}
+                  onChange={(e) => setStudentPassword(e.target.value)}
+                  type="password"
+                  placeholder={`e.g. 23001${org.uniqueCode}`}
+                  onKeyDown={(e) => e.key === "Enter" && handleStudentLogin()}
+                  className="bg-[#0D0D0D] border-[#2E2E2E] focus:border-violet-500 text-white placeholder:text-[#5A5A6A] rounded-xl text-xs h-11"
+                />
+              </div>
+
+              <Button
+                onClick={handleStudentLogin}
+                disabled={loadingStudentLogin}
+                className="w-full h-11 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold rounded-full shadow-lg shadow-violet-600/20 text-xs gap-2 transition-all mt-2"
+              >
+                {loadingStudentLogin ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                Launch Student Dashboard &amp; AI Editor →
+              </Button>
+
+              <div className="p-3 bg-violet-950/20 border border-violet-800/30 rounded-2xl text-[11px] text-[#888898] space-y-1">
+                <p className="font-bold text-violet-300 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-violet-400" /> Full Pro Features Unlocked
+                </p>
+                <p>Includes 78 master templates, ATS match scanner, AI bullet rewrites, and vector PDF exports.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 2: Institutional Admin / Placement Officer Login */}
+          {activeTab === "admin" && (
+            <div className="space-y-4 pt-1">
+              <div className="text-center space-y-1">
+                <h2 className="font-bricolage text-lg font-bold text-white">Placement Officer Sign In</h2>
+                <p className="text-xs text-[#888898]">Manage student rosters, upload CSV files, and inspect placement resumes</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs text-[#888898] flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-violet-400" /> Institutional Contact Email
+                </Label>
+                <Input
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  placeholder="e.g. placement@iitb.ac.in"
+                  className="bg-[#0D0D0D] border-[#2E2E2E] focus:border-violet-500 text-white placeholder:text-[#5A5A6A] rounded-xl text-xs h-11"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs text-[#888898] flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-violet-400" /> Institutional Admin Password
+                </Label>
+                <Input
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  type="password"
+                  placeholder="Enter admin password"
+                  onKeyDown={(e) => e.key === "Enter" && handleAdminLogin()}
+                  className="bg-[#0D0D0D] border-[#2E2E2E] focus:border-violet-500 text-white placeholder:text-[#5A5A6A] rounded-xl text-xs h-11"
+                />
+              </div>
+
+              <Button
+                onClick={handleAdminLogin}
+                disabled={loadingAdminLogin}
+                className="w-full h-11 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold rounded-full shadow-lg shadow-violet-600/20 text-xs gap-2 transition-all mt-2"
+              >
+                {loadingAdminLogin ? <Loader2 className="w-4 h-4 animate-spin" /> : <Building2 className="w-4 h-4" />}
+                Access Institutional Management Dashboard →
+              </Button>
+
+              <div className="p-3 bg-violet-950/20 border border-violet-800/30 rounded-2xl text-[11px] text-[#888898] space-y-1">
+                <p className="font-bold text-violet-300 flex items-center gap-1">
+                  <ShieldAlert className="w-3 h-3 text-violet-400" /> College Admin Control
+                </p>
+                <p>Upload student rosters via CSV / Excel, view student ATS scores, and issue logins.</p>
+              </div>
+            </div>
+          )}
+
         </Card>
       </section>
 

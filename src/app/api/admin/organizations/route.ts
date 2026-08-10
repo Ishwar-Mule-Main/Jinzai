@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyAdmin, adminUnauthorized } from "@/lib/admin-auth";
 import { PLAN_LIMITS, type PlanId } from "@/lib/resume/plans";
+import bcrypt from "bcryptjs";
 
 export const runtime = "nodejs";
 
@@ -47,18 +48,21 @@ export async function POST(req: NextRequest) {
   try {
     if (!verifyAdmin(req)) return adminUnauthorized();
     const body = await req.json();
-    const { name, type, uniqueCode, contactEmail, contactPhone, plan, seats, notes } = body;
+    const { name, type, uniqueCode, contactEmail, contactPhone, password, plan, seats, notes } = body;
 
-    if (!name) return NextResponse.json({ error: "Organization name is required" }, { status: 400 });
+    if (!name) return NextResponse.json({ error: "College / Organization name is required" }, { status: 400 });
+    if (!contactEmail) return NextResponse.json({ error: "Institutional contact email is required" }, { status: 400 });
+    if (!password) return NextResponse.json({ error: "Institutional admin password is required" }, { status: 400 });
+    if (!contactPhone) return NextResponse.json({ error: "Contact phone number is required" }, { status: 400 });
 
     const code = (uniqueCode || generateUniqueCode(name)).toUpperCase();
     // Ensure uniqueness
     const existing = await db.organization.findUnique({ where: { uniqueCode: code } });
     if (existing) {
-      return NextResponse.json({ error: "Unique code already in use. Try another." }, { status: 400 });
+      return NextResponse.json({ error: "Unique portal code already in use. Try another." }, { status: 400 });
     }
 
-    const planId = (plan as PlanId) || "pro_499";
+    const planId = (plan as PlanId) || "pro_399";
     if (!PLAN_LIMITS[planId]) return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
 
     const org = await db.organization.create({
@@ -66,11 +70,32 @@ export async function POST(req: NextRequest) {
         name,
         type: type || "college",
         uniqueCode: code,
-        contactEmail: contactEmail || null,
-        contactPhone: contactPhone || null,
+        contactEmail: contactEmail.trim().toLowerCase(),
+        contactPhone: contactPhone.trim(),
         plan: planId,
-        seats: Number(seats) || 0,
+        seats: Number(seats) || 300,
         notes: notes || null,
+      },
+    });
+
+    // Hash admin password and create/upsert Institutional Admin User
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const adminUser = await db.user.upsert({
+      where: { email: contactEmail.trim().toLowerCase() },
+      update: {
+        name: `${name} Placement Cell Admin`,
+        password: hashedPassword,
+        role: "org_admin",
+        organizationId: org.id,
+        plan: planId,
+      },
+      create: {
+        email: contactEmail.trim().toLowerCase(),
+        name: `${name} Placement Cell Admin`,
+        password: hashedPassword,
+        role: "org_admin",
+        organizationId: org.id,
+        plan: planId,
       },
     });
 
@@ -79,6 +104,9 @@ export async function POST(req: NextRequest) {
       name: org.name,
       type: org.type,
       uniqueCode: org.uniqueCode,
+      contactEmail: org.contactEmail,
+      contactPhone: org.contactPhone,
+      adminEmail: adminUser.email,
       plan: org.plan,
       seats: org.seats,
       createdAt: org.createdAt,

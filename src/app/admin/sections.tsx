@@ -1064,14 +1064,25 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
 
   useEffect(() => { load(); }, [load]);
 
+  const [adminPassword, setAdminPassword] = useState("");
+
   const createOrg = async () => {
-    if (!name) { toast.error("Organization name is required"); return; }
+    if (!name) { toast.error("College / Organization name is required"); return; }
+    if (!contactEmail) { toast.error("Institutional contact email is required"); return; }
+    if (!contactPhone) { toast.error("Contact phone number is required"); return; }
+    if (!adminPassword) { toast.error("Institutional admin password is required"); return; }
+
     setSaving(true);
     try {
-      const body: Record<string, unknown> = { name, type, plan };
+      const body: Record<string, unknown> = {
+        name,
+        type,
+        plan,
+        contactEmail,
+        contactPhone,
+        password: adminPassword,
+      };
       if (uniqueCode) body.uniqueCode = uniqueCode;
-      if (contactEmail) body.contactEmail = contactEmail;
-      if (contactPhone) body.contactPhone = contactPhone;
       if (seats) body.seats = Number(seats);
       if (notes) body.notes = notes;
       const res = await fetch("/api/admin/organizations", {
@@ -1083,8 +1094,8 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
         const j = await res.json();
         throw new Error(j.error || "Failed");
       }
-      toast.success("Organization created");
-      setName(""); setUniqueCode(""); setContactEmail(""); setContactPhone(""); setSeats(""); setNotes("");
+      toast.success("College Portal & Institutional Admin user created!");
+      setName(""); setUniqueCode(""); setContactEmail(""); setContactPhone(""); setAdminPassword(""); setSeats(""); setNotes("");
       setShowCreate(false);
       load();
       onCreated();
@@ -1280,9 +1291,32 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label className="text-xs text-[#888898]">Organization Name *</Label>
+              <Label className="text-xs text-[#888898]">College / Organization Name *</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. IIT Bombay" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
             </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-[#888898]">Institutional Contact Email *</Label>
+                <Input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="e.g. placement@iitb.ac.in" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
+              </div>
+              <div>
+                <Label className="text-xs text-[#888898]">Contact Phone Number *</Label>
+                <Input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="e.g. +91 98765 43210" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-[#888898]">Institutional Admin Password *</Label>
+                <Input value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} type="password" placeholder="Password for college admin" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
+              </div>
+              <div>
+                <Label className="text-xs text-[#888898]">Purchased Seats Count</Label>
+                <Input value={seats} onChange={(e) => setSeats(e.target.value)} type="number" placeholder="e.g. 300" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs text-[#888898]">Type</Label>
@@ -1296,15 +1330,8 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
                 </Select>
               </div>
               <div>
-                <Label className="text-xs text-[#888898]">Student Default Plan</Label>
-                <Select value={plan} onValueChange={setPlan}>
-                  <SelectTrigger className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-[#141414] border-[#2E2E2E] text-white">
-                    <SelectItem value="pro_399">Pro Plan (₹399/mo)</SelectItem>
-                    <SelectItem value="business_999">Business Plan (₹999/mo)</SelectItem>
-                    <SelectItem value="institution_4999">Institution Plan (₹4,999/mo)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label className="text-xs text-[#888898]">Unique Code (Optional)</Label>
+                <Input value={uniqueCode} onChange={(e) => setUniqueCode(e.target.value)} placeholder="Auto-generated if blank (e.g. IITBX3)" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl font-mono uppercase" />
               </div>
             </div>
           </div>

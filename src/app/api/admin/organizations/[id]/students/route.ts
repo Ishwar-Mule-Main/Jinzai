@@ -1,21 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyAdmin, adminUnauthorized } from "@/lib/admin-auth";
+import { verifyAdmin } from "@/lib/admin-auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 import { PLAN_LIMITS, type PlanId } from "@/lib/resume/plans";
 
 export const runtime = "nodejs";
 
+// GET /api/admin/organizations/[id]/students — list all students under an org
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const session = await getServerSession(authOptions);
+    const isAdmin = verifyAdmin(req);
+    const isOrgAdmin = session?.user?.role === "org_admin" && (session?.user as any)?.organizationId === id;
+
+    if (!isAdmin && !isOrgAdmin) {
+      return NextResponse.json({ error: "Unauthorized access to institution roster" }, { status: 401 });
+    }
+
+    const students = await db.user.findMany({
+      where: { organizationId: id, role: "student" },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        studentId: true,
+        createdAt: true,
+        _count: { select: { resumes: true } },
+      },
+    });
+
+    return NextResponse.json({ students });
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
+  }
+}
+
 // POST /api/admin/organizations/[id]/students — create one or many student accounts under an org
-// Body: { students: [{ studentId, name, email? }] } OR { studentId, name, email? } (single)
-// Email auto-generated as {studentId}@{orguniquecode}.edu if not provided
-// Password = studentId + org.uniqueCode (as specified by the user)
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    if (!verifyAdmin(req)) return adminUnauthorized();
     const { id } = await params;
-    const body = await req.json();
+    const session = await getServerSession(authOptions);
+    const isAdmin = verifyAdmin(req);
+    const isOrgAdmin = session?.user?.role === "org_admin" && (session?.user as any)?.organizationId === id;
 
+    if (!isAdmin && !isOrgAdmin) {
+      return NextResponse.json({ error: "Unauthorized access to institution roster" }, { status: 401 });
+    }
+
+    const body = await req.json();
     const org = await db.organization.findUnique({ where: { id } });
     if (!org) return NextResponse.json({ error: "Organization not found" }, { status: 404 });
 
@@ -49,7 +85,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       try {
         const existing = await db.user.findUnique({ where: { email } });
         if (existing) {
-          results.push({ studentId, name: s.name, email, password: "•••• (already exists)", status: "exists" });
+          results.push({ studentId, name: s.name, email, password: `${studentId}${org.uniqueCode}`, status: "exists" });
           continue;
         }
         const hashed = await bcrypt.hash(password, 10);
@@ -71,7 +107,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           },
         });
 
-        // Record a transaction (org-sponsored)
+        // Record an org-sponsored transaction
         if (config.price > 0) {
           await db.transaction.create({
             data: {
