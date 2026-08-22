@@ -14,35 +14,50 @@ import {
   Upload,
   Wand2,
   Check,
-  Search,
   Target,
   Gauge,
   Mail,
   Building2,
   ShieldCheck,
   Star,
-  ChevronDown,
+  ChevronRight,
   UserPlus,
   Crown,
   ArrowRight,
-  Terminal,
+  CheckCircle2,
+  Zap,
+  Lock,
   Layers,
-  Cpu,
+  GraduationCap,
+  DownloadCloud,
+  FileCheck2,
 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { TEMPLATES } from "@/lib/resume/types";
 import { useCurrentUser } from "@/lib/resume/use-current-user";
 import { useResumeStore } from "@/lib/resume/store";
-import { getSampleProfile } from "@/lib/resume/sample-profiles";
+
+// Hand-picked 8 premier templates showcasing distinct layout archetypes
+const FEATURED_TEMPLATE_IDS = [
+  "modern",
+  "midnight-exec",
+  "tech",
+  "aurora-pro",
+  "executive",
+  "campus-navy",
+  "minimal",
+  "corporate-elite",
+];
 
 export default function HomePage() {
   const router = useRouter();
   const { user } = useCurrentUser();
   const [authMode, setAuthMode] = useState<AuthMode | null>(null);
-
-  // Template Search & Filter state
-  const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [showAllTemplates, setShowAllTemplates] = useState(false);
 
   const loadSample = useResumeStore((s) => s.loadSample);
   const clearAll = useResumeStore((s) => s.clearAll);
@@ -63,256 +78,278 @@ export default function HomePage() {
     router.push("/editor");
   };
 
-  // Filter templates
-  const filteredTemplates = useMemo(() => {
-    return TEMPLATES.map((t, index) => ({ t, originalIndex: index })).filter(({ t }) => {
-      const matchesSearch =
-        search === "" ||
-        t.name.toLowerCase().includes(search.toLowerCase()) ||
-        t.description.toLowerCase().includes(search.toLowerCase()) ||
-        t.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()));
-
-      let matchesCategory = true;
-      if (activeCategory === "ats") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("ats"));
-      if (activeCategory === "entry") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("entry") || tag.toLowerCase().includes("college") || tag.toLowerCase().includes("academic"));
-      if (activeCategory === "tech") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("tech") || tag.toLowerCase().includes("developer"));
-      if (activeCategory === "creative") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("creative") || tag.toLowerCase().includes("bold"));
-      if (activeCategory === "executive") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("executive") || tag.toLowerCase().includes("serif"));
-
-      return matchesSearch && matchesCategory;
-    });
-  }, [search, activeCategory]);
+  // Extract exactly the 8 featured templates
+  const featuredTemplates = useMemo(() => {
+    const map = new Map(TEMPLATES.map((t, idx) => [t.id, { t, originalIndex: idx }]));
+    return FEATURED_TEMPLATE_IDS.map((id) => map.get(id) || { t: TEMPLATES[0], originalIndex: 0 });
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
-      {/* Navbar */}
+      {/* Top Navbar */}
       <PublicNav onLogin={() => setAuthMode("login")} onSignup={() => setAuthMode("signup")} />
 
-      {/* ── Hero Section (ClickHouse 7/5 Grid & High Voltage Electric Yellow) ── */}
-      <section className="relative pt-16 pb-20 px-4 sm:px-6 lg:px-8 border-b border-[#2a2a2a]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column: Headline & Action Signal (7 cols) */}
-          <div className="lg:col-span-7 space-y-6">
+      {/* ── 1. Hero Section (ClickHouse Dark Canvas & High-Voltage Electric Yellow) ── */}
+      <section className="relative pt-12 sm:pt-20 pb-20 px-4 sm:px-6 lg:px-8 border-b border-[#2a2a2a] overflow-hidden">
+        {/* Subtle background glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-[#faff69]/5 via-transparent to-transparent blur-3xl pointer-events-none -z-10" />
+
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          {/* Left Column: Value Proposition & CTAs (7 cols) */}
+          <div className="lg:col-span-7 space-y-6 text-left">
+            {/* Engine Status Pill */}
             <div className="inline-flex items-center gap-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] px-3.5 py-1.5 rounded-full text-xs font-mono">
-              <span className="w-2 h-2 rounded-full bg-[#faff69]"></span>
-              <span className="text-[#cccccc]">Jinzai Engine</span>
+              <span className="w-2 h-2 rounded-full bg-[#faff69] animate-pulse"></span>
+              <span className="text-[#cccccc]">Jinzai Engine 2.0</span>
               <span className="text-[#888888]">/</span>
-              <span className="text-[#faff69] font-semibold">AI Resume Platform</span>
+              <span className="text-[#faff69] font-semibold">AI Resume &amp; Talent Platform</span>
             </div>
 
+            {/* Main Headline */}
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.05]">
-              The High-Performance <span className="text-[#faff69]">AI Resume Builder</span>
+              Build an <span className="text-[#faff69] underline decoration-[#faff69]/40 underline-offset-8">ATS-Crushing</span> Resume in Seconds
             </h1>
 
+            {/* Subtitle */}
             <p className="text-[#cccccc] text-base sm:text-lg max-w-xl leading-relaxed">
-              Jinzai (人材) delivers ultra-fast AI rewriting, ATS compliance scoring, and 78 engineered templates. Build, optimize, and export recruiter-certified vector resumes in seconds.
+              Jinzai (人材) pairs <strong>78 recruiter-certified templates</strong> with multimodal AI bullet rewriting, instant ATS job matching, and pixel-perfect vector PDF export.
             </p>
 
-            {/* CTAs */}
+            {/* Action Buttons Group */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
                 onClick={handleStartBuilding}
-                className="h-11 px-7 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold text-sm rounded-md transition-colors inline-flex items-center gap-2"
+                className="h-12 px-8 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-bold text-sm rounded-md transition-all inline-flex items-center gap-2 shadow-lg shadow-[#faff69]/10 hover:shadow-[#faff69]/20 transform hover:-translate-y-0.5"
               >
                 <FileText className="w-4 h-4" /> Start Building Free
+                <ArrowRight className="w-4 h-4 ml-1" />
               </button>
 
               <ImportResumeDialog
                 trigger={
-                  <button className="h-11 px-6 bg-[#1a1a1a] hover:bg-[#242424] text-white border border-[#2a2a2a] hover:border-[#3a3a3a] text-sm font-semibold rounded-md transition-colors inline-flex items-center gap-2">
-                    <Upload className="w-4 h-4 text-[#faff69]" /> Upload &amp; Parse
+                  <button className="h-12 px-6 bg-[#1a1a1a] hover:bg-[#242424] text-white border border-[#2a2a2a] hover:border-[#3a3a3a] text-sm font-semibold rounded-md transition-colors inline-flex items-center gap-2">
+                    <Upload className="w-4 h-4 text-[#faff69]" /> Upload &amp; Parse CV
                   </button>
                 }
               />
 
               <button
                 onClick={handleTrySample}
-                className="h-11 px-5 text-[#888888] hover:text-white text-sm font-medium transition-colors inline-flex items-center gap-2"
+                className="h-12 px-5 text-[#888888] hover:text-white text-sm font-medium transition-colors inline-flex items-center gap-2"
               >
-                <Wand2 className="w-4 h-4 text-[#faff69]" /> Try Sample
+                <Wand2 className="w-4 h-4 text-[#faff69]" /> Try Sample Data
               </button>
             </div>
 
+            {/* Logged in indicator */}
             {user && (
               <div className="pt-1">
                 <Link href="/dashboard">
-                  <span className="inline-flex items-center gap-2 text-xs font-mono text-[#faff69] bg-[#1a1a1a] border border-[#2a2a2a] px-3 py-1.5 rounded-md hover:border-[#faff69]/40 transition-colors">
+                  <span className="inline-flex items-center gap-2 text-xs font-mono text-[#faff69] bg-[#1a1a1a] border border-[#2a2a2a] px-3.5 py-1.5 rounded-md hover:border-[#faff69]/40 transition-colors">
                     Logged in as {user.email} — Open Console →
                   </span>
                 </Link>
               </div>
             )}
+
+            {/* Micro Trust Indicators */}
+            <div className="pt-4 flex flex-wrap items-center gap-6 text-xs text-[#888888] font-mono border-t border-[#2a2a2a]/60">
+              <span className="flex items-center gap-1.5 text-[#cccccc]">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#22c55e]" /> 100% ATS Readable
+              </span>
+              <span className="flex items-center gap-1.5 text-[#cccccc]">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#faff69]" /> Zero Print Popups
+              </span>
+              <span className="flex items-center gap-1.5 text-[#cccccc]">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#3b82f6]" /> STAR Metric AI
+              </span>
+            </div>
           </div>
 
-          {/* Right Column: Code Window Card / Product UI Fragment (5 cols) */}
+          {/* Right Column: High-Fidelity Interactive Preview Card (5 cols) */}
           <div className="lg:col-span-5">
-            <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-5 shadow-2xl font-mono text-xs text-[#cccccc] space-y-3">
-              {/* Window Bar */}
+            <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-6 shadow-2xl space-y-4 relative group hover:border-[#3a3a3a] transition-all">
+              {/* Window Header */}
               <div className="flex items-center justify-between border-b border-[#2a2a2a] pb-3 text-[#888888]">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]/80"></span>
                   <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]/80"></span>
                   <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]/80"></span>
-                  <span className="text-[11px] text-[#888888] ml-2">resume-optimizer.sql</span>
+                  <span className="text-[11px] text-[#888888] ml-2 font-mono">jinzai-copilot.engine</span>
                 </div>
-                <span className="text-[10px] text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/30 px-2 py-0.5 rounded">ATS 100%</span>
+                <span className="text-[10px] text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/30 px-2 py-0.5 rounded font-mono font-bold">
+                  ● ATS MATCH 98%
+                </span>
               </div>
 
-              {/* Code Content */}
-              <div className="space-y-1 text-[13px] leading-relaxed pt-1">
-                <p><span className="text-[#3b82f6]">SELECT</span> candidate_name, ats_score, target_role</p>
-                <p><span className="text-[#3b82f6]">FROM</span> jinzai_resumes</p>
-                <p><span className="text-[#3b82f6]">WHERE</span> template_id = <span className="text-[#faff69]">&apos;tech-lead-pro&apos;</span></p>
-                <p>&nbsp;&nbsp;<span className="text-[#3b82f6]">AND</span> keyword_match_rate &gt;= <span className="text-[#22c55e]">0.98</span></p>
-                <p><span className="text-[#3b82f6]">OPTIMIZE WITH</span> (ai_action_verbs = <span className="text-[#faff69]">true</span>);</p>
+              {/* Target Role & Candidate Header */}
+              <div className="p-3.5 bg-[#121212] border border-[#2a2a2a] rounded-lg space-y-1">
+                <p className="text-[10px] text-[#888888] font-mono uppercase tracking-wider">Candidate Role</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-bold text-white">Staff Software Engineer</p>
+                  <span className="text-xs text-[#faff69] font-mono font-semibold">Tier-1 Layout</span>
+                </div>
               </div>
 
-              {/* Metrics Output Banner */}
-              <div className="mt-4 p-3 bg-[#121212] border border-[#2a2a2a] rounded-lg space-y-1.5">
-                <div className="flex justify-between items-center text-[11px]">
-                  <span className="text-[#888888]">Parsed Keywords:</span>
-                  <span className="text-white font-bold">24 / 24 Matched</span>
+              {/* AI Bullet Transformation Showcase */}
+              <div className="space-y-2 text-left">
+                <p className="text-[10px] text-[#888888] font-mono uppercase tracking-wider">AI Bullet Rewriter (STAR Formula)</p>
+                
+                {/* Before */}
+                <div className="p-2.5 bg-[#121212] border border-[#ef4444]/20 rounded-md text-[11px] text-[#888888] line-through">
+                  &ldquo;Worked on the payments backend and handled database queries.&rdquo;
                 </div>
-                <div className="flex justify-between items-center text-[11px]">
-                  <span className="text-[#888888]">Export Format:</span>
+
+                {/* After (Electric Yellow Highlight) */}
+                <div className="p-3 bg-[#121212] border border-[#faff69]/40 rounded-md text-xs text-white space-y-1">
+                  <div className="flex items-center gap-1.5 text-[10px] text-[#faff69] font-mono font-bold">
+                    <Sparkles className="w-3 h-3" /> JINZAI AI OPTIMIZED
+                  </div>
+                  <p className="leading-relaxed">
+                    &ldquo;Architected high-concurrency payment gateway handling <strong>₹24M+ ARR</strong> with <strong>99.99% uptime</strong>, slashing P99 database query latency by <strong>42%</strong>.&rdquo;
+                  </p>
+                </div>
+              </div>
+
+              {/* Live Metric Badges */}
+              <div className="grid grid-cols-2 gap-2 pt-1 font-mono text-[11px]">
+                <div className="p-2.5 bg-[#121212] border border-[#2a2a2a] rounded-md">
+                  <span className="text-[#888888] block text-[9px]">Matched Skills:</span>
+                  <span className="text-white font-bold">24 / 24 Keywords</span>
+                </div>
+                <div className="p-2.5 bg-[#121212] border border-[#2a2a2a] rounded-md">
+                  <span className="text-[#888888] block text-[9px]">Export Quality:</span>
                   <span className="text-[#faff69] font-bold">Vector PDF (ISO A4)</span>
-                </div>
-                <div className="flex justify-between items-center text-[11px]">
-                  <span className="text-[#888888]">Engine Status:</span>
-                  <span className="text-[#22c55e]">● Ready in 1.2s</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── Stat Callouts Row (ClickHouse Yellow Stat Display Numbers) ── */}
-        <div className="max-w-7xl mx-auto pt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
+        {/* ── Metric Display Stats (ClickHouse Signature Yellow Numbers) ── */}
+        <div className="max-w-7xl mx-auto pt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-left border-t border-[#2a2a2a]/60 mt-12">
           <div>
             <p className="text-4xl sm:text-5xl font-bold tracking-tight text-[#faff69]">78+</p>
-            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1">Recruiter Templates</p>
+            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1 font-mono">Recruiter Templates</p>
           </div>
           <div>
             <p className="text-4xl sm:text-5xl font-bold tracking-tight text-[#faff69]">100%</p>
-            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1">ATS Text Extraction</p>
+            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1 font-mono">ATS Text Compliance</p>
           </div>
           <div>
-            <p className="text-4xl sm:text-5xl font-bold tracking-tight text-[#faff69]">&lt; 3m</p>
-            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1">Generation Time</p>
+            <p className="text-4xl sm:text-5xl font-bold tracking-tight text-[#faff69]">&lt; 60s</p>
+            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1 font-mono">AI Generation Time</p>
           </div>
           <div>
             <p className="text-4xl sm:text-5xl font-bold tracking-tight text-[#faff69]">50k+</p>
-            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1">Resumes Exported</p>
+            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1 font-mono">Resumes Exported</p>
           </div>
         </div>
       </section>
 
-      {/* ── Interactive Templates Gallery ── */}
+      {/* ── 2. Featured Templates Spotlight (STRICTLY 8 TEMPLATES) ── */}
       <section id="templates" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full space-y-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#faff69] px-3 py-1 rounded-full text-xs font-mono mb-3">
-              78 PRODUCTION TEMPLATES
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 text-left">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#faff69] px-3.5 py-1 rounded-full text-xs font-mono">
+              CURATED COLLECTION
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Choose Your Engineered Layout</h2>
-            <p className="text-sm text-[#cccccc] mt-1">Recruiter-tested typography, layout hierarchy, and instant vector export.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+              Featured Templates (8 of 78)
+            </h2>
+            <p className="text-sm text-[#cccccc]">
+              Hand-picked, recruiter-certified layouts engineered for maximum readability and instant ATS pass rate.
+            </p>
           </div>
 
-          {/* Search bar */}
-          <div className="relative w-full md:w-80">
-            <Search className="w-4 h-4 text-[#888888] absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search templates by role or style..."
-              className="w-full pl-10 pr-4 h-10 bg-[#1a1a1a] border border-[#2a2a2a] focus:border-[#faff69] text-white text-xs rounded-md outline-none transition-colors"
-            />
-          </div>
+          <Link
+            href="/templates"
+            className="h-11 px-6 bg-[#1a1a1a] hover:bg-[#242424] text-white border border-[#2a2a2a] hover:border-[#faff69]/40 text-xs font-semibold rounded-md transition-colors inline-flex items-center gap-2 shrink-0 self-start md:self-auto"
+          >
+            <span>Explore All 78 Templates</span>
+            <ArrowRight className="w-4 h-4 text-[#faff69]" />
+          </Link>
         </div>
 
-        {/* Category Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-[#2a2a2a] pb-4">
-          {[
-            { id: "all", label: "All 78 Templates" },
-            { id: "ats", label: "100% ATS Optimized" },
-            { id: "tech", label: "Tech & Engineering" },
-            { id: "executive", label: "Executive & Senior" },
-            { id: "entry", label: "Freshers & Academic" },
-            { id: "creative", label: "Design & Creative" },
-          ].map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 rounded-md text-xs font-semibold transition-all ${
-                activeCategory === cat.id
-                  ? "bg-[#1a1a1a] text-white border border-[#faff69]"
-                  : "bg-transparent text-[#888888] hover:text-white hover:bg-[#1a1a1a]/60"
-              }`}
-            >
-              {cat.label}
-            </button>
+        {/* The 8 Curated Template Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
+          {featuredTemplates.map(({ t, originalIndex }) => (
+            <TemplateCard
+              key={t.id}
+              id={t}
+              index={originalIndex}
+              user={user}
+              onAuthRequired={() => setAuthMode("signup")}
+            />
           ))}
         </div>
 
-        {/* Uniform Grid of Equal Shape Template Cards */}
-        {(() => {
-          const displayedTemplates =
-            showAllTemplates || search !== "" || activeCategory !== "all"
-              ? filteredTemplates
-              : filteredTemplates.slice(0, 8);
+        {/* ── High-Impact "Explore All 78 Templates" Banner ── */}
+        <div className="mt-8 p-8 sm:p-10 bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#faff69]/50 rounded-xl transition-all text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
+          <div className="space-y-1.5 max-w-2xl">
+            <div className="inline-flex items-center gap-2 text-xs font-mono text-[#faff69]">
+              <Layers className="w-4 h-4" /> 70 MORE SPECIALIZED DESIGNS AVAILABLE
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              Need a sidebar, academic, or creative layout?
+            </h3>
+            <p className="text-xs sm:text-sm text-[#cccccc]">
+              Browse our complete library of 78 templates categorized by Tech, Executive, Campus Placement, Minimalist, and Timeline formats.
+            </p>
+          </div>
 
-          return (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-2">
-                {displayedTemplates.map(({ t, originalIndex }) => (
-                  <TemplateCard key={t.id} id={t} index={originalIndex} user={user} onAuthRequired={() => setAuthMode("signup")} />
-                ))}
-              </div>
-
-              {/* See More Templates Section */}
-              {filteredTemplates.length > 8 && (
-                <div className="pt-8 text-center space-y-4">
-                  <p className="text-xs font-mono text-[#888888]">
-                    Showing {displayedTemplates.length} of {filteredTemplates.length} templates
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center gap-3">
-                    <Link
-                      href="/templates"
-                      className="h-11 px-8 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold text-sm rounded-md transition-colors inline-flex items-center gap-2 shadow-lg shadow-[#faff69]/10"
-                    >
-                      <span>Explore All 78 Templates</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                    <button
-                      onClick={() => setShowAllTemplates(!showAllTemplates)}
-                      className="h-11 px-6 bg-[#1a1a1a] hover:bg-[#242424] text-white border border-[#2a2a2a] hover:border-[#3a3a3a] text-sm font-semibold rounded-md transition-colors inline-flex items-center gap-2"
-                    >
-                      {showAllTemplates ? "Show Less (8)" : `View More on Page (+${filteredTemplates.length - 8})`}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </>
-          );
-        })()}
+          <Link
+            href="/templates"
+            className="h-12 px-8 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-bold text-sm rounded-md transition-all inline-flex items-center gap-2 shrink-0 shadow-md shadow-[#faff69]/10"
+          >
+            <span>View All 78 Templates</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </section>
 
-      {/* ── AI Features (ClickHouse Dark Feature Cards) ── */}
+      {/* ── 3. Core Features / Why Candidates Choose Jinzai ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full space-y-12 border-t border-[#2a2a2a]">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Built for Maximum Recruiter Impact</h2>
-          <p className="text-sm text-[#cccccc]">Precision intelligence modules to rewrite bullets, match target job requirements, and score structure.</p>
+          <div className="inline-flex items-center gap-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#faff69] px-3.5 py-1 rounded-full text-xs font-mono">
+            ENGINEERED ADVANTAGES
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+            Built for Maximum Recruiter Impact
+          </h2>
+          <p className="text-sm text-[#cccccc]">
+            Every module in Jinzai is designed to help you stand out from automated ATS filters and hiring managers.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
           {[
-            { title: "LLM Bullet Optimizer", desc: "Quantifies your responsibilities into high-impact metric-backed achievements with strong action verbs.", icon: Sparkles },
-            { title: "Resume Quality Rating", desc: "Real-time automated evaluation across quantification, brevity, formatting, and structural completeness.", icon: Gauge },
-            { title: "Target ATS Matcher", desc: "Upload or paste any job description to discover missing hard keywords and compute similarity indices.", icon: Target },
-            { title: "Role Cover Letters", desc: "Generates tailored cover letters aligned with your resume experience in modern or formal tone with 1 click.", icon: Mail },
+            {
+              title: "AI STAR Bullet Rewriter",
+              desc: "Transforms simple job responsibilities into metric-backed achievements using Google & Amazon STAR frameworks.",
+              icon: Sparkles,
+            },
+            {
+              title: "Real-Time ATS Radar",
+              desc: "Paste any job description to discover missing hard keywords, skills, and compute your exact match percentage.",
+              icon: Target,
+            },
+            {
+              title: "Direct Vector PDF Export",
+              desc: "Downloads pristine high-DPI A4 PDFs with multi-page overflow protection and zero printer popup hassles.",
+              icon: DownloadCloud,
+            },
+            {
+              title: "Tailored Cover Letters",
+              desc: "Generates custom cover letters matched to your active resume in 3 tones (Confident, Formal, Concise) in 1 click.",
+              icon: Mail,
+            },
           ].map((f) => (
-            <div key={f.title} className="p-8 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#3a3a3a] transition-colors group space-y-4">
-              <div className="w-12 h-12 rounded-lg bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69]">
+            <div
+              key={f.title}
+              className="p-8 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#3a3a3a] transition-all group space-y-4"
+            >
+              <div className="w-12 h-12 rounded-lg bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69] group-hover:scale-105 transition-transform">
                 <f.icon className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-semibold text-white tracking-tight">{f.title}</h3>
@@ -322,34 +359,128 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Transparent Pricing (ClickHouse Featured Yellow Tier) ── */}
+      {/* ── 4. Simple 3-Step Workflow ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full space-y-12 border-t border-[#2a2a2a]">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">How Jinzai Works</h2>
+          <p className="text-sm text-[#cccccc]">From blank canvas to recruiter-ready resume in three simple steps.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+          {[
+            {
+              step: "01",
+              title: "Choose Layout or Upload CV",
+              desc: "Select from 78 engineered templates or upload your existing PDF/DOCX to auto-extract all experience.",
+            },
+            {
+              step: "02",
+              title: "AI Optimization & ATS Match",
+              desc: "Let Jinzai AI polish your achievement bullets, score your content, and verify keywords against target jobs.",
+            },
+            {
+              step: "03",
+              title: "Direct Vector PDF Download",
+              desc: "Download clean, razor-sharp vector PDFs ready for job applications, email submissions, and LinkedIn.",
+            },
+          ].map((s) => (
+            <div key={s.step} className="p-8 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] space-y-4">
+              <span className="text-3xl font-bold text-[#faff69] font-mono">{s.step}</span>
+              <h3 className="text-lg font-bold text-white">{s.title}</h3>
+              <p className="text-xs text-[#cccccc] leading-relaxed">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── 5. Campus & Institution Callout ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <div className="p-8 sm:p-12 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl flex flex-col md:flex-row items-center justify-between gap-8 text-left">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 bg-[#242424] text-[#faff69] border border-[#2a2a2a] px-3 py-1 rounded-full text-xs font-mono">
+              <GraduationCap className="w-3.5 h-3.5" /> INSTITUTION &amp; PLACEMENT PORTAL
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              Are you a College, University, or Placement Cell?
+            </h3>
+            <p className="text-xs sm:text-sm text-[#cccccc] max-w-xl">
+              Equip up to 300 students with dedicated accounts, placement officer tracking, and campus-branded resumes.
+            </p>
+          </div>
+
+          <Link
+            href="/institutions"
+            className="h-11 px-7 bg-[#242424] hover:bg-[#333333] text-white border border-[#2a2a2a] font-semibold text-xs rounded-md transition-colors inline-flex items-center gap-2 shrink-0"
+          >
+            <Building2 className="w-4 h-4 text-[#faff69]" /> Learn About Campus Plans
+          </Link>
+        </div>
+      </section>
+
+      {/* ── 6. Transparent Pricing (ClickHouse Featured Yellow Tier) ── */}
       <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full space-y-12 border-t border-[#2a2a2a]">
         <div className="text-center space-y-3">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Simple, Predictable Pricing</h2>
+          <div className="inline-flex items-center gap-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#faff69] px-3.5 py-1 rounded-full text-xs font-mono">
+            SIMPLE PRICING
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+            Transparent Plans for Every Career Stage
+          </h2>
           <p className="text-sm text-[#cccccc]">Create and edit for free. Upgrade when you are ready to export your ATS-compliant vector PDF.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto text-left">
           {[
-            { name: "Single Export", price: "₹99", period: "/ export", features: ["1 Resume PDF Export", "Access all 78 templates", "Vector A4 PDF download", "❌ No AI rewriting"], highlight: false },
-            { name: "Pro Plan", price: "₹399", period: "/ month", features: ["5 Resume PDF Exports", "LLM Bullet Rewriting", "ATS Keyword Matcher", "Cover Letter Generator", "All 78 templates"], highlight: true },
-            { name: "Business Plan", price: "₹999", period: "/ month", features: ["50 Resume PDF Exports", "Full AI Suite Access", "Priority Vector Processing", "No Contact Lock", "All 78 templates"], highlight: false },
-            { name: "Institution Plan", price: "₹4,999", period: "/ month", features: ["300 Student Portals", "Placement Cell Console", "Bulk Vector Exports", "Institution Domain Setup"], highlight: false },
+            {
+              name: "Single Export",
+              price: "₹99",
+              period: "/ export",
+              badge: "PAY-PER-DOWNLOAD",
+              features: ["1 Resume PDF Export", "Access all 78 templates", "Vector A4 PDF download", "❌ No AI writing tools"],
+              highlight: false,
+            },
+            {
+              name: "Pro Plan",
+              price: "₹399",
+              period: "/ month",
+              badge: "MOST POPULAR",
+              features: ["5 Resume PDF Exports", "LLM Bullet Rewriting", "ATS Keyword Matcher", "Cover Letter Generator", "All 78 templates"],
+              highlight: true,
+            },
+            {
+              name: "Business Plan",
+              price: "₹999",
+              period: "/ month",
+              badge: "POWER USERS",
+              features: ["50 Resume PDF Exports", "Full AI Suite Access", "Priority Vector Processing", "No Contact Lock", "All 78 templates"],
+              highlight: false,
+            },
+            {
+              name: "Institution Plan",
+              price: "₹4,999",
+              period: "/ month",
+              badge: "COLLEGES",
+              features: ["300 Student Portals", "Placement Cell Console", "Bulk Vector Exports", "Institution Domain Setup"],
+              highlight: false,
+            },
           ].map((plan) => (
             <div
               key={plan.name}
               className={`rounded-xl p-8 flex flex-col justify-between transition-all ${
                 plan.highlight
-                  ? "bg-[#faff69] text-[#0a0a0a] border border-[#faff69]"
+                  ? "bg-[#faff69] text-[#0a0a0a] border border-[#faff69] shadow-xl"
                   : "bg-[#1a1a1a] text-white border border-[#2a2a2a]"
               }`}
             >
               <div>
-                {plan.highlight && (
-                  <span className="bg-[#0a0a0a] text-[#faff69] text-[10px] font-mono px-2.5 py-0.5 uppercase font-bold rounded-full inline-block mb-3">
-                    RECOMMENDED
-                  </span>
-                )}
+                <span
+                  className={`text-[10px] font-mono px-2.5 py-0.5 uppercase font-bold rounded-full inline-block mb-3 ${
+                    plan.highlight ? "bg-[#0a0a0a] text-[#faff69]" : "bg-[#242424] text-[#888888]"
+                  }`}
+                >
+                  {plan.badge}
+                </span>
+
                 <p className={`text-xl font-bold ${plan.highlight ? "text-[#0a0a0a]" : "text-white"}`}>{plan.name}</p>
                 <p className={`text-4xl font-bold mt-2 ${plan.highlight ? "text-[#0a0a0a]" : "text-white"}`}>
                   {plan.price}
@@ -385,39 +516,56 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Testimonials ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full space-y-10 border-t border-[#2a2a2a]">
-        <div className="text-center space-y-3">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Approved by Engineers &amp; Leaders</h2>
-          <p className="text-sm text-[#cccccc]">Job seekers across top tier technology companies trust Jinzai.</p>
+      {/* ── 7. Frequently Asked Questions (Accordion) ── */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full space-y-8 border-t border-[#2a2a2a] text-left">
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl font-bold text-white tracking-tight">Frequently Asked Questions</h2>
+          <p className="text-xs text-[#888888]">Everything you need to know about Jinzai&apos;s templates and exports.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { name: "Rahul Verma", role: "Software Engineer at Google", quote: "I received 3 interview calls within a week of deploying my resume with Jinzai. The AI bullet optimizer was decisive.", avatar: "R" },
-            { name: "Ananya Krishnan", role: "Product Lead at Swiggy", quote: "The ATS keyword comparison allowed me to tailor my CV for competitive leadership roles in minutes.", avatar: "A" },
-            { name: "Vikram Singh", role: "Staff Data Scientist at Amazon", quote: "78 master templates allowed me to pick a crisp, high-density format that passed Taleo ATS instantly.", avatar: "V" },
-          ].map((t) => (
-            <div key={t.name} className="p-8 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-md bg-[#242424] border border-[#2a2a2a] text-[#faff69] flex items-center justify-center font-bold text-sm shrink-0">
-                  {t.avatar}
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white">{t.name}</p>
-                  <p className="text-xs text-[#888888]">{t.role}</p>
-                </div>
-              </div>
-              <p className="text-xs text-[#cccccc] leading-relaxed italic">&ldquo;{t.quote}&rdquo;</p>
-            </div>
-          ))}
-        </div>
+        <Accordion type="single" collapsible className="w-full space-y-3">
+          <AccordionItem value="item-1" className="border border-[#2a2a2a] rounded-xl px-4 bg-[#1a1a1a]">
+            <AccordionTrigger className="text-xs sm:text-sm font-semibold text-white hover:no-underline">
+              Are Jinzai resumes 100% ATS compliant?
+            </AccordionTrigger>
+            <AccordionContent className="text-xs text-[#888888] leading-relaxed">
+              Yes. All 78 templates are engineered with standard font encodings, clean semantic hierarchy, and pure text layers so automated Applicant Tracking Systems (Taleo, Workday, Lever, Greenhouse) can extract your experience flawlessly.
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="item-2" className="border border-[#2a2a2a] rounded-xl px-4 bg-[#1a1a1a]">
+            <AccordionTrigger className="text-xs sm:text-sm font-semibold text-white hover:no-underline">
+              How does the Vector PDF download work?
+            </AccordionTrigger>
+            <AccordionContent className="text-xs text-[#888888] leading-relaxed">
+              Unlike regular websites that force open a browser print dialog with clipped headers and margins, Jinzai generates high-DPI Vector PDFs directly with built-in multi-page break protection.
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="item-3" className="border border-[#2a2a2a] rounded-xl px-4 bg-[#1a1a1a]">
+            <AccordionTrigger className="text-xs sm:text-sm font-semibold text-white hover:no-underline">
+              Can I customize fonts, colors, and photos?
+            </AccordionTrigger>
+            <AccordionContent className="text-xs text-[#888888] leading-relaxed">
+              Yes. In the Jinzai Editor, you can switch between 18 professional typography pairings, customize accent colors, and toggle candidate portraits with live real-time preview.
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="item-4" className="border border-[#2a2a2a] rounded-xl px-4 bg-[#1a1a1a]">
+            <AccordionTrigger className="text-xs sm:text-sm font-semibold text-white hover:no-underline">
+              Can I import an existing PDF or Word document?
+            </AccordionTrigger>
+            <AccordionContent className="text-xs text-[#888888] leading-relaxed">
+              Yes! Click &ldquo;Upload &amp; Parse CV&rdquo; in the hero section to upload your existing resume in PDF, DOCX, MD, or TXT format. Jinzai AI will parse and populate the editor automatically.
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </section>
 
-      {/* ── ClickHouse Signature Full-Bleed Yellow CTA Band (cta-band-yellow) ── */}
+      {/* ── 8. ClickHouse Full-Bleed Yellow CTA Band ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <div className="rounded-xl bg-[#faff69] text-[#0a0a0a] p-10 sm:p-16 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="space-y-2 text-left">
+        <div className="rounded-xl bg-[#faff69] text-[#0a0a0a] p-10 sm:p-16 flex flex-col md:flex-row items-center justify-between gap-8 text-left shadow-2xl">
+          <div className="space-y-2">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0a0a0a]">
               Build Your High-Impact Resume Today
             </h2>
@@ -429,18 +577,18 @@ export default function HomePage() {
           <div className="shrink-0 flex items-center gap-3">
             <button
               onClick={handleStartBuilding}
-              className="h-12 px-8 bg-[#0a0a0a] hover:bg-[#242424] text-white font-semibold text-sm rounded-md transition-colors inline-flex items-center gap-2"
+              className="h-12 px-8 bg-[#0a0a0a] hover:bg-[#242424] text-white font-bold text-sm rounded-md transition-colors inline-flex items-center gap-2"
             >
-              <UserPlus className="w-4 h-4" /> Get Started Free
+              <UserPlus className="w-4 h-4" /> Start Building Free
             </button>
           </div>
         </div>
       </section>
 
-      {/* ── Footer ── */}
+      {/* Footer */}
       <PublicFooter />
 
-      {/* ── Auth Dialog ── */}
+      {/* Auth Dialog */}
       <AuthDialog mode={authMode} onClose={() => setAuthMode(null)} onSuccess={() => router.push("/dashboard")} />
     </div>
   );
