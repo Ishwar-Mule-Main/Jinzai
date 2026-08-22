@@ -9,9 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Loader2, Mail, Lock, Chrome, KeyRound, LogOut, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -206,150 +203,150 @@ export function AuthDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md bg-[#141414] border border-[#2E2E2E] text-white">
+      <DialogContent className="max-w-md bg-[#1a1a1a] border border-[#2a2a2a] text-white rounded-xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2.5 text-xl font-semibold text-white">
-            <div className="w-8 h-8 rounded-lg bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4 text-[#FF6200]" />
+          <DialogTitle className="flex items-center gap-2.5 text-xl font-bold text-white tracking-tight">
+            <div className="w-8 h-8 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69]">
+              <ShieldCheck className="w-4 h-4" />
             </div>
-            {activeMode === "signup" ? "Join free — it takes 30 seconds" : "Welcome back! Sign in to continue"}
+            {activeMode === "signup" ? "Join Jinzai Platform" : "Welcome Back"}
           </DialogTitle>
-          <DialogDescription className="text-[#888898] text-sm">
+          <DialogDescription className="text-[#888888] text-xs">
             {activeMode === "signup"
-              ? "Create your free account to save and manage your resumes."
-              : "Sign in to access your saved resumes."}
+              ? "Create your account to save, customize, and export ATS resumes."
+              : "Sign in to access your saved resume profiles."}
           </DialogDescription>
         </DialogHeader>
 
         {/* ===== LOGIN MODE ===== */}
         {activeMode === "login" && (
           <Tabs value={loginMethod} onValueChange={(v) => setLoginMethod(v as typeof loginMethod)}>
-            <TabsList className="grid grid-cols-3 w-full bg-[#1A1A1A] border border-[#2E2E2E] rounded-lg p-1">
+            <TabsList className="grid grid-cols-3 w-full bg-[#121212] border border-[#2a2a2a] rounded-md p-1">
               <TabsTrigger
                 value="google"
-                className="text-xs gap-1 text-[#888898] data-[state=active]:bg-[#FF6200] data-[state=active]:text-white rounded-md transition-all"
+                className="text-xs gap-1 text-[#888888] data-[state=active]:bg-[#faff69] data-[state=active]:text-[#0a0a0a] rounded-md transition-all font-semibold"
               >
                 <Chrome className="w-3.5 h-3.5" /> Google
               </TabsTrigger>
               <TabsTrigger
                 value="password"
-                className="text-xs gap-1 text-[#888898] data-[state=active]:bg-[#FF6200] data-[state=active]:text-white rounded-md transition-all"
+                className="text-xs gap-1 text-[#888888] data-[state=active]:bg-[#faff69] data-[state=active]:text-[#0a0a0a] rounded-md transition-all font-semibold"
               >
                 <Lock className="w-3.5 h-3.5" /> Password
               </TabsTrigger>
               <TabsTrigger
                 value="code"
-                className="text-xs gap-1 text-[#888898] data-[state=active]:bg-[#FF6200] data-[state=active]:text-white rounded-md transition-all"
+                className="text-xs gap-1 text-[#888888] data-[state=active]:bg-[#faff69] data-[state=active]:text-[#0a0a0a] rounded-md transition-all font-semibold"
               >
-                <KeyRound className="w-3.5 h-3.5" /> Email Code
+                <KeyRound className="w-3.5 h-3.5" /> Code
               </TabsTrigger>
             </TabsList>
 
             {/* Google login */}
             <TabsContent value="google" className="space-y-3 mt-4">
-              <div className="text-center py-3">
-                <p className="text-sm text-[#888898] mb-4">
-                  The easiest way to sign in — no password needed.
+              <div className="text-center py-2">
+                <p className="text-xs text-[#888888] mb-4">
+                  Quick single sign-on with your Google account.
                 </p>
-                <Button
+                <button
                   onClick={handleGoogle}
                   disabled={loading}
-                  className="w-full gap-2 h-11 bg-[#1A1A1A] border border-[#2E2E2E] hover:border-[#FF6200]/50 text-white hover:bg-[#222222] transition-all rounded-full text-sm font-semibold"
+                  className="w-full gap-2 h-11 bg-[#242424] border border-[#2a2a2a] hover:bg-[#3a3a3a] text-white transition-colors rounded-md text-xs font-semibold inline-flex items-center justify-center"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4 text-[#FF6200]" />}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4 text-[#faff69]" />}
                   Continue with Google
-                </Button>
+                </button>
               </div>
             </TabsContent>
 
             {/* Password login */}
             <TabsContent value="password" className="space-y-3 mt-4">
               <div className="flex flex-col gap-1.5">
-                <Label className="text-sm text-[#888898]">Your email address</Label>
-                <Input
+                <label className="text-xs text-[#888888]">Email Address</label>
+                <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   autoComplete="off"
                   placeholder="you@email.com"
-                  className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm h-11"
+                  className="bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md text-xs h-10 px-3 outline-none"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label className="text-sm text-[#888898]">Your password</Label>
-                <Input
+                <label className="text-xs text-[#888888]">Password</label>
+                <input
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   autoComplete="new-password"
                   placeholder="Enter your password"
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm h-11"
+                  className="bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md text-xs h-10 px-3 outline-none"
                 />
               </div>
-              <Button
+              <button
                 onClick={handleLogin}
                 disabled={loading}
-                className="w-full h-11 gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40 transition-all duration-300"
+                className="w-full h-11 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold rounded-md transition-colors inline-flex items-center justify-center text-xs"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
                 Sign In
-              </Button>
+              </button>
             </TabsContent>
 
             {/* OTP login */}
             <TabsContent value="code" className="space-y-3 mt-4">
-              <p className="text-sm text-[#888898]">We'll send a 6-digit code to your email — no password needed.</p>
+              <p className="text-xs text-[#888888]">We&apos;ll dispatch a 6-digit verification code to your email.</p>
               <div className="flex flex-col gap-1.5">
-                <Label className="text-sm text-[#888898]">Your email address</Label>
-                <Input
+                <label className="text-xs text-[#888888]">Email Address</label>
+                <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   placeholder="you@email.com"
-                  className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm h-11"
+                  className="bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md text-xs h-10 px-3 outline-none"
                 />
               </div>
               {loginOtpSent && (
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-sm text-[#888898]">Enter the 6-digit code from your email</Label>
-                  <Input
+                  <label className="text-xs text-[#888888]">6-Digit Code</label>
+                  <input
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
-                    placeholder="e.g. 123456"
+                    placeholder="123456"
                     maxLength={6}
-                    className="text-center text-lg tracking-[0.5em] font-mono bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg h-12"
+                    className="text-center text-lg tracking-[0.5em] font-mono bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md h-11 outline-none"
                     onKeyDown={(e) => e.key === "Enter" && verifyLoginOtp()}
                   />
                 </div>
               )}
               {!loginOtpSent ? (
-                <Button
+                <button
                   onClick={sendLoginOtp}
                   disabled={loading}
-                  className="w-full h-11 gap-1.5 bg-transparent border border-[#2E2E2E] hover:border-[#FF6200] text-white hover:bg-[#1A1A1A] rounded-full transition-all duration-300"
+                  className="w-full h-11 gap-1.5 bg-[#242424] border border-[#2a2a2a] hover:bg-[#3a3a3a] text-white rounded-md transition-colors inline-flex items-center justify-center text-xs font-semibold"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4 text-[#FF6200]" />}
-                  Send me a code by email
-                </Button>
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4 text-[#faff69]" />}
+                  Send Code by Email
+                </button>
               ) : (
-                <Button
+                <button
                   onClick={verifyLoginOtp}
                   disabled={loading}
-                  className="w-full h-11 gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 transition-all duration-300"
+                  className="w-full h-11 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold rounded-md transition-colors inline-flex items-center justify-center text-xs"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
                   Verify &amp; Sign In
-                </Button>
+                </button>
               )}
             </TabsContent>
 
-            <div className="pt-3 border-t border-[#2E2E2E] text-center">
+            <div className="pt-3 border-t border-[#2a2a2a] text-center">
               <button
                 onClick={() => setActiveMode("signup")}
-                className="text-xs text-[#888898] hover:text-[#FF6200] transition-colors"
+                className="text-xs text-[#888888] hover:text-[#faff69] transition-colors font-mono"
               >
-                Don't have an account yet? <strong className="text-[#FF6200]">Sign up free →</strong>
+                Need an account? <strong className="text-[#faff69]">Register now →</strong>
               </button>
             </div>
           </Tabs>
@@ -362,144 +359,144 @@ export function AuthDialog({
               <>
                 <div className="text-center pb-2">
                   <p className="text-sm font-semibold text-white">Step 1 of 2: Select Your Plan</p>
-                  <p className="text-xs text-[#888898] mt-0.5">Choose your starting plan. You can upgrade or change anytime.</p>
+                  <p className="text-xs text-[#888888] mt-0.5">Choose your starting tier. Upgrade anytime.</p>
                 </div>
 
                 <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                   {[
-                    { id: "free", name: "Free Plan", price: "₹0", sub: "1 Resume preview (No Export)" },
-                    { id: "single_99", name: "Single Export Pass", price: "₹99", sub: "1 Resume PDF Export (No AI/ATS)" },
-                    { id: "pro_399", name: "Pro Plan (Popular)", price: "₹399/mo", sub: "5 Resumes + ALL AI & ATS Features" },
-                    { id: "business_999", name: "Business Plan", price: "₹999/mo", sub: "50 Resumes + ALL AI & ATS Features" },
-                    { id: "institution_4999", name: "Institution Plan", price: "₹4,999/mo", sub: "300 Student Resumes + ALL Features" },
+                    { id: "free", name: "Free Plan", price: "₹0", sub: "1 Resume preview (No Vector Export)" },
+                    { id: "single_99", name: "Single Export Pass", price: "₹99", sub: "1 Vector PDF Export" },
+                    { id: "pro_399", name: "Pro Plan (Featured)", price: "₹399/mo", sub: "5 Resumes + ALL AI & ATS Tools" },
+                    { id: "business_999", name: "Business Plan", price: "₹999/mo", sub: "50 Resumes + Priority Support" },
+                    { id: "institution_4999", name: "Institution Plan", price: "₹4,999/mo", sub: "300 Student Roster + Placement Portal" },
                   ].map((p) => (
                     <button
                       key={p.id}
                       type="button"
                       onClick={() => setSelectedPlan(p.id)}
-                      className={`w-full text-left p-3 rounded-xl border flex items-center justify-between transition-all ${
+                      className={`w-full text-left p-3 rounded-lg border flex items-center justify-between transition-all ${
                         selectedPlan === p.id
-                          ? "border-[#FF6200] bg-[#FF6200]/10 ring-1 ring-[#FF6200]"
-                          : "border-[#2E2E2E] bg-[#1A1A1A] hover:border-[#FF6200]/40"
+                          ? "border-[#faff69] bg-[#242424]"
+                          : "border-[#2a2a2a] bg-[#121212] hover:border-[#3a3a3a]"
                       }`}
                     >
                       <div>
                         <p className="text-xs font-bold text-white">{p.name}</p>
-                        <p className="text-[10px] text-[#888898] mt-0.5">{p.sub}</p>
+                        <p className="text-[10px] text-[#888888] mt-0.5 font-mono">{p.sub}</p>
                       </div>
-                      <span className="text-xs font-mono font-bold text-[#FF6200] shrink-0 ml-2">{p.price}</span>
+                      <span className="text-xs font-mono font-bold text-[#faff69] shrink-0 ml-2">{p.price}</span>
                     </button>
                   ))}
                 </div>
 
-                <Button
+                <button
                   onClick={() => setSignupStep("details")}
-                  className="w-full h-11 gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40 transition-all duration-300 mt-2"
+                  className="w-full h-11 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold rounded-md transition-colors mt-2 inline-flex items-center justify-center text-xs"
                 >
                   Continue with Selected Plan →
-                </Button>
+                </button>
               </>
             ) : signupStep === "details" ? (
               <>
-                <div className="flex items-center justify-between text-xs text-[#888898] pb-1">
-                  <span>Selected: <strong className="text-white">{selectedPlan}</strong></span>
-                  <button onClick={() => setSignupStep("plan")} className="text-[#FF6200] hover:underline">Change plan</button>
+                <div className="flex items-center justify-between text-xs text-[#888888] pb-1">
+                  <span>Plan: <strong className="text-white font-mono">{selectedPlan}</strong></span>
+                  <button onClick={() => setSignupStep("plan")} className="text-[#faff69] hover:underline font-mono">Change</button>
                 </div>
-                {/* Google signup — top option */}
-                <Button
+
+                <button
                   onClick={handleGoogle}
                   disabled={loading}
-                  className="w-full h-11 gap-2 bg-[#1A1A1A] border border-[#2E2E2E] hover:border-[#FF6200]/50 text-white hover:bg-[#222222] transition-all rounded-full font-semibold"
+                  className="w-full h-11 gap-2 bg-[#242424] border border-[#2a2a2a] hover:bg-[#3a3a3a] text-white transition-colors rounded-md text-xs font-semibold inline-flex items-center justify-center"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4 text-[#FF6200]" />}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4 text-[#faff69]" />}
                   Sign up with Google (Recommended)
-                </Button>
+                </button>
 
-                <div className="flex items-center gap-2 text-xs text-[#5A5A6A]">
-                  <div className="flex-1 h-px bg-[#2E2E2E]" /> or sign up with email <div className="flex-1 h-px bg-[#2E2E2E]" />
+                <div className="flex items-center gap-2 text-xs text-[#888888]">
+                  <div className="flex-1 h-px bg-[#2a2a2a]" /> or with email <div className="flex-1 h-px bg-[#2a2a2a]" />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-sm text-[#888898]">Your name</Label>
-                  <Input
+                  <label className="text-xs text-[#888888]">Full Name</label>
+                  <input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     autoComplete="off"
                     placeholder="e.g. Rahul Sharma"
-                    className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm h-11"
+                    className="bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md text-xs h-10 px-3 outline-none"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-sm text-[#888898]">Your email address</Label>
-                  <Input
+                  <label className="text-xs text-[#888888]">Email Address</label>
+                  <input
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     type="email"
                     autoComplete="off"
                     placeholder="you@email.com"
-                    className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm h-11"
+                    className="bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md text-xs h-10 px-3 outline-none"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-sm text-[#888898]">Create a password (at least 6 characters)</Label>
-                  <Input
+                  <label className="text-xs text-[#888888]">Password (min 6 characters)</label>
+                  <input
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     type="password"
                     autoComplete="new-password"
                     placeholder="Choose a password"
                     onKeyDown={(e) => e.key === "Enter" && handleSignupSubmit()}
-                    className="bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg text-sm h-11"
+                    className="bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md text-xs h-10 px-3 outline-none"
                   />
                 </div>
-                <Button
+                <button
                   onClick={handleSignupSubmit}
                   disabled={loading}
-                  className="w-full h-11 gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40 transition-all duration-300"
+                  className="w-full h-11 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold rounded-md transition-colors inline-flex items-center justify-center text-xs"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-                  Send me a verification code
-                </Button>
+                  Send Verification Code
+                </button>
               </>
             ) : (
               <>
                 <div className="text-center py-2">
-                  <div className="w-14 h-14 rounded-full bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center mx-auto mb-3">
-                    <Mail className="w-6 h-6 text-[#FF6200]" />
+                  <div className="w-12 h-12 rounded-lg bg-[#242424] border border-[#2a2a2a] flex items-center justify-center mx-auto mb-3 text-[#faff69]">
+                    <Mail className="w-5 h-5" />
                   </div>
-                  <p className="text-sm font-semibold text-white">Check your email inbox</p>
-                  <p className="text-sm text-[#888898] mt-1">
-                    We sent a 6-digit code to <strong className="text-white">{email}</strong>
+                  <p className="text-sm font-semibold text-white">Check your email</p>
+                  <p className="text-xs text-[#888888] mt-1 font-mono">
+                    Code sent to <strong className="text-white">{email}</strong>
                   </p>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-sm text-[#888898]">Enter the 6-digit code from your email</Label>
-                  <Input
+                  <label className="text-xs text-[#888888]">6-Digit Code</label>
+                  <input
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
-                    placeholder="e.g. 123456"
+                    placeholder="123456"
                     maxLength={6}
-                    className="text-center text-xl tracking-[0.5em] font-mono bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg h-14"
+                    className="text-center text-xl tracking-[0.5em] font-mono bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md h-12 outline-none"
                     onKeyDown={(e) => e.key === "Enter" && handleSignupVerify()}
                   />
                 </div>
-                <Button
+                <button
                   onClick={handleSignupVerify}
                   disabled={loading}
-                  className="w-full h-11 gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40 transition-all duration-300"
+                  className="w-full h-11 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold rounded-md transition-colors inline-flex items-center justify-center text-xs"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  Confirm &amp; Create My Account
-                </Button>
+                  Confirm &amp; Activate Account
+                </button>
               </>
             )}
 
-            <div className="pt-3 border-t border-[#2E2E2E] text-center">
+            <div className="pt-3 border-t border-[#2a2a2a] text-center">
               <button
                 onClick={() => setActiveMode("login")}
-                className="text-xs text-[#888898] hover:text-[#FF6200] transition-colors"
+                className="text-xs text-[#888888] hover:text-[#faff69] transition-colors font-mono"
               >
-                Already have an account? <strong className="text-[#FF6200]">Sign In →</strong>
+                Already have an account? <strong className="text-[#faff69]">Sign In →</strong>
               </button>
             </div>
           </div>
@@ -520,9 +517,7 @@ export function LogoutButton({ onLogout }: { onLogout?: () => void }) {
       localStorage.removeItem("admin-token");
       useResumeStore.getState().clearAll();
       useResumeStore.getState().setSavedId(null);
-    } catch {
-      // ignore
-    }
+    } catch {}
 
     onLogout?.();
 
@@ -536,9 +531,9 @@ export function LogoutButton({ onLogout }: { onLogout?: () => void }) {
   };
 
   return (
-    <Button variant="ghost" size="sm" onClick={handleLogout} disabled={loading} className="gap-1.5 hover:text-[#FF6200] transition-colors">
-      {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#FF6200]" /> : <LogOut className="w-3.5 h-3.5" />}
-      <span className="hidden sm:inline">Log out</span>
-    </Button>
+    <button onClick={handleLogout} disabled={loading} className="h-9 px-3 bg-[#1a1a1a] hover:bg-[#242424] text-[#cccccc] hover:text-white border border-[#2a2a2a] rounded-md text-xs font-semibold gap-1.5 inline-flex items-center transition-colors">
+      {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#faff69]" /> : <LogOut className="w-3.5 h-3.5" />}
+      <span className="hidden sm:inline">Logout</span>
+    </button>
   );
 }

@@ -69,11 +69,30 @@ export interface Language {
   proficiency: string;
 }
 
+export interface CustomSectionItem {
+  id: string;
+  title: string;
+  subtitle?: string;
+  date?: string;
+  description?: string;
+}
+
 export interface CustomSection {
   id: string;
   title: string;
-  items: string[];
+  items: (CustomSectionItem | string)[];
 }
+
+export type SectionKey =
+  | "personal"
+  | "summary"
+  | "experience"
+  | "education"
+  | "skills"
+  | "projects"
+  | "certifications"
+  | "languages"
+  | "custom";
 
 export interface ResumeData {
   personalInfo: PersonalInfo;
@@ -85,6 +104,8 @@ export interface ResumeData {
   certifications: Certification[];
   languages: Language[];
   customSections: CustomSection[];
+  sectionOrder?: string[];
+  sectionPlacements?: Record<string, "sidebar" | "main" | "left" | "right">;
 }
 
 export type TemplateId =

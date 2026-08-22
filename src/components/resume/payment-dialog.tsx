@@ -8,11 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Copy, Check, QrCode, Smartphone, ShieldCheck, AlertCircle } from "lucide-react";
+import { Loader2, Copy, Check, Smartphone, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { PLAN_LIMITS, type PlanId } from "@/lib/resume/plans";
 
@@ -49,7 +45,6 @@ export function PaymentDialog({
       return;
     }
     setVerifying(true);
-    // Simulate verification — in production, verify with payment gateway API
     await new Promise((r) => setTimeout(r, 2000));
     setVerifying(false);
     setStep("success");
@@ -57,7 +52,6 @@ export function PaymentDialog({
     setTimeout(() => {
       onPaymentSuccess();
       onClose();
-      // Reset for next time
       setStep("pay");
       setTransactionId("");
     }, 2000);
@@ -65,165 +59,155 @@ export function PaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-lg sm:max-w-xl w-[92vw] max-h-[90vh] overflow-y-auto bg-[#141414] border border-[#2E2E2E] text-white p-6 sm:p-8">
+      <DialogContent className="max-w-lg sm:max-w-xl w-[92vw] max-h-[90vh] overflow-y-auto bg-[#1a1a1a] border border-[#2a2a2a] text-white p-6 sm:p-8 rounded-xl font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2.5 text-white font-semibold">
-            <div className="w-8 h-8 rounded-lg bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center">
-              <Smartphone className="w-4 h-4 text-[#FF6200]" />
+          <DialogTitle className="flex items-center gap-2.5 text-white font-bold tracking-tight text-xl">
+            <div className="w-8 h-8 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69]">
+              <Smartphone className="w-4 h-4" />
             </div>
             Pay ₹{planConfig.price} for {planConfig.name}
           </DialogTitle>
-          <DialogDescription className="text-[#888898] text-sm">
-            Follow these 3 simple steps to activate your plan in under a minute.
+          <DialogDescription className="text-[#888888] text-xs">
+            Follow these 3 quick steps to activate your plan in under a minute.
           </DialogDescription>
         </DialogHeader>
 
         {step === "pay" && (
           <div className="space-y-4">
-
             {/* Numbered Steps */}
             <div className="grid grid-cols-3 gap-2 text-center">
               {[
-                { n: "1", label: "Scan QR", sub: "Open GPay / PhonePe" },
+                { n: "1", label: "Scan QR", sub: "GPay / PhonePe" },
                 { n: "2", label: "Pay Amount", sub: `₹${planConfig.price}` },
-                { n: "3", label: "Enter Code", sub: "12-digit reference" },
+                { n: "3", label: "Enter Code", sub: "12-digit ref" },
               ].map((s) => (
-                <div key={s.n} className="p-2 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E]">
-                  <div className="w-6 h-6 rounded-full bg-[#FF6200] text-white text-xs font-bold flex items-center justify-center mx-auto mb-1">{s.n}</div>
+                <div key={s.n} className="p-2.5 rounded-lg bg-[#121212] border border-[#2a2a2a]">
+                  <div className="w-5 h-5 rounded bg-[#faff69] text-[#0a0a0a] text-[11px] font-bold flex items-center justify-center mx-auto mb-1">{s.n}</div>
                   <p className="text-xs font-semibold text-white">{s.label}</p>
-                  <p className="text-[10px] text-[#888898]">{s.sub}</p>
+                  <p className="text-[10px] text-[#888888] font-mono">{s.sub}</p>
                 </div>
               ))}
             </div>
 
             {/* QR Code */}
-            <div className="flex flex-col items-center gap-3 p-4 bg-white rounded-xl border border-[#2E2E2E]">
+            <div className="flex flex-col items-center gap-3 p-4 bg-white rounded-lg border border-[#2a2a2a]">
               <div className="relative">
                 <img
                   src={QR_CODE_URL}
-                  alt="UPI QR Code — scan with any UPI app to pay"
-                  className="w-48 h-48 object-contain rounded-lg"
+                  alt="UPI QR Code"
+                  className="w-44 h-44 object-contain rounded"
                 />
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#FF6200] px-3 py-0.5 rounded-full">
-                  <span className="text-[9px] font-semibold text-white">Scan to Pay</span>
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#0a0a0a] px-3 py-0.5 rounded-full border border-[#faff69]">
+                  <span className="text-[9px] font-mono font-bold text-[#faff69]">SCAN TO PAY</span>
                 </div>
               </div>
-              <p className="text-xs text-center text-[#888898]">
-                Scan with <strong>GPay, PhonePe, Paytm</strong> or any UPI app
+              <p className="text-xs text-center text-[#555555]">
+                Scan with <strong>GPay, PhonePe, Paytm</strong> or BHIM
               </p>
             </div>
 
             {/* UPI ID fallback */}
-            <div className="rounded-xl border border-[#2E2E2E] p-3 bg-[#1A1A1A]">
-              <p className="text-sm text-[#888898] mb-2">Can't scan? Type this UPI ID in your app:</p>
+            <div className="rounded-lg border border-[#2a2a2a] p-3 bg-[#121212]">
+              <p className="text-xs text-[#888888] mb-2">Can&apos;t scan? Type this UPI ID in your app:</p>
               <div className="flex items-center gap-2 mt-1">
-                <code className="flex-1 px-3 py-2 bg-black/40 rounded-lg text-sm font-mono border border-[#2E2E2E] text-white">
+                <code className="flex-1 px-3 py-2 bg-[#1a1a1a] rounded text-xs font-mono border border-[#2a2a2a] text-white">
                   {UPI_ID}
                 </code>
-                <Button
-                  size="sm"
+                <button
                   onClick={copyUpi}
-                  className="gap-1 shrink-0 bg-transparent border border-[#2E2E2E] hover:border-[#FF6200] hover:bg-[#222222] text-white rounded-lg transition-all"
+                  className="h-9 px-3 gap-1 shrink-0 bg-[#242424] hover:bg-[#3a3a3a] border border-[#2a2a2a] text-white rounded-md text-xs font-semibold inline-flex items-center transition-colors"
                 >
-                  {copied ? <Check className="w-3.5 h-3.5 text-[#22C55E]" /> : <Copy className="w-3.5 h-3.5 text-[#888898]" />}
+                  {copied ? <Check className="w-3.5 h-3.5 text-[#22c55e]" /> : <Copy className="w-3.5 h-3.5 text-[#888888]" />}
                   {copied ? "Copied!" : "Copy"}
-                </Button>
+                </button>
               </div>
             </div>
 
             {/* Amount */}
-            <div className="rounded-xl border border-[#FF6200]/30 p-4 bg-[#FF6200]/5">
+            <div className="rounded-lg border border-[#2a2a2a] p-4 bg-[#121212]">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-[#888898]">Amount to pay</span>
-                <span className="text-2xl font-bold text-[#FF6200]">₹{planConfig.price}</span>
+                <span className="text-xs font-medium text-[#888888]">Amount to pay</span>
+                <span className="text-2xl font-bold text-[#faff69] font-mono">₹{planConfig.price}</span>
               </div>
-              <p className="text-xs text-[#5A5A6A] mt-1">
+              <p className="text-[11px] text-[#888888] mt-1 font-mono">
                 {plan === "single_99" || plan === "trial_99" ? "One-time payment per resume export pass" : "Monthly subscription — cancel anytime"}
               </p>
             </div>
 
-            <Button
+            <button
               onClick={() => setStep("verify")}
-              className="w-full h-11 gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40 transition-all duration-300"
+              className="w-full h-11 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold text-xs rounded-md transition-colors inline-flex items-center justify-center"
             >
-              I've Paid — Enter the Reference Number →
-            </Button>
+              I&apos;ve Paid — Enter Reference Number →
+            </button>
           </div>
         )}
 
         {step === "verify" && (
           <div className="space-y-4">
             <div className="text-center py-2">
-              <div className="w-14 h-14 rounded-full bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center mx-auto mb-3">
-                <ShieldCheck className="w-6 h-6 text-[#FF6200]" />
+              <div className="w-12 h-12 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center mx-auto mb-3 text-[#faff69]">
+                <ShieldCheck className="w-6 h-6" />
               </div>
-              <p className="text-base font-semibold text-white">Almost there! Confirm your payment</p>
-              <p className="text-sm text-[#888898] mt-1">
-                Open your UPI app → go to transaction history → copy the 12-digit reference number.
+              <p className="text-sm font-semibold text-white">Confirm Your Payment</p>
+              <p className="text-xs text-[#888888] mt-1">
+                Open your UPI app → check history → copy the 12-digit reference number.
               </p>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label className="text-sm text-[#888898]">Payment reference number (12-digit code from your UPI app)</Label>
-              <Input
+              <label className="text-xs text-[#888888]">12-Digit Reference Number</label>
+              <input
                 value={transactionId}
                 onChange={(e) => setTransactionId(e.target.value)}
-                placeholder="e.g. 456789012345"
-                className="mt-1 text-center font-mono text-lg tracking-widest bg-black/40 border-[#2E2E2E] focus:border-[#FF6200] text-white placeholder:text-[#5A5A6A] rounded-lg h-12"
+                placeholder="456789012345"
+                className="text-center font-mono text-base tracking-widest bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md h-11 px-3 outline-none"
               />
-              <p className="text-xs text-[#5A5A6A]">
-                💡 In GPay: Tap the payment → see "UPI transaction ID". In PhonePe: Tap history → see "UPI Ref No".
-              </p>
             </div>
 
             {/* Summary */}
-            <div className="rounded-xl border border-[#2E2E2E] p-3 bg-[#1A1A1A] space-y-2">
+            <div className="rounded-lg border border-[#2a2a2a] p-3 bg-[#121212] space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[#888898]">Plan</span>
+                <span className="text-[#888888]">Plan</span>
                 <span className="font-semibold text-white">{planConfig.name}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[#888898]">Amount</span>
-                <span className="font-semibold text-[#FF6200]">₹{planConfig.price}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[#888898]">UPI ID</span>
-                <span className="font-mono text-white text-[11px]">{UPI_ID}</span>
+                <span className="text-[#888888]">Amount</span>
+                <span className="font-semibold text-[#faff69] font-mono">₹{planConfig.price}</span>
               </div>
             </div>
 
             <div className="flex gap-2">
-              <Button
+              <button
                 onClick={() => setStep("pay")}
-                className="flex-1 h-11 bg-transparent border border-[#2E2E2E] hover:border-[#FF6200] text-white hover:bg-[#1A1A1A] rounded-full transition-all duration-300"
+                className="flex-1 h-11 bg-[#121212] border border-[#2a2a2a] hover:bg-[#242424] text-white rounded-md text-xs font-semibold inline-flex items-center justify-center transition-colors"
               >
-                ← Go Back
-              </Button>
-              <Button
+                ← Back
+              </button>
+              <button
                 onClick={verifyPayment}
                 disabled={verifying || !transactionId}
-                className="flex-1 h-11 gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40 transition-all duration-300"
+                className="flex-1 h-11 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold text-xs rounded-md transition-colors inline-flex items-center justify-center disabled:opacity-50"
               >
                 {verifying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
-                {verifying ? "Checking payment…" : "Confirm & Activate Plan"}
-              </Button>
+                {verifying ? "Checking…" : "Confirm & Activate"}
+              </button>
             </div>
           </div>
         )}
 
         {step === "success" && (
           <div className="text-center py-8">
-            <div className="w-16 h-16 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/30 flex items-center justify-center mx-auto mb-4">
-              <Check className="w-8 h-8 text-[#22C55E]" />
+            <div className="w-14 h-14 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center mx-auto mb-4 text-[#22c55e]">
+              <Check className="w-7 h-7" />
             </div>
-            <h3 className="text-xl font-bold mb-2 text-white">🎉 Payment Confirmed!</h3>
-            <p className="text-sm text-[#888898] mb-4">
+            <h3 className="text-lg font-bold mb-2 text-white">Payment Confirmed!</h3>
+            <p className="text-xs text-[#888888] mb-4">
               Your <strong className="text-white">{planConfig.name}</strong> plan is now active.
-              You can download your resume as a PDF and access all features right away.
             </p>
-            <Badge className="bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/30 font-semibold">
+            <span className="bg-[#242424] text-[#22c55e] border border-[#2a2a2a] text-xs font-mono px-3 py-1 rounded-full font-bold">
               {planConfig.name} Active ✓
-            </Badge>
+            </span>
           </div>
         )}
       </DialogContent>

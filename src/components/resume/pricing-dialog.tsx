@@ -9,9 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Check, Crown, Zap, Rocket, CheckCircle2, Smartphone, Building2, Sparkles, XCircle } from "lucide-react";
+import { Check, Crown, Zap, Rocket, Smartphone, Building2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { PLAN_LIMITS, PAID_PLANS, type PlanId } from "@/lib/resume/plans";
 import { PaymentDialog } from "./payment-dialog";
@@ -68,20 +66,20 @@ export function PricingDialog({
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-        <DialogContent className="max-w-6xl w-[96vw] max-h-[92vh] overflow-y-auto bg-[#141414] border border-[#2E2E2E] text-white p-6 sm:p-8 lg:p-10">
+        <DialogContent className="max-w-6xl w-[96vw] max-h-[92vh] overflow-y-auto bg-[#1a1a1a] border border-[#2a2a2a] text-white p-6 sm:p-8 lg:p-10 rounded-xl selection:bg-[#faff69] selection:text-[#0a0a0a]">
           <DialogHeader className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center mx-auto mb-1">
-              <Crown className="w-6 h-6 text-[#FF6200]" />
+            <div className="w-10 h-10 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center mx-auto mb-1 text-[#faff69]">
+              <Crown className="w-5 h-5" />
             </div>
-            <DialogTitle className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">
+            <DialogTitle className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
               Unlock Unlimited Resumes &amp; Vector PDF Exports
             </DialogTitle>
-            <DialogDescription className="text-[#888898] text-xs sm:text-sm max-w-xl mx-auto">
-              Choose the plan that fits your goals — from single export passes to Pro, Business, and Institution plans. Instant UPI activation.
+            <DialogDescription className="text-[#888888] text-xs sm:text-sm max-w-xl mx-auto">
+              Choose the tier that matches your career goals — single export passes, Pro, Business, or Institution plans. Instant UPI activation.
             </DialogDescription>
           </DialogHeader>
 
-          {/* Pricing cards grid — 4 Plans */}
+          {/* Pricing cards grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-6">
             {PAID_PLANS.map((planId) => {
               const config = PLAN_LIMITS[planId];
@@ -93,51 +91,45 @@ export function PricingDialog({
               return (
                 <div
                   key={planId}
-                  className={`relative p-5 sm:p-6 rounded-2xl bg-[#1A1A1A] border transition-all duration-300 flex flex-col justify-between ${
+                  className={`relative p-5 sm:p-6 rounded-xl bg-[#121212] border transition-all flex flex-col justify-between ${
                     isPopular
-                      ? "border-[#FF6200] shadow-xl shadow-[#FF6200]/15 ring-1 ring-[#FF6200]"
-                      : isInstitution
-                      ? "border-teal-500/60 shadow-xl shadow-teal-500/10"
-                      : "border-[#2E2E2E] hover:border-[#FF6200]/40"
+                      ? "border-[#faff69] bg-[#1a1a1a]"
+                      : "border-[#2a2a2a] hover:border-[#3a3a3a]"
                   }`}
                 >
                   {config.badge && (
-                    <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 text-white text-[9px] font-bold uppercase tracking-wider px-3 py-0.5 border-0 ${
-                      isPopular ? "bg-[#FF6200]" : isInstitution ? "bg-teal-600" : "bg-[#333333]"
-                    }`}>
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#faff69] text-[#0a0a0a] text-[9px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
                       {config.badge}
-                    </Badge>
+                    </span>
                   )}
 
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                        isInstitution ? "bg-teal-500/10 text-teal-400" : "bg-[#FF6200]/10 text-[#FF6200]"
-                      }`}>
+                      <div className="w-8 h-8 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69]">
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-bold text-base text-white truncate">{config.name}</h3>
-                        <p className="text-[10px] text-[#888898] truncate">{config.period}</p>
+                        <h3 className="font-bold text-sm text-white truncate">{config.name}</h3>
+                        <p className="text-[10px] text-[#888888] font-mono truncate">{config.period}</p>
                       </div>
                     </div>
 
                     {/* Price */}
-                    <div className="mb-4 pb-4 border-b border-[#2E2E2E]">
-                      <span className="text-2xl sm:text-3xl font-extrabold text-white">₹{config.price}</span>
-                      <span className="text-[11px] text-[#888898] ml-1">/ {config.period}</span>
+                    <div className="mb-4 pb-4 border-b border-[#2a2a2a]">
+                      <span className="text-2xl sm:text-3xl font-extrabold text-white font-mono">₹{config.price}</span>
+                      <span className="text-[11px] text-[#888888] ml-1 font-mono">/ {config.period}</span>
                     </div>
 
                     {/* Features list */}
-                    <ul className="space-y-2 mb-6 text-[11px] text-[#888898]">
+                    <ul className="space-y-2 mb-6 text-[11px] text-[#888888]">
                       {config.features.map((feat) => {
                         const isNegative = feat.startsWith("❌");
                         return (
-                          <li key={feat} className={`flex items-start gap-1.5 ${isNegative ? "text-[#888898]/70" : "text-[#CCCCCC]"}`}>
+                          <li key={feat} className={`flex items-start gap-1.5 ${isNegative ? "text-[#888888]/60" : "text-[#cccccc]"}`}>
                             {isNegative ? (
                               <XCircle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
                             ) : (
-                              <Check className="w-3.5 h-3.5 text-[#FF6200] shrink-0 mt-0.5" />
+                              <Check className="w-3.5 h-3.5 text-[#faff69] shrink-0 mt-0.5" />
                             )}
                             <span className="leading-tight">{feat}</span>
                           </li>
@@ -147,40 +139,38 @@ export function PricingDialog({
                   </div>
 
                   {/* CTA Button */}
-                  <Button
+                  <button
                     onClick={() => {
                       if (isCurrent) return;
                       setPaymentPlan(planId);
                     }}
                     disabled={isCurrent}
-                    className={`w-full h-10 font-semibold rounded-full gap-1.5 text-xs transition-all duration-300 ${
+                    className={`w-full h-10 font-semibold rounded-md gap-1.5 text-xs transition-colors inline-flex items-center justify-center ${
                       isCurrent
-                        ? "bg-[#2E2E2E] text-[#888898] cursor-default"
+                        ? "bg-[#242424] text-[#888888] cursor-default"
                         : isPopular
-                        ? "bg-[#FF6200] hover:bg-[#E55700] text-white shadow-lg shadow-[#FF6200]/20"
-                        : isInstitution
-                        ? "bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-600/20"
-                        : "bg-transparent border border-[#2E2E2E] hover:border-[#FF6200] text-white hover:bg-[#222222]"
+                        ? "bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a]"
+                        : "bg-[#1a1a1a] hover:bg-[#242424] border border-[#2a2a2a] text-white"
                     }`}
                   >
                     {isCurrent ? (
-                      "Your Active Plan"
+                      "Active Plan"
                     ) : (
                       <>
                         <Smartphone className="w-3.5 h-3.5" />
                         Pay ₹{config.price} via UPI
                       </>
                     )}
-                  </Button>
+                  </button>
                 </div>
               );
             })}
           </div>
 
-          <div className="mt-6 p-4 rounded-xl bg-black/40 border border-[#2E2E2E] text-center space-y-1">
+          <div className="mt-6 p-4 rounded-xl bg-[#121212] border border-[#2a2a2a] text-center space-y-1">
             <p className="text-xs font-semibold text-white">⚡ Instant UPI Activation for All Plans</p>
-            <p className="text-[11px] text-[#888898]">
-              Scan QR code or use UPI ID <strong className="text-[#FF6200]">domainexpansion@okaxis</strong> with GPay, PhonePe, Paytm, or BHIM. Enter reference number for instant upgrade.
+            <p className="text-[11px] text-[#888888] font-mono">
+              Scan QR code or use UPI ID <strong className="text-[#faff69]">domainexpansion@okaxis</strong> with GPay, PhonePe, Paytm, or BHIM. Enter reference number for instant upgrade.
             </p>
           </div>
         </DialogContent>

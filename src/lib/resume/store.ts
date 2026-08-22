@@ -34,7 +34,7 @@ interface ResumeState {
   loadSample: () => void;
   clearAll: () => void;
   setData: (d: ResumeData) => void;
-  mergeData: (d: ResumeData, sectionsToMerge?: string[]) => void;
+  mergeData: (d: Partial<ResumeData>, sectionsToMerge?: string[]) => void;
   updateData: (updater: (d: ResumeData) => ResumeData) => void;
   updatePersonal: (patch: Partial<ResumeData["personalInfo"]>) => void;
   setSummary: (s: string) => void;
@@ -68,6 +68,11 @@ interface ResumeState {
   addCustomSection: () => void;
   updateCustomSection: (id: string, patch: Partial<ResumeData["customSections"][0]>) => void;
   removeCustomSection: (id: string) => void;
+
+  // Section Ordering & Placement across Preview Layout
+  moveSectionOrder: (sectionKey: string, dir: -1 | 1) => void;
+  setSectionPlacement: (sectionKey: string, placement: "sidebar" | "main" | "left" | "right") => void;
+  reorderSectionList: (newOrder: string[]) => void;
 
   // Generic reordering via drag-and-drop
   reorderSection: (section: keyof ResumeData, oldIndex: number, newIndex: number) => void;
@@ -412,9 +417,44 @@ export const useResumeStore = create<ResumeState>()(
         pushHistory(set, get, next);
       },
 
+      moveSectionOrder: (sectionKey, dir) => {
+        const next = structuredClone(get().data);
+        const order = next.sectionOrder || [
+          "personal",
+          "summary",
+          "experience",
+          "education",
+          "skills",
+          "projects",
+          "certifications",
+          "languages",
+          "custom",
+        ];
+        const idx = order.indexOf(sectionKey);
+        const target = idx + dir;
+        if (idx >= 0 && target >= 0 && target < order.length) {
+          [order[idx], order[target]] = [order[target], order[idx]];
+          next.sectionOrder = order;
+          pushHistory(set, get, next);
+        }
+      },
+
+      setSectionPlacement: (sectionKey, placement) => {
+        const next = structuredClone(get().data);
+        if (!next.sectionPlacements) next.sectionPlacements = {};
+        next.sectionPlacements[sectionKey] = placement;
+        pushHistory(set, get, next);
+      },
+
+      reorderSectionList: (newOrder) => {
+        const next = structuredClone(get().data);
+        next.sectionOrder = newOrder;
+        pushHistory(set, get, next);
+      },
+
       reorderSection: (section, oldIndex, newIndex) => {
         const next = structuredClone(get().data);
-        const arr = next[section];
+        const arr = next[section] as any;
         if (!Array.isArray(arr)) return;
         if (oldIndex < 0 || oldIndex >= arr.length || newIndex < 0 || newIndex >= arr.length) return;
         const [moved] = arr.splice(oldIndex, 1);

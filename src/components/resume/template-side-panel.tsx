@@ -11,8 +11,6 @@ import {
   SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { PanelRightOpen, Search } from "lucide-react";
 import { toast } from "sonner";
 import { TemplateCard } from "./template-card";
@@ -20,7 +18,6 @@ import { TemplateCard } from "./template-card";
 const CATEGORIES = ["All", "Sidebar", "Banner", "Single", "Serif", "Minimal", "ATS", "Photo", "Numbered", "Creative"] as const;
 
 export function TemplateSidePanel() {
-  const template = useResumeStore((s) => s.template);
   const setTemplate = useResumeStore((s) => s.setTemplate);
   const setView = useResumeStore((s) => s.setView);
   const [open, setOpen] = useState(false);
@@ -43,29 +40,29 @@ export function TemplateSidePanel() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <PanelRightOpen className="w-3.5 h-3.5" /> Templates
-        </Button>
+        <button className="h-9 px-3 gap-1.5 text-xs text-[#cccccc] hover:text-white bg-[#1a1a1a] hover:bg-[#242424] border border-[#2a2a2a] rounded-md font-semibold inline-flex items-center transition-colors">
+          <PanelRightOpen className="w-3.5 h-3.5 text-[#faff69]" /> Templates
+        </button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:w-[480px] sm:max-w-[480px] overflow-y-auto p-0">
-        <SheetHeader className="p-4 border-b sticky top-0 bg-background z-10">
-          <SheetTitle className="flex items-center gap-2">
-            <PanelRightOpen className="w-5 h-5 text-teal-600" /> All Templates
+      <SheetContent side="right" className="w-full sm:w-[480px] sm:max-w-[480px] overflow-y-auto p-0 bg-[#0a0a0a] border-l border-[#2a2a2a] text-white font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
+        <SheetHeader className="p-4 border-b border-[#2a2a2a] sticky top-0 bg-[#0a0a0a] z-10">
+          <SheetTitle className="flex items-center gap-2 text-base font-bold text-white tracking-tight">
+            <PanelRightOpen className="w-4 h-4 text-[#faff69]" /> Layout Engine Library
           </SheetTitle>
-          <SheetDescription>
-            {TEMPLATES.length} distinct designs. Click any to start editing with that template.
+          <SheetDescription className="text-xs text-[#888888]">
+            {TEMPLATES.length} architectural designs. Click any to immediately switch active layout.
           </SheetDescription>
         </SheetHeader>
 
         {/* Search + filters */}
-        <div className="p-4 space-y-3 border-b sticky top-[88px] bg-background z-10">
+        <div className="p-4 space-y-3 border-b border-[#2a2a2a] sticky top-[73px] bg-[#0a0a0a] z-10">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#888888]" />
+            <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search templates..."
-              className="pl-9 h-9 text-sm"
+              className="w-full pl-9 pr-3 h-9 text-xs bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md outline-none"
             />
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -73,17 +70,17 @@ export function TemplateSidePanel() {
               <button
                 key={cat}
                 onClick={() => setFilter(cat)}
-                className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-all ${
+                className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono transition-colors ${
                   filter === cat
-                    ? "bg-teal-600 text-white border-teal-600"
-                    : "bg-background text-muted-foreground border-border hover:bg-muted"
+                    ? "bg-[#faff69] text-[#0a0a0a] font-bold"
+                    : "bg-[#1a1a1a] text-[#888888] hover:text-white border border-[#2a2a2a]"
                 }`}
               >
                 {cat}
               </button>
             ))}
           </div>
-          <p className="text-[11px] text-muted-foreground">{filtered.length} templates shown</p>
+          <p className="text-[10px] text-[#888888] font-mono">{filtered.length} layouts shown</p>
         </div>
 
         {/* Template grid */}
@@ -97,13 +94,6 @@ export function TemplateSidePanel() {
             />
           ))}
         </div>
-
-        {filtered.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground px-4">
-            <Search className="w-8 h-8 mx-auto mb-3 opacity-40" />
-            <p className="text-sm">No templates match your search.</p>
-          </div>
-        )}
       </SheetContent>
     </Sheet>
   );

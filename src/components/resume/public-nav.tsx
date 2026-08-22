@@ -21,7 +21,7 @@ export function PublicNav({ onLogin, onSignup }: { onLogin?: () => void; onSignu
   const { user } = useCurrentUser();
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0D0D0D]/85 backdrop-blur-xl border-b border-[#2E2E2E]">
+    <header className="sticky top-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-[#2a2a2a]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -30,12 +30,12 @@ export function PublicNav({ onLogin, onSignup }: { onLogin?: () => void; onSignu
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="px-3.5 py-2 text-sm text-[#888898] hover:text-white transition-colors font-medium rounded-full hover:bg-white/5"
+                className="text-sm text-[#cccccc] hover:text-white transition-colors font-medium hover:text-[#faff69]"
               >
                 {link.label}
               </Link>
@@ -43,32 +43,34 @@ export function PublicNav({ onLogin, onSignup }: { onLogin?: () => void; onSignu
           </nav>
 
           {/* Auth buttons */}
-          <div className="hidden md:flex items-center gap-2.5">
+          <div className="hidden md:flex items-center gap-3">
             {user ? (
               <Link href="/dashboard">
-                <Button size="sm" className="gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 transition-all">
-                  Go to Dashboard →
-                </Button>
+                <button className="h-10 px-5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] text-sm font-semibold rounded-md transition-colors inline-flex items-center gap-1.5">
+                  Dashboard →
+                </button>
               </Link>
             ) : (
               <>
-                <Button variant="ghost" size="sm" onClick={onLogin} className="gap-1.5 text-white/80 hover:text-white hover:bg-[#1A1A1A] rounded-full border border-[#2E2E2E] hover:border-[#FF6200]/50 transition-all">
-                  <LogIn className="w-3.5 h-3.5" /> Log In
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={onSignup}
-                  className="gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-full shadow-lg shadow-[#FF6200]/20 hover:shadow-[#FF6200]/40 transition-all"
+                <button
+                  onClick={onLogin}
+                  className="h-10 px-4 text-sm font-medium text-[#cccccc] hover:text-white transition-colors inline-flex items-center gap-1.5"
                 >
-                  <UserPlus className="w-3.5 h-3.5" /> Sign Up
-                </Button>
+                  <LogIn className="w-4 h-4" /> Sign In
+                </button>
+                <button
+                  onClick={onSignup}
+                  className="h-10 px-5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] text-sm font-semibold rounded-md transition-colors inline-flex items-center gap-1.5"
+                >
+                  <UserPlus className="w-4 h-4" /> Get Started
+                </button>
               </>
             )}
           </div>
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2 text-white/90 hover:text-white focus:outline-none"
+            className="md:hidden p-2 text-[#cccccc] hover:text-white focus:outline-none"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -77,24 +79,30 @@ export function PublicNav({ onLogin, onSignup }: { onLogin?: () => void; onSignu
 
         {/* Mobile nav */}
         {mobileOpen && (
-          <nav className="md:hidden py-4 space-y-2 border-t border-[#2E2E2E] bg-[#141414] px-2 rounded-b-xl my-1 shadow-2xl">
+          <nav className="md:hidden py-4 space-y-2 border-t border-[#2a2a2a] bg-[#121212] px-3 rounded-b-xl my-1 shadow-2xl">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="block px-4 py-2.5 text-sm text-[#888898] hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium"
+                className="block px-3 py-2 text-sm text-[#cccccc] hover:text-white hover:bg-[#1a1a1a] rounded-md transition-colors font-medium"
                 onClick={() => setMobileOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="flex flex-col gap-2 pt-3 px-2 border-t border-[#2E2E2E]">
-              <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); onLogin?.(); }} className="gap-1.5 w-full bg-transparent border-[#2E2E2E] text-white hover:bg-[#1A1A1A]">
-                <LogIn className="w-4 h-4" /> Log In
-              </Button>
-              <Button size="sm" onClick={() => { setMobileOpen(false); onSignup?.(); }} className="gap-1.5 w-full bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold">
-                <UserPlus className="w-4 h-4" /> Sign Up
-              </Button>
+            <div className="flex flex-col gap-2 pt-3 border-t border-[#2a2a2a]">
+              <button
+                onClick={() => { setMobileOpen(false); onLogin?.(); }}
+                className="h-10 w-full bg-[#1a1a1a] border border-[#2a2a2a] text-white text-sm font-semibold rounded-md inline-flex items-center justify-center gap-1.5"
+              >
+                <LogIn className="w-4 h-4" /> Sign In
+              </button>
+              <button
+                onClick={() => { setMobileOpen(false); onSignup?.(); }}
+                className="h-10 w-full bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] text-sm font-semibold rounded-md inline-flex items-center justify-center gap-1.5"
+              >
+                <UserPlus className="w-4 h-4" /> Get Started
+              </button>
             </div>
           </nav>
         )}

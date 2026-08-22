@@ -44,164 +44,180 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  /* DE Color Tokens */
-  --de-orange: #FF6200;
-  --de-orange-hover: #E55700;
-  --de-orange-light: #FF8C42;
-  --de-orange-glow: rgba(255, 98, 0, 0.20);
-  --de-dark: #0D0D0D;
-  --de-dark-surface: #141414;
-  --de-dark-card: #1A1A1A;
-  --de-dark-elevated: #222222;
-  --de-dark-border: #2E2E2E;
+  --radius: 0.5rem;
 
-  --background: #0D0D0D;
-  --foreground: #FFFFFF;
-  --card: #141414;
-  --card-foreground: #FFFFFF;
-  --popover: #141414;
-  --popover-foreground: #FFFFFF;
-  --primary: #FF6200;
-  --primary-foreground: #FFFFFF;
-  --secondary: #1A1A1A;
-  --secondary-foreground: #FFFFFF;
-  --muted: #1A1A1A;
-  --muted-foreground: #888898;
-  --accent: #222222;
-  --accent-foreground: #FF6200;
-  --destructive: #EF4444;
-  --border: #2E2E2E;
-  --input: #252525;
-  --ring: #FF6200;
-  --chart-1: #FF6200;
-  --chart-2: #FF8C42;
-  --chart-3: #22C55E;
-  --chart-4: #3B82F6;
-  --chart-5: #A855F7;
-  --sidebar: #141414;
-  --sidebar-foreground: #FFFFFF;
-  --sidebar-primary: #FF6200;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1A1A1A;
-  --sidebar-accent-foreground: #FF6200;
-  --sidebar-border: #2E2E2E;
-  --sidebar-ring: #FF6200;
+  /* ClickHouse Core Tokens */
+  --clickhouse-canvas: #0a0a0a;
+  --clickhouse-primary: #faff69;
+  --clickhouse-primary-active: #e6eb52;
+  --clickhouse-primary-disabled: #3a3a1f;
+  --clickhouse-surface-soft: #121212;
+  --clickhouse-surface-card: #1a1a1a;
+  --clickhouse-surface-elevated: #242424;
+  --clickhouse-surface-yellow-band: #faff69;
+  --clickhouse-on-primary: #0a0a0a;
+  --clickhouse-on-dark: #ffffff;
+  --clickhouse-on-yellow: #0a0a0a;
+  --clickhouse-hairline: #2a2a2a;
+  --clickhouse-hairline-strong: #3a3a3a;
+  --clickhouse-ink: #ffffff;
+  --clickhouse-body: #cccccc;
+  --clickhouse-body-strong: #e6e6e6;
+  --clickhouse-muted: #888888;
+  --clickhouse-muted-soft: #5a5a5a;
+  --clickhouse-accent-emerald: #22c55e;
+  --clickhouse-accent-rose: #ef4444;
+  --clickhouse-accent-blue: #3b82f6;
 
-  /* Intercom Design System Tokens (from DESIGN.md) */
-  --intercom-canvas: #f5f1ec;
-  --intercom-surface-1: #ffffff;
-  --intercom-surface-2: #ebe7e1;
-  --intercom-ink: #111111;
-  --intercom-ink-muted: #626260;
-  --intercom-hairline: #d3cec6;
-  --intercom-fin-orange: #ff5600;
-  --intercom-brand-blue: #0007cb;
+  /* Global Semantic Mapping (ClickHouse Design System) */
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --card: #1a1a1a;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
+  --primary: #faff69;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ffffff;
+  --muted: #1a1a1a;
+  --muted-foreground: #888888;
+  --accent: #242424;
+  --accent-foreground: #faff69;
+  --destructive: #ef4444;
+  --border: #2a2a2a;
+  --input: #1a1a1a;
+  --ring: #faff69;
+  --chart-1: #faff69;
+  --chart-2: #e6eb52;
+  --chart-3: #22c55e;
+  --chart-4: #3b82f6;
+  --chart-5: #ef4444;
+  --sidebar: #121212;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #faff69;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #1a1a1a;
+  --sidebar-accent-foreground: #faff69;
+  --sidebar-border: #2a2a2a;
+  --sidebar-ring: #faff69;
 }
 
 .dark {
-  --background: #0D0D0D;
-  --foreground: #FFFFFF;
-  --card: #141414;
-  --card-foreground: #FFFFFF;
-  --popover: #141414;
-  --popover-foreground: #FFFFFF;
-  --primary: #FF6200;
-  --primary-foreground: #FFFFFF;
-  --secondary: #1A1A1A;
-  --secondary-foreground: #FFFFFF;
-  --muted: #1A1A1A;
-  --muted-foreground: #888898;
-  --accent: #222222;
-  --accent-foreground: #FF6200;
-  --destructive: #EF4444;
-  --border: #2E2E2E;
-  --input: #252525;
-  --ring: #FF6200;
-  --chart-1: #FF6200;
-  --chart-2: #FF8C42;
-  --chart-3: #22C55E;
-  --chart-4: #3B82F6;
-  --chart-5: #A855F7;
-  --sidebar: #141414;
-  --sidebar-foreground: #FFFFFF;
-  --sidebar-primary: #FF6200;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1A1A1A;
-  --sidebar-accent-foreground: #FF6200;
-  --sidebar-border: #2E2E2E;
-  --sidebar-ring: #FF6200;
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --card: #1a1a1a;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
+  --primary: #faff69;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ffffff;
+  --muted: #1a1a1a;
+  --muted-foreground: #888888;
+  --accent: #242424;
+  --accent-foreground: #faff69;
+  --destructive: #ef4444;
+  --border: #2a2a2a;
+  --input: #1a1a1a;
+  --ring: #faff69;
+  --chart-1: #faff69;
+  --chart-2: #e6eb52;
+  --chart-3: #22c55e;
+  --chart-4: #3b82f6;
+  --chart-5: #ef4444;
+  --sidebar: #121212;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #faff69;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #1a1a1a;
+  --sidebar-accent-foreground: #faff69;
+  --sidebar-border: #2a2a2a;
+  --sidebar-ring: #faff69;
 }
 
-/* Liquid Glass Effect */
-.liquid-glass {
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  position: relative;
-  overflow: hidden;
-}
-
-.liquid-glass-orange {
-  background: rgba(255, 98, 0, 0.03);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 98, 0, 0.25);
-  position: relative;
-}
-
-/* Gradient text */
-.text-gradient-orange {
-  background: linear-gradient(135deg, #FF6200 0%, #FF8C42 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.font-bricolage {
-  font-family: var(--font-bricolage), sans-serif;
-}
-
-/* Intercom Design System Utility Classes (from intercom/DESIGN.md) */
-.intercom-card {
-  background-color: var(--card);
-  border: 1px solid var(--border);
+/* ClickHouse Design System Utilities */
+.clickhouse-card {
+  background-color: var(--clickhouse-surface-card);
+  border: 1px solid var(--clickhouse-hairline);
   border-radius: 12px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.15s ease;
 }
 
-.intercom-card:hover {
-  border-color: rgba(255, 86, 0, 0.4);
+.clickhouse-card:hover {
+  border-color: var(--clickhouse-hairline-strong);
 }
 
-.intercom-btn-fin {
-  background-color: var(--intercom-fin-orange);
-  color: #ffffff;
+.clickhouse-btn-primary {
+  background-color: var(--clickhouse-primary);
+  color: var(--clickhouse-on-primary);
+  font-family: var(--font-inter), sans-serif;
   font-weight: 600;
+  font-size: 14px;
   border-radius: 8px;
-  padding: 10px 18px;
-  transition: all 0.2s ease;
+  padding: 12px 20px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
 }
 
-.intercom-btn-fin:hover {
-  background-color: #e04b00;
-  box-shadow: 0 4px 14px rgba(255, 86, 0, 0.35);
+.clickhouse-btn-primary:hover {
+  background-color: var(--clickhouse-primary-active);
 }
 
-.intercom-btn-primary {
-  background-color: #111111;
-  color: #ffffff;
-  font-weight: 500;
+.clickhouse-btn-secondary {
+  background-color: var(--clickhouse-surface-card);
+  color: var(--clickhouse-on-dark);
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid var(--clickhouse-hairline);
   border-radius: 8px;
-  padding: 10px 18px;
+  padding: 12px 20px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.intercom-btn-secondary {
-  background-color: #ffffff;
-  color: #111111;
-  border: 1px solid #d3cec6;
-  border-radius: 8px;
-  padding: 10px 18px;
+.clickhouse-btn-secondary:hover {
+  background-color: var(--clickhouse-surface-elevated);
+  border-color: var(--clickhouse-hairline-strong);
+}
+
+.clickhouse-badge-yellow {
+  background-color: var(--clickhouse-primary);
+  color: var(--clickhouse-on-primary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.clickhouse-stat {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1.0;
+  letter-spacing: -1.5px;
+  color: var(--clickhouse-primary);
+}
+
+.clickhouse-code {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 14px;
+  background-color: var(--clickhouse-surface-card);
+  border: 1px solid var(--clickhouse-hairline);
+  border-radius: 12px;
+  padding: 24px;
 }
 
 @layer base {

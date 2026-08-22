@@ -2,7 +2,16 @@
 
 import type { ResumeData } from "@/lib/resume/types";
 import type { TemplateSpec, VisualArchetype } from "@/lib/resume/template-specs";
-import { formatDateRange, getActiveSections, withAlpha, shade, initials, contactItems } from "@/lib/resume/template-helpers";
+import {
+  formatDateRange,
+  getActiveSections,
+  withAlpha,
+  shade,
+  initials,
+  contactItems,
+  renderFormattedText,
+  normalizeCustomItem,
+} from "@/lib/resume/template-helpers";
 
 const fontClassMap: Record<string, string> = {
   inter: "font-sans",
@@ -68,16 +77,64 @@ function Bullet({ style, accent }: { style: TemplateSpec["bulletStyle"]; accent:
 }
 
 function Bullets({ items, spec }: { items: string[]; spec: TemplateSpec }) {
-  if (items.length === 0) return null;
+  if (!items || items.length === 0) return null;
   return (
     <ul className={`mt-1.5 ${spec.density === "compact" ? "space-y-0.5" : "space-y-1"}`}>
       {items.map((a, i) => (
-        <li key={i} className="flex gap-0.5" style={{ fontSize: DENSITIES[spec.density].fontSize }}>
+        <li key={i} className="flex gap-0.5 break-words [overflow-wrap:anywhere]" style={{ fontSize: DENSITIES[spec.density].fontSize }}>
           {spec.bulletStyle !== "none" && <Bullet style={spec.bulletStyle} accent={spec.accent} />}
-          <span className="text-gray-700 leading-snug">{a}</span>
+          <span className="text-gray-700 leading-snug break-words [overflow-wrap:anywhere]">{renderFormattedText(a)}</span>
         </li>
       ))}
     </ul>
+  );
+}
+
+function ParameterizedCustomSections({ data, spec }: { data: ResumeData; spec: TemplateSpec }) {
+  if (!data.customSections || data.customSections.length === 0) return null;
+  const valid = data.customSections.filter((s) => s.items && s.items.length > 0);
+  if (valid.length === 0) return null;
+
+  return (
+    <>
+      {valid.map((sec) => (
+        <section key={sec.id} className={DENSITIES[spec.density].sectionGap}>
+          <h2
+            className="font-bold uppercase tracking-wider mb-2 border-b pb-1 break-words"
+            style={{
+              fontSize: DENSITIES[spec.density].headingSize,
+              color: shade(spec.accent, -0.15),
+              borderColor: withAlpha(spec.accent, 0.3),
+            }}
+          >
+            {sec.title}
+          </h2>
+          <div className={DENSITIES[spec.density].itemGap}>
+            {sec.items.map((rawIt, i) => {
+              const it = normalizeCustomItem(rawIt);
+              return (
+                <div key={it.id || i} className="break-words [overflow-wrap:anywhere]">
+                  <div className="flex justify-between items-baseline gap-2 flex-wrap">
+                    <h3 className="font-semibold text-gray-900 break-words" style={{ fontSize: DENSITIES[spec.density].fontSize }}>
+                      {renderFormattedText(it.title)}
+                    </h3>
+                    {it.date && <span className="text-xs text-gray-500">{it.date}</span>}
+                  </div>
+                  {it.subtitle && (
+                    <p className="text-xs text-gray-600 font-medium break-words">{renderFormattedText(it.subtitle)}</p>
+                  )}
+                  {it.description && (
+                    <p className="text-gray-700 mt-1 whitespace-pre-wrap leading-relaxed break-words" style={{ fontSize: DENSITIES[spec.density].fontSize }}>
+                      {renderFormattedText(it.description)}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ))}
+    </>
   );
 }
 
@@ -193,6 +250,9 @@ function TimelineLayout({ data, spec }: { data: ResumeData; spec: TemplateSpec }
           </div>
         </section>
       )}
+
+      {/* Custom Sections */}
+      <ParameterizedCustomSections data={data} spec={spec} />
     </div>
   );
 }
@@ -322,6 +382,9 @@ function CardBlocksLayout({ data, spec }: { data: ResumeData; spec: TemplateSpec
           </div>
         )}
       </div>
+
+      {/* Custom Sections */}
+      <ParameterizedCustomSections data={data} spec={spec} />
     </div>
   );
 }
@@ -413,6 +476,9 @@ function EditorialLayout({ data, spec }: { data: ResumeData; spec: TemplateSpec 
             </div>
           )}
         </div>
+
+        {/* Custom Sections */}
+        <ParameterizedCustomSections data={data} spec={spec} />
       </div>
     </div>
   );
@@ -526,6 +592,9 @@ function TechTerminalLayout({ data, spec }: { data: ResumeData; spec: TemplateSp
             ))}
           </section>
         )}
+
+        {/* Custom Sections */}
+        <ParameterizedCustomSections data={data} spec={spec} />
       </div>
     </div>
   );
@@ -632,6 +701,9 @@ function DarkExecutiveLayout({ data, spec }: { data: ResumeData; spec: TemplateS
           </div>
         </section>
       )}
+
+      {/* Custom Sections */}
+      <ParameterizedCustomSections data={data} spec={spec} />
     </div>
   );
 }
@@ -724,6 +796,9 @@ function BannerGradientLayout({ data, spec }: { data: ResumeData; spec: Template
             </div>
           </section>
         )}
+
+        {/* Custom Sections */}
+        <ParameterizedCustomSections data={data} spec={spec} />
       </div>
     </div>
   );
@@ -841,6 +916,9 @@ function SidebarModernLayout({ data, spec }: { data: ResumeData; spec: TemplateS
           </div>
         </section>
       )}
+
+      {/* Custom Sections */}
+      <ParameterizedCustomSections data={data} spec={spec} />
     </main>
   );
 
@@ -938,6 +1016,9 @@ function MinimalSwissLayout({ data, spec }: { data: ResumeData; spec: TemplateSp
             </div>
           </section>
         )}
+
+        {/* Custom Sections */}
+        <ParameterizedCustomSections data={data} spec={spec} />
       </div>
     </div>
   );

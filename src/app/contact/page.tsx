@@ -4,12 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { PublicNav } from "@/components/resume/public-nav";
 import { PublicFooter } from "@/components/resume/public-footer";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Mail,
   Clock,
@@ -23,7 +20,6 @@ import {
   CreditCard,
   Briefcase,
   ShieldAlert,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -80,7 +76,6 @@ export default function ContactPage() {
       setEmail("");
       setMessage("");
     } catch {
-      // Direct client fallback confirmation if offline
       setSubmitted(true);
       toast.success("Thank you! Your inquiry has been dispatched to admin@domainexpansion.in.");
     } finally {
@@ -89,20 +84,20 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col font-sans selection:bg-[#FF6200] selection:text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
       <PublicNav />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full space-y-16">
         {/* Header */}
-        <section className="text-center max-w-3xl mx-auto space-y-4">
-          <Badge className="bg-[#1A1A1A] border-[#2E2E2E] text-[#FF6200] px-3 py-1 text-xs font-mono rounded-full gap-1.5 inline-flex">
-            <Mail className="w-3.5 h-3.5" /> Direct Support & Inquiries
-          </Badge>
-          <h1 className="font-bricolage text-4xl sm:text-6xl font-bold tracking-tight text-white leading-tight">
-            Let's Connect — We're Here to <span className="text-gradient-orange">Help You Succeed</span>
+        <section className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#faff69] px-3.5 py-1 text-xs font-mono rounded-full">
+            <Mail className="w-3.5 h-3.5" /> Direct Support &amp; Inquiries
+          </div>
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-white leading-tight">
+            Connect with the <span className="text-[#faff69]">Jinzai Team</span>
           </h1>
-          <p className="text-base sm:text-lg text-[#888898]">
-            Have a question about our 72 resume templates, AI scanning features, or subscription plans? Drop us a message below.
+          <p className="text-base sm:text-lg text-[#cccccc]">
+            Have a question about our 78 resume templates, AI scanning features, or subscription plans? Drop us a message below.
           </p>
         </section>
 
@@ -110,167 +105,164 @@ export default function ContactPage() {
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column: Direct Info Cards */}
           <div className="lg:col-span-5 space-y-6">
-            <Card className="p-6 bg-[#141414] border-[#2E2E2E] rounded-2xl space-y-6">
-              <h2 className="font-bricolage text-xl font-bold text-white flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-[#FF6200]" /> Contact Information
+            <div className="p-8 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl space-y-6">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2 tracking-tight">
+                <Building2 className="w-5 h-5 text-[#faff69]" /> Contact Information
               </h2>
 
               <div className="space-y-4 text-sm">
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E]">
-                  <Mail className="w-5 h-5 text-[#FF6200] shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-[#121212] border border-[#2a2a2a]">
+                  <Mail className="w-5 h-5 text-[#faff69] shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-xs font-mono text-[#888898]">Email Us</p>
+                    <p className="text-xs font-mono text-[#888888]">Email Us</p>
                     <p className="text-white font-semibold">admin@domainexpansion.in</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E]">
-                  <Clock className="w-5 h-5 text-[#FF6200] shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-[#121212] border border-[#2a2a2a]">
+                  <Clock className="w-5 h-5 text-[#faff69] shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-xs font-mono text-[#888898]">Support Hours</p>
+                    <p className="text-xs font-mono text-[#888888]">Support Hours</p>
                     <p className="text-white font-semibold">Monday – Friday: 9 AM – 6 PM IST</p>
-                    <p className="text-[11px] text-[#888898]">Response within 24 hours</p>
+                    <p className="text-[11px] text-[#888888]">Response within 24 hours</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E]">
-                  <MapPin className="w-5 h-5 text-[#FF6200] shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-[#121212] border border-[#2a2a2a]">
+                  <MapPin className="w-5 h-5 text-[#faff69] shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-xs font-mono text-[#888898]">Corporate HQ</p>
+                    <p className="text-xs font-mono text-[#888888]">Corporate HQ</p>
                     <p className="text-white font-semibold">Domain Expansion</p>
-                    <p className="text-xs text-[#888898]">Bengaluru, Karnataka, India</p>
+                    <p className="text-xs text-[#888888]">Bengaluru, Karnataka, India</p>
                   </div>
                 </div>
               </div>
-            </Card>
+            </div>
 
-            {/* Grievance & IT Rules Card */}
-            <Card className="p-6 bg-[#141414] border-[#2E2E2E] rounded-2xl space-y-3">
+            {/* Grievance Card */}
+            <div className="p-6 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl space-y-3">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-[#FF6200]" />
-                <h3 className="font-bricolage text-sm font-bold text-white">Grievance Officer (India IT Rules 2021)</h3>
+                <ShieldAlert className="w-4 h-4 text-[#faff69]" />
+                <h3 className="text-sm font-bold text-white">Grievance Officer (India IT Rules 2021)</h3>
               </div>
-              <p className="text-xs text-[#888898] leading-relaxed">
+              <p className="text-xs text-[#888888] leading-relaxed">
                 In compliance with Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules 2021:
               </p>
-              <div className="p-3 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] text-xs font-mono text-[#888898] space-y-1">
+              <div className="p-3.5 rounded-lg bg-[#121212] border border-[#2a2a2a] text-xs font-mono text-[#888888] space-y-1">
                 <p><span className="text-white font-semibold">Officer Email:</span> admin@domainexpansion.in</p>
                 <p><span className="text-white font-semibold">Response Window:</span> Within 24–48 hours</p>
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Right Column: Contact Form */}
           <div className="lg:col-span-7">
-            <Card className="p-8 bg-[#141414] border-[#2E2E2E] rounded-2xl shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#FF6200]/5 rounded-full blur-[90px] pointer-events-none" />
-
+            <div className="p-8 sm:p-10 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl shadow-2xl relative overflow-hidden">
               {submitted ? (
                 <div className="py-12 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-[#FF6200]/20 border border-[#FF6200] flex items-center justify-center mx-auto text-[#FF6200]">
+                  <div className="w-16 h-16 rounded-full bg-[#faff69]/10 border border-[#faff69] flex items-center justify-center mx-auto text-[#faff69]">
                     <CheckCircle2 className="w-8 h-8" />
                   </div>
-                  <h3 className="font-bricolage text-2xl font-bold text-white">Message Dispatched!</h3>
-                  <p className="text-sm text-[#888898] max-w-md mx-auto">
+                  <h3 className="text-2xl font-bold text-white tracking-tight">Message Dispatched!</h3>
+                  <p className="text-sm text-[#888888] max-w-md mx-auto">
                     Thank you for reaching out. Our support team at Domain Expansion has received your inquiry and will respond to <strong className="text-white">{email || "your email"}</strong> within 24 hours.
                   </p>
-                  <Button
+                  <button
                     onClick={() => setSubmitted(false)}
-                    variant="outline"
-                    className="border-[#2E2E2E] text-white hover:bg-[#1A1A1A] rounded-full px-6"
+                    className="border border-[#2a2a2a] text-white hover:bg-[#242424] rounded-md px-6 h-10 text-xs font-semibold"
                   >
                     Send Another Message
-                  </Button>
+                  </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                   <div>
-                    <h2 className="font-bricolage text-2xl font-bold text-white mb-1">Send Us a Message</h2>
-                    <p className="text-xs text-[#888898]">Fill in the form below and our team will get back to you promptly.</p>
+                    <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">Send Us a Message</h2>
+                    <p className="text-xs text-[#888888]">Fill in the form below and our team will get back to you promptly.</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-xs font-mono text-[#888898]">Your Name *</Label>
-                      <Input
+                      <Label className="text-xs font-mono text-[#888888]">Your Name *</Label>
+                      <input
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="John Doe"
                         required
-                        className="bg-[#1A1A1A] border-[#2E2E2E] text-white placeholder:text-[#555] focus:border-[#FF6200] rounded-xl h-11"
+                        className="w-full bg-[#121212] border border-[#2a2a2a] text-white placeholder:text-[#555] focus:border-[#faff69] rounded-md h-10 px-3 text-xs outline-none transition-colors"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-xs font-mono text-[#888898]">Email Address *</Label>
-                      <Input
+                      <Label className="text-xs font-mono text-[#888888]">Email Address *</Label>
+                      <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="john@example.com"
                         required
-                        className="bg-[#1A1A1A] border-[#2E2E2E] text-white placeholder:text-[#555] focus:border-[#FF6200] rounded-xl h-11"
+                        className="w-full bg-[#121212] border border-[#2a2a2a] text-white placeholder:text-[#555] focus:border-[#faff69] rounded-md h-10 px-3 text-xs outline-none transition-colors"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-mono text-[#888898]">Inquiry Category</Label>
+                    <Label className="text-xs font-mono text-[#888888]">Inquiry Category</Label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full bg-[#1A1A1A] border border-[#2E2E2E] text-white rounded-xl h-11 px-3 text-sm focus:border-[#FF6200] outline-none"
+                      className="w-full bg-[#121212] border border-[#2a2a2a] text-white rounded-md h-10 px-3 text-xs focus:border-[#faff69] outline-none transition-colors"
                     >
-                      <option value="Technical & Editor Support">Technical & Editor Support</option>
-                      <option value="Billing & Subscriptions">Billing & Subscriptions</option>
-                      <option value="Feature Requests & Feedback">Feature Requests & Feedback</option>
-                      <option value="Enterprise & Partnerships">Enterprise & Partnerships</option>
+                      <option value="Technical & Editor Support">Technical &amp; Editor Support</option>
+                      <option value="Billing & Subscriptions">Billing &amp; Subscriptions</option>
+                      <option value="Feature Requests & Feedback">Feature Requests &amp; Feedback</option>
+                      <option value="Enterprise & Partnerships">Enterprise &amp; Partnerships</option>
                     </select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-mono text-[#888898]">Your Message *</Label>
-                    <Textarea
+                    <Label className="text-xs font-mono text-[#888888]">Your Message *</Label>
+                    <textarea
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       rows={5}
                       placeholder="Describe how we can assist you..."
                       required
-                      className="bg-[#1A1A1A] border-[#2E2E2E] text-white placeholder:text-[#555] focus:border-[#FF6200] rounded-xl text-sm"
+                      className="w-full bg-[#121212] border border-[#2a2a2a] text-white placeholder:text-[#555] focus:border-[#faff69] rounded-md p-3 text-xs outline-none transition-colors resize-none"
                     />
                   </div>
 
-                  <Button
+                  <button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-12 rounded-full bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold gap-2 shadow-lg shadow-[#FF6200]/20"
+                    className="w-full h-11 rounded-md bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold text-sm transition-colors inline-flex items-center justify-center gap-2"
                   >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     {loading ? "Sending Message..." : "Submit Inquiry"}
-                  </Button>
+                  </button>
                 </form>
               )}
-            </Card>
+            </div>
           </div>
         </section>
 
         {/* Support Categories Cards */}
-        <section className="space-y-8">
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="font-bricolage text-3xl font-bold text-white mb-2">How Can We Help You?</h2>
-            <p className="text-[#888898] text-sm">Select a category below or explore our quick-help support topics.</p>
+        <section className="space-y-8 border-t border-[#2a2a2a] pt-16">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <h2 className="text-3xl font-bold text-white tracking-tight">How Can We Help You?</h2>
+            <p className="text-[#888888] text-sm">Select a category below or explore our quick-help support topics.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {SUPPORT_CATEGORIES.map((cat) => {
               const Icon = cat.icon;
               return (
-                <Card key={cat.title} className="p-6 bg-[#141414] border-[#2E2E2E] rounded-2xl hover:border-[#FF6200]/40 transition-all duration-300 group">
-                  <div className="w-10 h-10 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] group-hover:border-[#FF6200]/50 flex items-center justify-center mb-4 text-[#FF6200]">
+                <div key={cat.title} className="p-8 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl hover:border-[#3a3a3a] transition-colors group space-y-3">
+                  <div className="w-10 h-10 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69]">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="font-bricolage text-base font-bold text-white mb-2">{cat.title}</h3>
-                  <p className="text-xs text-[#888898] leading-relaxed">{cat.desc}</p>
-                </Card>
+                  <h3 className="text-sm font-bold text-white tracking-tight">{cat.title}</h3>
+                  <p className="text-xs text-[#888888] leading-relaxed">{cat.desc}</p>
+                </div>
               );
             })}
           </div>

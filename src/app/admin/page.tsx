@@ -1,11 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Shield, Users, DollarSign, HeadphonesIcon, LogOut, Loader2, Lock,
   LayoutDashboard, Settings as SettingsIcon, TrendingUp, UserPlus,
@@ -97,37 +92,53 @@ export default function AdminPage() {
   // ---------- Login screen ----------
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0D0D0D] p-4 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#FF6200]/10 rounded-full blur-[140px] pointer-events-none" />
-        <Card className="max-w-md w-full p-8 bg-[#141414] border-[#2E2E2E] shadow-2xl relative z-10 rounded-2xl">
-          <div className="text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF6200] to-[#FF8C42] flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#FF6200]/20 border border-white/10">
-              <Shield className="w-7 h-7 text-white" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] p-4 relative overflow-hidden font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
+        <div className="max-w-md w-full p-8 bg-[#1a1a1a] border border-[#2a2a2a] shadow-2xl relative z-10 rounded-xl space-y-6">
+          <div className="text-center">
+            <div className="w-12 h-12 rounded-lg bg-[#faff69] flex items-center justify-center mx-auto mb-3 text-[#0a0a0a] font-bold shadow-sm">
+              <Shield className="w-6 h-6" />
             </div>
-            <h1 className="font-bricolage text-2xl font-bold text-white">Admin Control Panel</h1>
-            <p className="text-xs text-[#888898] font-mono mt-1">Domain Expansion Technologies — Protected Portal</p>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Admin Console</h1>
+            <p className="text-xs text-[#888888] font-mono mt-1">Domain Expansion Technologies — Protected Workspace</p>
           </div>
           <div className="space-y-4">
             <div>
-              <Label className="text-[11px] font-mono text-[#888898] mb-1.5 block">Sender Email Address</Label>
-              <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="admin@email.com" className="bg-[#0B0B0C] border-[#2E2E2E] focus:border-[#FF6200] text-white rounded-xl text-xs" />
+              <label className="text-[11px] font-mono text-[#888888] mb-1.5 block">Sender Email Address</label>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                placeholder="admin@email.com"
+                className="w-full bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md text-xs h-10 px-3 outline-none transition-colors"
+              />
             </div>
             <div>
-              <Label className="text-[11px] font-mono text-[#888898] mb-1.5 block">Password</Label>
-              <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="••••••••" className="bg-[#0B0B0C] border-[#2E2E2E] focus:border-[#FF6200] text-white rounded-xl text-xs" onKeyDown={(e) => e.key === "Enter" && login()} />
+              <label className="text-[11px] font-mono text-[#888888] mb-1.5 block">Password</label>
+              <input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password"
+                placeholder="••••••••"
+                className="w-full bg-[#121212] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md text-xs h-10 px-3 outline-none transition-colors"
+                onKeyDown={(e) => e.key === "Enter" && login()}
+              />
             </div>
-            <Button onClick={login} disabled={loading} className="w-full gap-2 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-xl shadow-lg shadow-[#FF6200]/20">
+            <button
+              onClick={login}
+              disabled={loading}
+              className="w-full h-11 gap-2 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold rounded-md transition-colors inline-flex items-center justify-center text-xs"
+            >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-              Login to Admin Panel
-            </Button>
+              Authenticate Admin Session
+            </button>
             <button
               onClick={() => { setEmail(ADMIN_EMAIL); setPassword(ADMIN_PASSWORD); }}
-              className="w-full text-xs text-[#FF6200] hover:underline font-mono text-center block pt-1"
+              className="w-full text-xs text-[#faff69] hover:underline font-mono text-center block pt-1"
             >
               Use default admin credentials
             </button>
           </div>
-        </Card>
+        </div>
       </div>
     );
   }
@@ -141,15 +152,13 @@ export default function AdminPage() {
     { id: "accounts", label: "Account Creation", icon: UserPlus },
   ];
 
-  // Switch section and auto-close the sidebar on mobile
   const goToSection = (s: Section) => {
     setSection(s);
     setSidebarOpen(false);
   };
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white flex font-sans">
-      {/* Mobile overlay backdrop — click to close sidebar */}
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-30 md:hidden"
@@ -157,92 +166,90 @@ export default function AdminPage() {
         />
       )}
 
-      {/* Left sidebar — fixed off-canvas on mobile, static on desktop */}
+      {/* Left sidebar */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen w-72 shrink-0 border-r border-[#2E2E2E] bg-[#141414] flex flex-col z-40 transition-transform duration-300 ${
+        className={`fixed md:sticky top-0 left-0 h-screen w-72 shrink-0 border-r border-[#2a2a2a] bg-[#121212] flex flex-col z-40 transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-        <div className="p-4 border-b border-[#2E2E2E] flex items-center justify-between">
+        <div className="p-4 border-b border-[#2a2a2a] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FF6200] to-[#FF8C42] flex items-center justify-center shadow-lg shadow-[#FF6200]/20 border border-white/10">
-              <Shield className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-[#faff69] flex items-center justify-center text-[#0a0a0a] font-bold text-sm">
+              <Shield className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-bricolage font-bold text-sm leading-tight text-white">Jinzai Admin</p>
-              <p className="text-[10px] text-[#888898] font-mono leading-tight">domain.expansion</p>
+              <p className="font-bold text-sm leading-tight text-white">Jinzai Admin</p>
+              <p className="text-[10px] text-[#888888] font-mono leading-tight">domain.expansion</p>
             </div>
           </div>
-          {/* Close button — mobile only */}
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-[#888898] hover:bg-[#1A1A1A] hover:text-white"
+            className="md:hidden w-8 h-8 rounded-md flex items-center justify-center text-[#888888] hover:bg-[#1a1a1a] hover:text-white"
             aria-label="Close sidebar"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
         <ScrollArea className="flex-1">
-          <nav className="p-3 space-y-1.5">
+          <nav className="p-3 space-y-1">
             {navItems.map((item) => {
               const active = section === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => goToSection(item.id)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs transition-all group ${
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-xs transition-all ${
                     active
-                      ? "bg-[#FF6200]/10 text-[#FF6200] border border-[#FF6200]/30 font-semibold"
-                      : "text-[#888898] hover:bg-[#1A1A1A] hover:text-white"
+                      ? "bg-[#1a1a1a] text-[#faff69] border border-[#2a2a2a] font-semibold"
+                      : "text-[#888888] hover:bg-[#1a1a1a] hover:text-white"
                   }`}
                 >
-                  <item.icon className={`w-4 h-4 shrink-0 ${active ? "text-[#FF6200]" : ""}`} />
+                  <item.icon className={`w-4 h-4 shrink-0 ${active ? "text-[#faff69]" : ""}`} />
                   <span className="flex-1 text-left font-medium">{item.label}</span>
                   {item.badge !== undefined && item.badge > 0 && (
-                    <Badge className={`text-[9px] font-mono px-1.5 py-0 h-4 border-0 ${active ? "bg-[#FF6200] text-white" : "bg-[#1A1A1A] text-[#888898]"}`}>
+                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full ${active ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "bg-[#1a1a1a] text-[#888888]"}`}>
                       {item.badge}
-                    </Badge>
+                    </span>
                   )}
-                  {active && <ChevronRight className="w-3.5 h-3.5 text-[#FF6200]" />}
+                  {active && <ChevronRight className="w-3.5 h-3.5 text-[#faff69]" />}
                 </button>
               );
             })}
           </nav>
         </ScrollArea>
-        <div className="p-3 border-t border-[#2E2E2E] space-y-2">
-          <div className="rounded-xl bg-[#0B0B0C] border border-[#2E2E2E] p-3">
-            <div className="flex items-center gap-2 text-[10px] font-mono text-[#888898] mb-1">
-              <HeadphonesIcon className="w-3 h-3 text-[#FF6200]" /> SUPPORT QUEUE
+        <div className="p-3 border-t border-[#2a2a2a] space-y-2">
+          <div className="rounded-md bg-[#1a1a1a] border border-[#2a2a2a] p-3">
+            <div className="flex items-center gap-2 text-[10px] font-mono text-[#888888] mb-1">
+              <HeadphonesIcon className="w-3 h-3 text-[#faff69]" /> SUPPORT QUEUE
             </div>
-            <p className="text-xs text-white font-mono"><span className="text-[#FF6200] font-bold">{stats?.openTickets || 0}</span> tickets open</p>
+            <p className="text-xs text-white font-mono"><span className="text-[#faff69] font-bold">{stats?.openTickets || 0}</span> tickets open</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout} className="w-full gap-2 text-[#888898] hover:text-white hover:bg-[#1A1A1A] justify-start rounded-xl">
+          <button onClick={logout} className="w-full h-9 px-3 text-xs text-[#888888] hover:text-white hover:bg-[#1a1a1a] rounded-md transition-colors flex items-center gap-2">
             <LogOut className="w-3.5 h-3.5" /> Logout Session
-          </Button>
+          </button>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 min-w-0 w-full bg-[#0D0D0D]">
+      <main className="flex-1 min-w-0 w-full bg-[#0a0a0a]">
         {/* Top bar */}
-        <header className="border-b border-[#2E2E2E] bg-[#0D0D0D]/90 backdrop-blur sticky top-0 z-20">
+        <header className="border-b border-[#2a2a2a] bg-[#0a0a0a]/90 backdrop-blur sticky top-0 z-20">
           <div className="px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
-              {/* Hamburger — mobile only */}
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="md:hidden w-9 h-9 rounded-lg flex items-center justify-center text-[#888898] hover:bg-[#1A1A1A] shrink-0 border border-[#2E2E2E]"
+                className="md:hidden w-9 h-9 rounded-md flex items-center justify-center text-[#888888] hover:bg-[#1a1a1a] shrink-0 border border-[#2a2a2a]"
                 aria-label="Open sidebar"
               >
                 <Menu className="w-5 h-5 text-white" />
               </button>
-              <h2 className="font-bricolage text-base font-bold capitalize truncate text-white">{navItems.find((n) => n.id === section)?.label}</h2>
+              <h2 className="text-sm font-bold capitalize truncate text-white">{navItems.find((n) => n.id === section)?.label}</h2>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 text-xs font-mono text-[#888898] shrink-0">
-              <button onClick={() => loadDashboard(token!)} className="flex items-center gap-1.5 hover:text-white transition-colors bg-[#141414] border border-[#2E2E2E] px-2.5 py-1 rounded-lg">
-                <RefreshCw className="w-3 h-3 text-[#FF6200]" /> <span className="hidden sm:inline">Refresh</span>
+            <div className="flex items-center gap-2 sm:gap-3 text-xs font-mono text-[#888888] shrink-0">
+              <button onClick={() => loadDashboard(token!)} className="flex items-center gap-1.5 hover:text-white transition-colors bg-[#1a1a1a] border border-[#2a2a2a] px-2.5 py-1 rounded-md">
+                <RefreshCw className="w-3 h-3 text-[#faff69]" /> <span className="hidden sm:inline">Refresh</span>
               </button>
-              <span className="hidden sm:inline text-[#2E2E2E]">|</span>
+              <span className="hidden sm:inline text-[#2a2a2a]">|</span>
               <span className="hidden sm:inline text-[11px]">{new Date().toLocaleString()}</span>
             </div>
           </div>

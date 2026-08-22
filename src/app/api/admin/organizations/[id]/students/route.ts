@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const session = await getServerSession(authOptions);
     const isAdmin = verifyAdmin(req);
-    const isOrgAdmin = session?.user?.role === "org_admin" && (session?.user as any)?.organizationId === id;
+    const isOrgAdmin = (session?.user as any)?.role === "org_admin" && (session?.user as any)?.organizationId === id;
 
     if (!isAdmin && !isOrgAdmin) {
       return NextResponse.json({ error: "Unauthorized access to institution roster" }, { status: 401 });
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
     const session = await getServerSession(authOptions);
     const isAdmin = verifyAdmin(req);
-    const isOrgAdmin = session?.user?.role === "org_admin" && (session?.user as any)?.organizationId === id;
+    const isOrgAdmin = (session?.user as any)?.role === "org_admin" && (session?.user as any)?.organizationId === id;
 
     if (!isAdmin && !isOrgAdmin) {
       return NextResponse.json({ error: "Unauthorized access to institution roster" }, { status: 401 });

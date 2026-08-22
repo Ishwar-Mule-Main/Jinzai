@@ -10,6 +10,8 @@ export interface CurrentUser {
   plan: string;
   planExpiresAt: string | null;
   resumeCount: number;
+  role?: string;
+  organization?: { name?: string } | null;
 }
 
 export function useCurrentUser() {

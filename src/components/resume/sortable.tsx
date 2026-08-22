@@ -79,9 +79,10 @@ export function SortableItem({ id, children, renderHandle, dragHandleOnly = true
   );
 }
 
-interface SortableListProps<T extends { id: string }> {
+export interface SortableListProps<T extends { id: string }> {
   items: T[];
-  onReorder: (oldIndex: number, newIndex: number) => void;
+  onReorder?: (oldIndex: number, newIndex: number) => void;
+  onChange?: (items: T[]) => void;
   renderItem: (item: T, index: number) => React.ReactNode;
   className?: string;
 }
@@ -89,6 +90,7 @@ interface SortableListProps<T extends { id: string }> {
 export function SortableList<T extends { id: string }>({
   items,
   onReorder,
+  onChange,
   renderItem,
   className,
 }: SortableListProps<T>) {
@@ -107,7 +109,8 @@ export function SortableList<T extends { id: string }>({
     const oldIndex = items.findIndex((i) => i.id === active.id);
     const newIndex = items.findIndex((i) => i.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
-    onReorder(oldIndex, newIndex);
+    if (onReorder) onReorder(oldIndex, newIndex);
+    if (onChange) onChange(arrayMove(items, oldIndex, newIndex));
   };
 
   return (

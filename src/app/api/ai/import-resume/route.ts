@@ -150,8 +150,8 @@ async function extractTextFromPDFBuffer(buffer: Buffer): Promise<string> {
       const parser = new PDFParse({ data: uint8Array });
       
       // Crucial: Call load() before getText() in pdf-parse v2
-      await parser.load();
-      const textResult = await parser.getText();
+      await (parser as any).load();
+      const textResult = await (parser as any).getText();
       const pdfText = textResult?.text;
 
       if (typeof parser.destroy === "function") {

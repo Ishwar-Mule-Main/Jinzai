@@ -984,8 +984,9 @@ function EditorView() {
           <div className="sticky top-2 right-2 z-10 flex justify-end print:hidden p-2">
             <ZoomControls zoom={previewZoom} setZoom={setPreviewZoom} />
           </div>
-          <div className="p-2 sm:p-4 lg:p-8 flex justify-center print:p-0 print:scale-100 print:origin-top-left origin-top transition-transform" style={{ transform: `scale(${previewZoom})` }}>
+          <div className="p-4 sm:p-6 lg:p-8 flex justify-center print:p-0">
             <A4MultiPageWrapper
+              zoom={previewZoom}
               containerRef={resumeRef}
               onContextMenu={(e) => {
                 e.preventDefault();

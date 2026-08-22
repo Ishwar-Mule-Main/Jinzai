@@ -10,12 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { HeadphonesIcon, Loader2, Send, CheckCircle2, MessageSquare, Sparkles } from "lucide-react";
+import { HeadphonesIcon, Loader2, Send, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
 interface Ticket {
@@ -84,44 +79,44 @@ export function SupportDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-1.5 text-[#9A9AAB] hover:text-white hover:bg-[#1A1A1A]">
-          <HeadphonesIcon className="w-3.5 h-3.5 text-[#FF6200]" /> <span className="hidden sm:inline">Support &amp; Help</span>
-        </Button>
+        <button className="h-9 px-3 gap-1.5 text-xs text-[#888888] hover:text-white bg-[#1a1a1a] hover:bg-[#242424] border border-[#2a2a2a] rounded-md font-semibold inline-flex items-center transition-colors">
+          <HeadphonesIcon className="w-3.5 h-3.5 text-[#faff69]" /> <span className="hidden sm:inline">Support</span>
+        </button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto bg-[#141414] text-white border-[#2E2E2E] p-6 sm:p-7 shadow-2xl rounded-3xl selection:bg-[#FF6200] selection:text-white">
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto bg-[#1a1a1a] text-white border-[#2a2a2a] p-6 sm:p-7 rounded-xl font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
         <DialogHeader className="space-y-1">
-          <DialogTitle className="flex items-center gap-2.5 font-bricolage text-xl font-bold text-white">
-            <div className="p-2 rounded-xl bg-[#FF6200]/10 border border-[#FF6200]/30">
-              <HeadphonesIcon className="w-5 h-5 text-[#FF6200]" />
+          <DialogTitle className="flex items-center gap-2.5 text-xl font-bold text-white tracking-tight">
+            <div className="w-8 h-8 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69]">
+              <HeadphonesIcon className="w-4 h-4" />
             </div>
-            Customer Support &amp; Help Desk
+            Support Desk &amp; Inquiries
           </DialogTitle>
-          <DialogDescription className="text-xs text-[#9A9AAB]">
-            Have a question, technical issue, or feedback? Send us a message and our support team will respond to your account.
+          <DialogDescription className="text-xs text-[#888888]">
+            Have a question, technical issue, or feedback? Send us a ticket and our team will respond directly.
           </DialogDescription>
         </DialogHeader>
 
         {/* Previous tickets */}
         {tickets.length > 0 && (
           <div className="space-y-2 mb-4">
-            <p className="text-xs font-mono text-[#9A9AAB] flex items-center gap-1.5 uppercase tracking-wider">
-              <MessageSquare className="w-3.5 h-3.5 text-[#FF6200]" /> Your Support Tickets ({tickets.length})
+            <p className="text-xs font-mono text-[#888888] flex items-center gap-1.5 uppercase tracking-wider">
+              <MessageSquare className="w-3.5 h-3.5 text-[#faff69]" /> Your Tickets ({tickets.length})
             </p>
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
               {tickets.map((t) => (
-                <div key={t.id} className="rounded-2xl border border-[#2E2E2E] bg-[#0D0D0D] p-3 space-y-1.5">
+                <div key={t.id} className="rounded-lg border border-[#2a2a2a] bg-[#121212] p-3 space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-bold text-white truncate">{t.subject}</p>
-                    <Badge className={`text-[9px] font-mono border-0 ${
-                      t.status === "open" ? "bg-amber-500/10 text-amber-400 border border-amber-500/30" :
-                      t.status === "replied" ? "bg-[#FF6200]/10 text-[#FF6200] border border-[#FF6200]/30" :
-                      "bg-[#1A1A1A] text-[#888898] border border-[#2E2E2E]"
-                    }`}>{t.status.toUpperCase()}</Badge>
+                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${
+                      t.status === "open" ? "bg-amber-500/10 text-amber-400 border-amber-500/30" :
+                      t.status === "replied" ? "bg-[#faff69]/10 text-[#faff69] border-[#faff69]/30" :
+                      "bg-[#242424] text-[#888888] border-[#2a2a2a]"
+                    }`}>{t.status.toUpperCase()}</span>
                   </div>
-                  <p className="text-[11px] text-[#9A9AAB] line-clamp-2">{t.message}</p>
+                  <p className="text-[11px] text-[#888888] line-clamp-2">{t.message}</p>
                   {t.reply && (
-                    <div className="mt-1.5 p-2 rounded-xl bg-[#FF6200]/10 border border-[#FF6200]/20 text-[11px] text-white">
-                      <span className="font-bold text-[#FF6200]">Official Support Reply:</span> {t.reply}
+                    <div className="mt-1.5 p-2 rounded-md bg-[#242424] border border-[#2a2a2a] text-[11px] text-[#cccccc]">
+                      <span className="font-bold text-[#faff69]">Support Reply:</span> {t.reply}
                     </div>
                   )}
                 </div>
@@ -131,58 +126,58 @@ export function SupportDialog() {
         )}
 
         {/* New ticket form */}
-        <div className="space-y-3.5 border-t border-[#2E2E2E] pt-4">
+        <div className="space-y-3.5 border-t border-[#2a2a2a] pt-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-xs font-mono text-[#9A9AAB]">Email Address</Label>
-              <Input
+              <label className="text-xs font-mono text-[#888888]">Email Address</label>
+              <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 placeholder="you@domain.com"
-                className="h-10 text-xs bg-[#0D0D0D] border-[#2E2E2E] text-white focus-visible:ring-[#FF6200] rounded-xl"
+                className="w-full h-9 text-xs bg-[#121212] border border-[#2a2a2a] text-white focus:border-[#faff69] rounded-md px-3 outline-none"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs font-mono text-[#9A9AAB]">Full Name</Label>
-              <Input
+              <label className="text-xs font-mono text-[#888888]">Full Name</label>
+              <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
-                className="h-10 text-xs bg-[#0D0D0D] border-[#2E2E2E] text-white focus-visible:ring-[#FF6200] rounded-xl"
+                className="w-full h-9 text-xs bg-[#121212] border border-[#2a2a2a] text-white focus:border-[#faff69] rounded-md px-3 outline-none"
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs font-mono text-[#9A9AAB]">Subject</Label>
-            <Input
+            <label className="text-xs font-mono text-[#888888]">Subject</label>
+            <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Brief summary of your question or issue"
-              className="h-10 text-xs bg-[#0D0D0D] border-[#2E2E2E] text-white focus-visible:ring-[#FF6200] rounded-xl"
+              className="w-full h-9 text-xs bg-[#121212] border border-[#2a2a2a] text-white focus:border-[#faff69] rounded-md px-3 outline-none"
             />
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs font-mono text-[#9A9AAB]">Detailed Message</Label>
-            <Textarea
+            <label className="text-xs font-mono text-[#888888]">Detailed Message</label>
+            <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
               placeholder="Provide details about your query, billing, or technical issue..."
-              className="text-xs bg-[#0D0D0D] border-[#2E2E2E] text-white focus-visible:ring-[#FF6200] rounded-xl p-3"
+              className="w-full text-xs bg-[#121212] border border-[#2a2a2a] text-white focus:border-[#faff69] rounded-md p-3 outline-none resize-none"
             />
           </div>
 
-          <Button
+          <button
             onClick={submit}
             disabled={loading}
-            className="w-full h-11 bg-[#FF6200] hover:bg-[#E55700] text-white font-bold text-xs gap-2 rounded-full shadow-xl shadow-[#FF6200]/30 transition-all"
+            className="w-full h-10 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold text-xs gap-2 rounded-md transition-colors inline-flex items-center justify-center"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             Submit Support Ticket
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

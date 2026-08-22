@@ -8,7 +8,7 @@ const DEMO_EMAIL = "ishwar@domainexpansion.in";
 const DEMO_PASSWORD = "DomainEx@26";
 
 // In-memory store for email verification codes
-const codeStore = new Map<string, { code: string; expires: number; name?: string; password?: string }>();
+const codeStore = new Map<string, { code: string; expires: number; name?: string; password?: string; plan?: string }>();
 
 export function generateCode(email: string): string {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -175,8 +175,8 @@ export const authOptions: NextAuthOptions = {
         token.id = dbUser.id;
         token.plan = dbUser.plan;
       } else if (user) {
-        token.id = (user as { id: string }).id;
-        token.plan = (user as { plan: string }).plan || "free";
+        token.id = (user as { id?: string }).id;
+        token.plan = (user as unknown as { plan?: string }).plan || "free";
       }
       if (token.id) {
         const dbUser = await db.user.findUnique({ where: { id: token.id as string } });

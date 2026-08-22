@@ -11,7 +11,7 @@ import {
   Users, DollarSign, Loader2, Send, Trash2, Pencil, Search, Eye, FileText,
   TrendingUp, Cpu, KeyRound, CheckCircle2, AlertCircle, ArrowUpCircle,
   ArrowDownCircle, Copy, Plus, Globe, Smartphone, Monitor, Tablet, ExternalLink,
-  X, Building2, GraduationCap, UserPlus, Save, Sparkles, Filter, Layers,
+  X, Building2, GraduationCap, UserPlus, Save, Sparkles, Filter, Layers, User,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -33,7 +33,7 @@ import { StatCard, planBadge, planLabel, PLAN_OPTIONS, handleAuthError, type Adm
 const authHeaders = (t: string) => ({ Authorization: `Bearer ${t}` });
 
 // ============================================================
-// DASHBOARD SECTION (REAL DATA ONLY — NO DEMO SEED BUTTON)
+// DASHBOARD SECTION
 // ============================================================
 export function DashboardSection({ stats, users, tickets, onJump, token }: {
   stats: AdminStats | null;
@@ -42,7 +42,7 @@ export function DashboardSection({ stats, users, tickets, onJump, token }: {
   onJump: (s: Section) => void;
   token: string;
 }) {
-  if (!stats) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#FF6200]" /></div>;
+  if (!stats) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#faff69]" /></div>;
 
   const recentUsers = users.slice(0, 5);
   const recentTickets = tickets.filter((t) => t.status !== "resolved").slice(0, 4);
@@ -53,15 +53,15 @@ export function DashboardSection({ stats, users, tickets, onJump, token }: {
   return (
     <div className="space-y-6 text-left font-sans">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2E2E2E] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2a2a2a] pb-4">
         <div>
-          <h3 className="text-lg font-bold text-white font-bricolage">Realtime Analytics &amp; Platform Metrics</h3>
-          <p className="text-xs text-[#888898] mt-0.5 font-mono">Actual live numbers calculated directly from your database</p>
+          <h3 className="text-lg font-bold text-white tracking-tight">Realtime Analytics &amp; Platform Metrics</h3>
+          <p className="text-xs text-[#888888] mt-0.5 font-mono">Actual live numbers calculated directly from your database</p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge className="bg-[#FF6200]/10 text-[#FF6200] border-[#FF6200]/30 font-mono text-[10px] py-1 px-3">
+          <span className="bg-[#1a1a1a] text-[#faff69] border border-[#2a2a2a] font-mono text-[10px] py-1 px-3 rounded-full">
             LIVE PRODUCTION DATABASE
-          </Badge>
+          </span>
         </div>
       </div>
 
@@ -75,74 +75,74 @@ export function DashboardSection({ stats, users, tickets, onJump, token }: {
 
       {/* Account Segregation Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-5 bg-[#141414] border-[#2E2E2E] rounded-2xl">
+        <div className="p-6 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-[#FF6200]/10 flex items-center justify-center border border-[#FF6200]/20">
-                <Users className="w-4 h-4 text-[#FF6200]" />
+              <div className="w-8 h-8 rounded-lg bg-[#242424] flex items-center justify-center border border-[#2a2a2a]">
+                <Users className="w-4 h-4 text-[#faff69]" />
               </div>
               <div>
                 <h4 className="text-xs font-bold text-white uppercase tracking-wider">Individual Website Users</h4>
-                <p className="text-[10px] text-[#888898]">Direct registrations and plan purchases</p>
+                <p className="text-[10px] text-[#888888]">Direct registrations and plan purchases</p>
               </div>
             </div>
-            <p className="text-xl font-bold text-white">{individualUsers.length}</p>
+            <p className="text-xl font-bold text-[#faff69] font-mono">{individualUsers.length}</p>
           </div>
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#2E2E2E] text-center text-xs">
-            <div className="p-2 rounded-xl bg-[#0D0D0D]">
-              <p className="text-[10px] text-[#888898]">Free Tier</p>
-              <p className="font-bold text-white">{individualUsers.filter((u) => u.plan === "free").length}</p>
+          <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#2a2a2a] text-center text-xs">
+            <div className="p-2.5 rounded-lg bg-[#121212] border border-[#2a2a2a]">
+              <p className="text-[10px] text-[#888888] font-mono">Free Tier</p>
+              <p className="font-bold text-white font-mono mt-0.5">{individualUsers.filter((u) => u.plan === "free").length}</p>
             </div>
-            <div className="p-2 rounded-xl bg-[#0D0D0D]">
-              <p className="text-[10px] text-[#888898]">Single (₹99)</p>
-              <p className="font-bold text-[#FF6200]">{individualUsers.filter((u) => u.plan === "single_99" || u.plan === "trial_99").length}</p>
+            <div className="p-2.5 rounded-lg bg-[#121212] border border-[#2a2a2a]">
+              <p className="text-[10px] text-[#888888] font-mono">Single (₹99)</p>
+              <p className="font-bold text-[#faff69] font-mono mt-0.5">{individualUsers.filter((u) => u.plan === "single_99" || u.plan === "trial_99").length}</p>
             </div>
-            <div className="p-2 rounded-xl bg-[#0D0D0D]">
-              <p className="text-[10px] text-[#888898]">Pro/Biz (₹399+)</p>
-              <p className="font-bold text-emerald-400">{individualUsers.filter((u) => u.plan === "pro_399" || u.plan === "business_999").length}</p>
+            <div className="p-2.5 rounded-lg bg-[#121212] border border-[#2a2a2a]">
+              <p className="text-[10px] text-[#888888] font-mono">Pro/Biz (₹399+)</p>
+              <p className="font-bold text-[#22c55e] font-mono mt-0.5">{individualUsers.filter((u) => u.plan === "pro_399" || u.plan === "business_999").length}</p>
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-5 bg-[#141414] border-[#2E2E2E] rounded-2xl">
+        <div className="p-6 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
-                <GraduationCap className="w-4 h-4 text-violet-400" />
+              <div className="w-8 h-8 rounded-lg bg-[#242424] flex items-center justify-center border border-[#2a2a2a]">
+                <GraduationCap className="w-4 h-4 text-[#faff69]" />
               </div>
               <div>
                 <h4 className="text-xs font-bold text-white uppercase tracking-wider">Institutional Student Accounts</h4>
-                <p className="text-[10px] text-[#888898]">Colleges, Universities &amp; Institutes</p>
+                <p className="text-[10px] text-[#888888]">Colleges, Universities &amp; Institutes</p>
               </div>
             </div>
-            <p className="text-xl font-bold text-violet-400">{studentUsers.length}</p>
+            <p className="text-xl font-bold text-[#faff69] font-mono">{studentUsers.length}</p>
           </div>
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#2E2E2E] text-center text-xs">
-            <div className="p-2 rounded-xl bg-[#0D0D0D]">
-              <p className="text-[10px] text-[#888898]">Connected Colleges</p>
-              <p className="font-bold text-violet-300">{stats.organizations}</p>
+          <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#2a2a2a] text-center text-xs">
+            <div className="p-2.5 rounded-lg bg-[#121212] border border-[#2a2a2a]">
+              <p className="text-[10px] text-[#888888] font-mono">Connected Colleges</p>
+              <p className="font-bold text-white font-mono mt-0.5">{stats.organizations}</p>
             </div>
-            <div className="p-2 rounded-xl bg-[#0D0D0D]">
-              <p className="text-[10px] text-[#888898]">Student Pro Access</p>
-              <p className="font-bold text-emerald-400">{studentUsers.length} accounts</p>
+            <div className="p-2.5 rounded-lg bg-[#121212] border border-[#2a2a2a]">
+              <p className="text-[10px] text-[#888888] font-mono">Student Pro Access</p>
+              <p className="font-bold text-[#22c55e] font-mono mt-0.5">{studentUsers.length} accounts</p>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Conversion + Revenue snapshot */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="p-5 bg-[#141414] border-[#2E2E2E] rounded-2xl">
-          <p className="text-xs font-semibold text-[#888898] mb-3 flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5 text-[#FF6200]" /> Conversion Rate</p>
-          <p className="text-3xl font-bold text-[#FF6200]">{stats.totalUsers > 0 ? Math.round((stats.activePaid / stats.totalUsers) * 100) : 0}%</p>
-          <p className="text-[11px] text-[#888898] mt-1">{stats.activePaid} paid of {stats.totalUsers} users</p>
-          <div className="h-2 rounded-full bg-[#0D0D0D] overflow-hidden mt-3">
-            <div className="h-full bg-gradient-to-r from-[#FF6200] to-emerald-500" style={{ width: `${stats.totalUsers > 0 ? (stats.activePaid / stats.totalUsers) * 100 : 0}%` }} />
+        <div className="p-6 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
+          <p className="text-xs font-semibold text-[#888888] mb-3 flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5 text-[#faff69]" /> Conversion Rate</p>
+          <p className="text-3xl font-bold text-[#faff69] font-mono">{stats.totalUsers > 0 ? Math.round((stats.activePaid / stats.totalUsers) * 100) : 0}%</p>
+          <p className="text-[11px] text-[#888888] font-mono mt-1">{stats.activePaid} paid of {stats.totalUsers} users</p>
+          <div className="h-2 rounded-full bg-[#121212] overflow-hidden mt-3 border border-[#2a2a2a]">
+            <div className="h-full bg-[#faff69]" style={{ width: `${stats.totalUsers > 0 ? (stats.activePaid / stats.totalUsers) * 100 : 0}%` }} />
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-5 bg-[#141414] border-[#2E2E2E] rounded-2xl">
-          <p className="text-xs font-semibold text-[#888898] mb-3 flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5 text-emerald-400" /> Revenue Breakdown</p>
+        <div className="p-6 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
+          <p className="text-xs font-semibold text-[#888888] mb-3 flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5 text-[#22c55e]" /> Revenue Breakdown</p>
           <div className="space-y-2">
             {Object.entries(stats.revenueByPlan).map(([plan, amount]) => {
               const pct = stats.totalRevenue > 0 ? (amount / stats.totalRevenue) * 100 : 0;
@@ -150,90 +150,88 @@ export function DashboardSection({ stats, users, tickets, onJump, token }: {
                 <div key={plan}>
                   <div className="flex justify-between text-[11px] mb-1">
                     <span className="text-white font-medium">{planLabel(plan)}</span>
-                    <span className="text-[#888898] font-mono">₹{amount.toLocaleString("en-IN")}</span>
+                    <span className="text-[#888888] font-mono">₹{amount.toLocaleString("en-IN")}</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-[#0D0D0D] overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-emerald-500 to-[#FF6200]" style={{ width: `${pct}%` }} />
+                  <div className="h-1.5 rounded-full bg-[#121212] overflow-hidden border border-[#2a2a2a]">
+                    <div className="h-full bg-[#faff69]" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               );
             })}
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-5 bg-[#141414] border-[#2E2E2E] rounded-2xl">
-          <p className="text-xs font-semibold text-[#888898] mb-3 flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-violet-400" /> Institution Portals</p>
-          <p className="text-3xl font-bold text-violet-400">{stats.organizations}</p>
-          <p className="text-[11px] text-[#888898] mt-1">{stats.students} student accounts with ₹399/mo Pro features</p>
-          <Button variant="outline" size="sm" className="w-full mt-3 gap-1.5 bg-[#0D0D0D] border-[#2E2E2E] text-white hover:bg-[#1A1A1A] rounded-full" onClick={() => onJump("accounts")}>
-            <Plus className="w-3 h-3 text-[#FF6200]" /> Create Org / Student
-          </Button>
-        </Card>
+        <div className="p-6 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
+          <p className="text-xs font-semibold text-[#888888] mb-3 flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-[#faff69]" /> Institution Portals</p>
+          <p className="text-3xl font-bold text-white font-mono">{stats.organizations}</p>
+          <p className="text-[11px] text-[#888888] font-mono mt-1">{stats.students} student accounts with ₹399/mo Pro features</p>
+          <button className="w-full mt-3 h-9 gap-1.5 bg-[#242424] hover:bg-[#3a3a3a] border border-[#2a2a2a] text-white rounded-md text-xs font-semibold transition-colors inline-flex items-center justify-center" onClick={() => onJump("accounts")}>
+            <Plus className="w-3 h-3 text-[#faff69]" /> Create Org / Student
+          </button>
+        </div>
       </div>
 
       {/* Recent users + tickets */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="p-5 bg-[#141414] border-[#2E2E2E] rounded-2xl">
+        <div className="p-6 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-bold text-white uppercase tracking-wider">Recent Registrations</p>
-            <button onClick={() => onJump("users")} className="text-[10px] text-[#FF6200] hover:underline font-mono">View all →</button>
+            <button onClick={() => onJump("users")} className="text-[10px] text-[#faff69] hover:underline font-mono">View all →</button>
           </div>
           <div className="space-y-2">
             {recentUsers.map((u) => (
-              <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-[#0D0D0D] border border-[#2E2E2E]">
-                <div className="w-8 h-8 rounded-full bg-[#141414] border border-[#2E2E2E] flex items-center justify-center text-xs font-semibold text-white">
+              <div key={u.id} className="flex items-center gap-3 p-3 rounded-md bg-[#121212] border border-[#2a2a2a]">
+                <div className="w-8 h-8 rounded-full bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center text-xs font-semibold text-white">
                   {u.email[0]?.toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-xs font-medium truncate text-white">{u.email}</p>
-                    {u.role === "student" && <Badge className="bg-violet-900/50 text-violet-300 border-0 text-[9px]">Student</Badge>}
+                    {u.role === "student" && <span className="bg-[#242424] text-[#faff69] border border-[#2a2a2a] text-[9px] px-1.5 py-0.5 rounded-full font-mono">Student</span>}
                   </div>
-                  <p className="text-[10px] text-[#888898] font-mono">{u.name || "—"} · {new Date(u.createdAt).toLocaleDateString()}</p>
+                  <p className="text-[10px] text-[#888888] font-mono">{u.name || "—"} · {new Date(u.createdAt).toLocaleDateString()}</p>
                 </div>
-                <Badge className={`text-[9px] border-0 ${planBadge(u.plan)}`}>{planLabel(u.plan)}</Badge>
+                <span className={`text-[9px] px-2 py-0.5 rounded-md ${planBadge(u.plan)}`}>{planLabel(u.plan)}</span>
               </div>
             ))}
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-5 bg-[#141414] border-[#2E2E2E] rounded-2xl">
+        <div className="p-6 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-bold text-white uppercase tracking-wider">Open Support Tickets</p>
-            <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-[10px] font-mono">{recentTickets.length} open</Badge>
+            <span className="bg-[#242424] text-[#faff69] border border-[#2a2a2a] text-[10px] font-mono px-2 py-0.5 rounded-full">{recentTickets.length} open</span>
           </div>
           {recentTickets.length === 0 ? (
-            <p className="text-center text-xs text-[#888898] py-8">No open support tickets</p>
+            <p className="text-center text-xs text-[#888888] py-8 font-mono">No open support tickets</p>
           ) : (
             <div className="space-y-2">
               {recentTickets.map((t) => (
-                <div key={t.id} className="p-2.5 rounded-xl bg-[#0D0D0D] border border-[#2E2E2E]">
+                <div key={t.id} className="p-3 rounded-md bg-[#121212] border border-[#2a2a2a]">
                   <p className="text-xs font-medium truncate text-white">{t.subject}</p>
-                  <p className="text-[10px] text-[#888898] font-mono">{t.name || t.email} · {new Date(t.createdAt).toLocaleDateString()}</p>
+                  <p className="text-[10px] text-[#888888] font-mono">{t.name || t.email} · {new Date(t.createdAt).toLocaleDateString()}</p>
                 </div>
               ))}
             </div>
           )}
-        </Card>
+        </div>
       </div>
     </div>
   );
 }
 
 // ============================================================
-// USERS & RESUMES SECTION (SEPARATED USER TYPES)
+// USERS & RESUMES SECTION
 // ============================================================
 export function UsersSection({ token, onRefresh }: { token: string; onRefresh: () => void }) {
   const [activeTab, setActiveTab] = useState<"users" | "resumes">("users");
 
-  // Users state
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [userCategory, setUserCategory] = useState<"all" | "individual" | "student">("all");
   const [userSearch, setUserSearch] = useState("");
   const [planFilter, setPlanFilter] = useState<string>("");
 
-  // Resumes state
   const [resumes, setResumes] = useState<any[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
   const [resumeCategory, setResumeCategory] = useState<"all" | "individual" | "student">("all");
@@ -248,18 +246,18 @@ export function UsersSection({ token, onRefresh }: { token: string; onRefresh: (
     setLoadingUsers(true);
     try {
       const params = new URLSearchParams();
-      if (userSearch) params.set("q", userSearch);
-      if (planFilter && planFilter !== "all") params.set("plan", planFilter);
+      if (userSearch) params.set("search", userSearch);
+      if (planFilter) params.set("plan", planFilter);
+      if (userCategory === "student") params.set("role", "student");
       if (userCategory === "individual") params.set("role", "user");
-      else if (userCategory === "student") params.set("role", "student");
 
-      const res = await fetch(`/api/admin/users?${params}`, { headers: authHeaders(token) });
+      const res = await fetch(`/api/admin/users?${params.toString()}`, { headers: authHeaders(token) });
       if (!res.ok) {
         if (handleAuthError(res)) return;
         throw new Error("Failed");
       }
       const json = await res.json();
-      setUsers(json.users);
+      setUsers(json.users || []);
     } catch {
       toast.error("Failed to load users");
     } finally {
@@ -271,10 +269,11 @@ export function UsersSection({ token, onRefresh }: { token: string; onRefresh: (
     setLoadingResumes(true);
     try {
       const params = new URLSearchParams();
-      if (resumeSearch) params.set("q", resumeSearch);
-      if (resumeCategory !== "all") params.set("type", resumeCategory);
+      if (resumeSearch) params.set("search", resumeSearch);
+      if (resumeCategory === "student") params.set("role", "student");
+      if (resumeCategory === "individual") params.set("role", "user");
 
-      const res = await fetch(`/api/admin/resumes?${params}`, { headers: authHeaders(token) });
+      const res = await fetch(`/api/admin/resumes?${params.toString()}`, { headers: authHeaders(token) });
       if (!res.ok) {
         if (handleAuthError(res)) return;
         throw new Error("Failed");
@@ -293,7 +292,7 @@ export function UsersSection({ token, onRefresh }: { token: string; onRefresh: (
     else loadResumes();
   }, [activeTab, loadUsers, loadResumes]);
 
-  const openUserDetail = async (u: AdminUser) => {
+  const openUserDetail = (u: AdminUser) => {
     setSelectedUser(u);
     setUserDetailOpen(true);
   };
@@ -315,21 +314,21 @@ export function UsersSection({ token, onRefresh }: { token: string; onRefresh: (
 
   return (
     <div className="space-y-5 text-left font-sans">
-      {/* Top Mode Switcher: Users vs Resumes */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2E2E2E] pb-3">
-        <div className="flex items-center gap-2 p-1 bg-[#141414] border border-[#2E2E2E] rounded-full text-xs font-semibold">
+      {/* Top Mode Switcher */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2a2a2a] pb-3">
+        <div className="flex items-center gap-2 p-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded-md text-xs font-semibold">
           <button
             onClick={() => setActiveTab("users")}
-            className={`py-2 px-4 rounded-full flex items-center gap-2 transition-all ${
-              activeTab === "users" ? "bg-[#FF6200] text-white shadow-md font-bold" : "text-[#888898] hover:text-white"
+            className={`py-2 px-4 rounded-md flex items-center gap-2 transition-all ${
+              activeTab === "users" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "text-[#888888] hover:text-white"
             }`}
           >
             <Users className="w-3.5 h-3.5" /> User Accounts
           </button>
           <button
             onClick={() => setActiveTab("resumes")}
-            className={`py-2 px-4 rounded-full flex items-center gap-2 transition-all ${
-              activeTab === "resumes" ? "bg-[#FF6200] text-white shadow-md font-bold" : "text-[#888898] hover:text-white"
+            className={`py-2 px-4 rounded-md flex items-center gap-2 transition-all ${
+              activeTab === "resumes" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "text-[#888888] hover:text-white"
             }`}
           >
             <FileText className="w-3.5 h-3.5" /> Resumes Explorer
@@ -337,110 +336,107 @@ export function UsersSection({ token, onRefresh }: { token: string; onRefresh: (
         </div>
       </div>
 
-      {/* ================= MODE 1: USER ACCOUNTS ================= */}
+      {/* MODE 1: USER ACCOUNTS */}
       {activeTab === "users" && (
         <div className="space-y-4">
-          {/* Sub-Category Tabs: All vs Individual vs Institutional Students */}
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setUserCategory("all")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
-                userCategory === "all" ? "bg-white text-black font-bold" : "bg-[#141414] text-[#888898] border border-[#2E2E2E] hover:text-white"
+              className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                userCategory === "all" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "bg-[#1a1a1a] text-[#888888] border border-[#2a2a2a] hover:text-white"
               }`}
             >
               All Accounts ({users.length})
             </button>
             <button
               onClick={() => setUserCategory("individual")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
-                userCategory === "individual" ? "bg-[#FF6200] text-white font-bold" : "bg-[#141414] text-[#888898] border border-[#2E2E2E] hover:text-white"
+              className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
+                userCategory === "individual" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "bg-[#1a1a1a] text-[#888888] border border-[#2a2a2a] hover:text-white"
               }`}
             >
-              <Users className="w-3 h-3" /> Individual Website Users
+              <Users className="w-3 h-3" /> Individual Users
             </button>
             <button
               onClick={() => setUserCategory("student")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
-                userCategory === "student" ? "bg-violet-600 text-white font-bold" : "bg-[#141414] text-[#888898] border border-[#2E2E2E] hover:text-white"
+              className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
+                userCategory === "student" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "bg-[#1a1a1a] text-[#888888] border border-[#2a2a2a] hover:text-white"
               }`}
             >
-              <GraduationCap className="w-3.5 h-3.5" /> Institutional / College Students
+              <GraduationCap className="w-3.5 h-3.5" /> College Students
             </button>
           </div>
 
-          {/* Filters */}
-          <Card className="p-4 bg-[#141414] border-[#2E2E2E] rounded-2xl">
+          <div className="p-4 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
             <div className="flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#888898]" />
-                <Input
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#888888]" />
+                <input
                   value={userSearch}
                   onChange={(e) => setUserSearch(e.target.value)}
                   placeholder="Search by email, name, college, or student ID..."
-                  className="pl-9 bg-[#0D0D0D] border-[#2E2E2E] text-white h-9 text-xs rounded-xl focus:border-[#FF6200]"
+                  className="w-full pl-9 pr-3 bg-[#121212] border border-[#2a2a2a] text-white h-9 text-xs rounded-md focus:border-[#faff69] outline-none"
                   onKeyDown={(e) => e.key === "Enter" && loadUsers()}
                 />
               </div>
               <Select value={planFilter || "all"} onValueChange={(v) => setPlanFilter(v === "all" ? "" : v)}>
-                <SelectTrigger className="w-[150px] bg-[#0D0D0D] border-[#2E2E2E] text-white h-9 text-xs rounded-xl"><SelectValue placeholder="All plans" /></SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#2E2E2E] text-white">
+                <SelectTrigger className="w-[150px] bg-[#121212] border-[#2a2a2a] text-white h-9 text-xs rounded-md"><SelectValue placeholder="All plans" /></SelectTrigger>
+                <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a] text-white">
                   <SelectItem value="all">All plans</SelectItem>
                   {PLAN_OPTIONS.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <Button onClick={loadUsers} variant="outline" size="sm" className="bg-[#0D0D0D] border-[#2E2E2E] text-white h-9 text-xs rounded-xl gap-1.5">
-                <Search className="w-3.5 h-3.5 text-[#FF6200]" /> Search
-              </Button>
+              <button onClick={loadUsers} className="bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold h-9 px-4 text-xs rounded-md gap-1.5 inline-flex items-center">
+                <Search className="w-3.5 h-3.5" /> Search
+              </button>
             </div>
-          </Card>
+          </div>
 
-          {/* Users list */}
-          <Card className="bg-[#141414] border-[#2E2E2E] rounded-2xl overflow-hidden">
+          <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl overflow-hidden">
             {loadingUsers ? (
-              <div className="flex items-center justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#FF6200]" /></div>
+              <div className="flex items-center justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#faff69]" /></div>
             ) : users.length === 0 ? (
-              <p className="text-center text-xs text-[#888898] py-12">No matching users found.</p>
+              <p className="text-center text-xs text-[#888888] py-12 font-mono">No matching users found.</p>
             ) : (
-              <div className="divide-y divide-[#2E2E2E]">
+              <div className="divide-y divide-[#2a2a2a]">
                 {users.map((u) => (
-                  <div key={u.id} className="flex items-center gap-3 p-4 hover:bg-[#1A1A1A] transition-colors">
-                    <div className="w-9 h-9 rounded-full bg-[#0D0D0D] border border-[#2E2E2E] flex items-center justify-center text-xs font-semibold text-white shrink-0">
+                  <div key={u.id} className="flex items-center gap-3 p-4 hover:bg-[#242424] transition-colors">
+                    <div className="w-9 h-9 rounded-full bg-[#121212] border border-[#2a2a2a] flex items-center justify-center text-xs font-semibold text-white shrink-0 font-mono">
                       {u.email[0]?.toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-xs font-bold text-white truncate">{u.email}</p>
                         {u.role === "student" ? (
-                          <Badge className="bg-violet-900/50 text-violet-300 border border-violet-700/50 text-[9px] gap-1">
-                            <GraduationCap className="w-3 h-3" /> Institutional Student
-                          </Badge>
+                          <span className="bg-[#242424] text-[#faff69] border border-[#2a2a2a] text-[9px] px-2 py-0.5 rounded-full font-mono">
+                            Student
+                          </span>
                         ) : (
-                          <Badge className="bg-blue-900/40 text-blue-300 border border-blue-700/40 text-[9px]">
-                            Individual Account
-                          </Badge>
+                          <span className="bg-[#242424] text-[#888888] border border-[#2a2a2a] text-[9px] px-2 py-0.5 rounded-full font-mono">
+                            Individual
+                          </span>
                         )}
-                        {u.organization && <Badge className="bg-[#0D0D0D] text-[#888898] border border-[#2E2E2E] text-[9px]">{u.organization.name}</Badge>}
+                        {u.organization && <span className="bg-[#121212] text-[#888888] border border-[#2a2a2a] text-[9px] px-2 py-0.5 rounded-full font-mono">{u.organization.name}</span>}
                       </div>
-                      <p className="text-[11px] text-[#888898] font-mono mt-0.5">
-                        {u.name || "—"} · {u.resumeCount} resumes · {u.studentId ? `Student ID: ${u.studentId} · ` : ""}Joined {new Date(u.createdAt).toLocaleDateString()}
+                      <p className="text-[11px] text-[#888888] font-mono mt-0.5">
+                        {u.name || "—"} · {u.resumeCount} resumes · {u.studentId ? `ID: ${u.studentId} · ` : ""}Joined {new Date(u.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <Badge className={`border-0 text-[10px] ${planBadge(u.plan)}`}>{planLabel(u.plan)}</Badge>
+                    <span className={`border-0 text-[10px] px-2 py-0.5 rounded-md ${planBadge(u.plan)}`}>{planLabel(u.plan)}</span>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-[#888898] hover:bg-[#0D0D0D] rounded-xl">
+                        <button className="h-8 w-8 flex items-center justify-center text-[#888888] hover:bg-[#121212] hover:text-white rounded-md transition-colors">
                           <Pencil className="w-3.5 h-3.5" />
-                        </Button>
+                        </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-[#141414] border-[#2E2E2E] text-white">
-                        <DropdownMenuLabel className="text-[#888898] text-[10px] font-mono">Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => openUserDetail(u)} className="text-xs cursor-pointer">
-                          <Eye className="w-3.5 h-3.5 mr-2 text-[#FF6200]" /> View Details &amp; Resumes
+                      <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-[#2a2a2a] text-white">
+                        <DropdownMenuLabel className="text-[#888888] text-[10px] font-mono">Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => openUserDetail(u)} className="text-xs cursor-pointer hover:text-[#faff69]">
+                          <Eye className="w-3.5 h-3.5 mr-2 text-[#faff69]" /> View Details &amp; Resumes
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { setSelectedUser(u); setEditOpen(true); }} className="text-xs cursor-pointer">
-                          <Pencil className="w-3.5 h-3.5 mr-2 text-[#FF6200]" /> Edit Account
+                        <DropdownMenuItem onClick={() => { setSelectedUser(u); setEditOpen(true); }} className="text-xs cursor-pointer hover:text-[#faff69]">
+                          <Pencil className="w-3.5 h-3.5 mr-2 text-[#faff69]" /> Edit Account
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-[#2E2E2E]" />
+                        <DropdownMenuSeparator className="bg-[#2a2a2a]" />
                         <DropdownMenuItem onClick={() => { setSelectedUser(u); setDeleteOpen(true); }} className="text-red-400 text-xs cursor-pointer">
                           <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete Account
                         </DropdownMenuItem>
@@ -450,85 +446,85 @@ export function UsersSection({ token, onRefresh }: { token: string; onRefresh: (
                 ))}
               </div>
             )}
-          </Card>
+          </div>
         </div>
       )}
 
-      {/* ================= MODE 2: RESUMES EXPLORER ================= */}
+      {/* MODE 2: RESUMES EXPLORER */}
       {activeTab === "resumes" && (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setResumeCategory("all")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
-                resumeCategory === "all" ? "bg-white text-black font-bold" : "bg-[#141414] text-[#888898] border border-[#2E2E2E] hover:text-white"
+              className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                resumeCategory === "all" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "bg-[#1a1a1a] text-[#888888] border border-[#2a2a2a] hover:text-white"
               }`}
             >
               All Resumes ({resumes.length})
             </button>
             <button
               onClick={() => setResumeCategory("individual")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
-                resumeCategory === "individual" ? "bg-[#FF6200] text-white font-bold" : "bg-[#141414] text-[#888898] border border-[#2E2E2E] hover:text-white"
+              className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
+                resumeCategory === "individual" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "bg-[#1a1a1a] text-[#888888] border border-[#2a2a2a] hover:text-white"
               }`}
             >
-              <Users className="w-3 h-3" /> Individual User Resumes
+              <Users className="w-3 h-3" /> Individual Resumes
             </button>
             <button
               onClick={() => setResumeCategory("student")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
-                resumeCategory === "student" ? "bg-violet-600 text-white font-bold" : "bg-[#141414] text-[#888898] border border-[#2E2E2E] hover:text-white"
+              className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
+                resumeCategory === "student" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "bg-[#1a1a1a] text-[#888888] border border-[#2a2a2a] hover:text-white"
               }`}
             >
-              <GraduationCap className="w-3.5 h-3.5" /> Institutional Student Resumes
+              <GraduationCap className="w-3.5 h-3.5" /> Student Resumes
             </button>
           </div>
 
-          <Card className="p-4 bg-[#141414] border-[#2E2E2E] rounded-2xl">
+          <div className="p-4 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#888898]" />
-              <Input
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#888888]" />
+              <input
                 value={resumeSearch}
                 onChange={(e) => setResumeSearch(e.target.value)}
                 placeholder="Search resumes by title, template, email..."
-                className="pl-9 bg-[#0D0D0D] border-[#2E2E2E] text-white h-9 text-xs rounded-xl focus:border-[#FF6200]"
+                className="w-full pl-9 pr-3 bg-[#121212] border border-[#2a2a2a] text-white h-9 text-xs rounded-md focus:border-[#faff69] outline-none"
                 onKeyDown={(e) => e.key === "Enter" && loadResumes()}
               />
             </div>
-          </Card>
+          </div>
 
-          <Card className="bg-[#141414] border-[#2E2E2E] rounded-2xl overflow-hidden">
+          <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl overflow-hidden">
             {loadingResumes ? (
-              <div className="flex items-center justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#FF6200]" /></div>
+              <div className="flex items-center justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#faff69]" /></div>
             ) : resumes.length === 0 ? (
-              <p className="text-center text-xs text-[#888898] py-12">No resumes found in database.</p>
+              <p className="text-center text-xs text-[#888888] py-12 font-mono">No resumes found in database.</p>
             ) : (
-              <div className="divide-y divide-[#2E2E2E]">
+              <div className="divide-y divide-[#2a2a2a]">
                 {resumes.map((r) => (
-                  <div key={r.id} className="flex items-center gap-3 p-4 hover:bg-[#1A1A1A] transition-colors">
-                    <FileText className="w-5 h-5 text-[#FF6200] shrink-0" />
+                  <div key={r.id} className="flex items-center gap-3 p-4 hover:bg-[#242424] transition-colors">
+                    <FileText className="w-5 h-5 text-[#faff69] shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-xs font-bold text-white truncate">{r.title}</p>
-                        <Badge className="bg-[#0D0D0D] text-[#888898] border border-[#2E2E2E] text-[9px] uppercase font-mono">{r.template}</Badge>
+                        <span className="bg-[#121212] text-[#888888] border border-[#2a2a2a] text-[9px] uppercase font-mono px-2 py-0.5 rounded-md">{r.template}</span>
                       </div>
-                      <p className="text-[11px] text-[#888898] font-mono mt-0.5">
+                      <p className="text-[11px] text-[#888888] font-mono mt-0.5">
                         Author: {r.user?.email || "Anonymous"} {r.user?.organization ? `(${r.user.organization.name})` : ""} · Updated {new Date(r.updatedAt).toLocaleDateString()}
                       </p>
                     </div>
                     {r.user?.role === "student" ? (
-                      <Badge className="bg-violet-900/50 text-violet-300 border-0 text-[9px]">Student Resume</Badge>
+                      <span className="bg-[#242424] text-[#faff69] border border-[#2a2a2a] text-[9px] px-2 py-0.5 rounded-full font-mono">Student Resume</span>
                     ) : (
-                      <Badge className="bg-blue-900/40 text-blue-300 border-0 text-[9px]">User Resume</Badge>
+                      <span className="bg-[#242424] text-[#888888] border border-[#2a2a2a] text-[9px] px-2 py-0.5 rounded-full font-mono">User Resume</span>
                     )}
-                    <Button size="sm" variant="outline" className="h-8 text-xs border-[#2E2E2E] bg-[#0D0D0D] text-white hover:bg-[#141414] rounded-full gap-1" onClick={() => window.open(`/share/${r.slug || r.shareToken || r.id}`, "_blank")}>
-                      <ExternalLink className="w-3 h-3 text-[#FF6200]" /> View
-                    </Button>
+                    <button className="h-8 px-3 text-xs border border-[#2a2a2a] bg-[#121212] text-white hover:bg-[#242424] rounded-md gap-1 inline-flex items-center font-semibold transition-colors" onClick={() => window.open(`/share/${r.slug || r.shareToken || r.id}`, "_blank")}>
+                      <ExternalLink className="w-3 h-3 text-[#faff69]" /> View
+                    </button>
                   </div>
                 ))}
               </div>
             )}
-          </Card>
+          </div>
         </div>
       )}
 
@@ -558,16 +554,16 @@ export function UsersSection({ token, onRefresh }: { token: string; onRefresh: (
 
       {/* Delete confirm */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent className="bg-[#141414] border-[#2E2E2E] text-white rounded-3xl">
+        <AlertDialogContent className="bg-[#1a1a1a] border-[#2a2a2a] text-white rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete user account?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#888898]">
+            <AlertDialogDescription className="text-[#888888]">
               This will permanently delete <span className="text-red-400 font-bold">{selectedUser?.email}</span> and all their resumes.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-[#0D0D0D] border-[#2E2E2E] text-white rounded-full">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 rounded-full">Delete permanently</AlertDialogAction>
+            <AlertDialogCancel className="bg-[#121212] border-[#2a2a2a] text-white rounded-md">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white rounded-md font-semibold">Delete permanently</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -575,7 +571,7 @@ export function UsersSection({ token, onRefresh }: { token: string; onRefresh: (
   );
 }
 
-// User detail dialog — shows user info + credentials + their resumes
+// User detail dialog
 function UserDetailDialog({ user, token, open, onOpenChange, onEdit, onDelete }: {
   user: AdminUser; token: string; open: boolean; onOpenChange: (v: boolean) => void; onEdit: () => void; onDelete: () => void;
 }) {
@@ -600,13 +596,13 @@ function UserDetailDialog({ user, token, open, onOpenChange, onEdit, onDelete }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden bg-[#141414] border-[#2E2E2E] text-white flex flex-col rounded-3xl">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden bg-[#1a1a1a] border-[#2a2a2a] text-white flex flex-col rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#0D0D0D] border border-[#2E2E2E] flex items-center justify-center text-sm font-bold text-white">{user.email[0]?.toUpperCase()}</div>
+            <div className="w-8 h-8 rounded-full bg-[#121212] border border-[#2a2a2a] flex items-center justify-center text-sm font-bold text-white font-mono">{user.email[0]?.toUpperCase()}</div>
             Account Details &amp; Resumes
           </DialogTitle>
-          <DialogDescription className="text-xs text-[#888898]">Full credentials and created resume documents</DialogDescription>
+          <DialogDescription className="text-xs text-[#888888]">Full credentials and created resume documents</DialogDescription>
         </DialogHeader>
         <div className="overflow-y-auto pr-1 space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -621,36 +617,36 @@ function UserDetailDialog({ user, token, open, onOpenChange, onEdit, onDelete }:
           </div>
 
           <div>
-            <p className="text-xs font-bold text-white mb-2 flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-[#FF6200]" /> Created Resumes ({resumes.length})</p>
+            <p className="text-xs font-bold text-white mb-2 flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-[#faff69]" /> Created Resumes ({resumes.length})</p>
             {loading ? (
-              <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-[#FF6200]" /></div>
+              <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-[#faff69]" /></div>
             ) : resumes.length === 0 ? (
-              <p className="text-center text-xs text-[#888898] py-6 bg-[#0D0D0D] rounded-xl border border-[#2E2E2E]">No resumes created yet.</p>
+              <p className="text-center text-xs text-[#888888] py-6 bg-[#121212] rounded-md border border-[#2a2a2a] font-mono">No resumes created yet.</p>
             ) : (
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {resumes.map((r) => (
-                  <div key={r.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-[#0D0D0D] border border-[#2E2E2E]">
-                    <FileText className="w-4 h-4 text-[#FF6200] shrink-0" />
+                  <div key={r.id} className="flex items-center gap-3 p-2.5 rounded-md bg-[#121212] border border-[#2a2a2a]">
+                    <FileText className="w-4 h-4 text-[#faff69] shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold truncate text-white">{r.title}</p>
-                      <p className="text-[10px] text-[#888898] font-mono">{r.template} · Updated {new Date(r.updatedAt).toLocaleDateString()}</p>
+                      <p className="text-[10px] text-[#888888] font-mono">{r.template} · Updated {new Date(r.updatedAt).toLocaleDateString()}</p>
                     </div>
-                    <Button size="sm" variant="ghost" className="h-7 text-[10px] gap-1 text-[#FF6200]" onClick={() => window.open(`/share/${r.id}`, "_blank")}>
+                    <button className="h-7 px-2 text-[10px] gap-1 text-[#faff69] hover:underline font-mono inline-flex items-center" onClick={() => window.open(`/share/${r.id}`, "_blank")}>
                       <ExternalLink className="w-3 h-3" /> View
-                    </Button>
+                    </button>
                   </div>
                 ))}
               </div>
             )}
           </div>
         </div>
-        <DialogFooter className="gap-2 pt-2 border-t border-[#2E2E2E]">
-          <Button variant="outline" onClick={onDelete} className="gap-1.5 bg-red-950/20 border-red-800 text-red-300 hover:bg-red-900/40 rounded-full text-xs">
+        <DialogFooter className="gap-2 pt-2 border-t border-[#2a2a2a]">
+          <button onClick={onDelete} className="h-9 px-4 gap-1.5 bg-red-950/30 border border-red-800 text-red-300 hover:bg-red-900/50 rounded-md text-xs font-semibold inline-flex items-center">
             <Trash2 className="w-3.5 h-3.5" /> Delete Account
-          </Button>
-          <Button onClick={onEdit} className="gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white rounded-full text-xs font-bold">
+          </button>
+          <button onClick={onEdit} className="h-9 px-4 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] rounded-md text-xs font-semibold inline-flex items-center">
             <Pencil className="w-3.5 h-3.5" /> Edit Account &amp; Plan
-          </Button>
+          </button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -659,11 +655,11 @@ function UserDetailDialog({ user, token, open, onOpenChange, onEdit, onDelete }:
 
 function InfoRow({ label, value, onCopy }: { label: string; value: React.ReactNode; onCopy?: () => void }) {
   return (
-    <div className="rounded-xl bg-[#0D0D0D] border border-[#2E2E2E] p-2.5">
-      <p className="text-[10px] text-[#888898] font-mono uppercase tracking-wide">{label}</p>
+    <div className="rounded-md bg-[#121212] border border-[#2a2a2a] p-3">
+      <p className="text-[10px] text-[#888888] font-mono uppercase tracking-wide">{label}</p>
       <div className="flex items-center gap-1.5 mt-0.5">
         <p className="text-xs font-semibold text-white break-all">{value}</p>
-        {onCopy && <Copy className="w-3 h-3 text-[#888898] hover:text-white cursor-pointer shrink-0" onClick={onCopy} />}
+        {onCopy && <Copy className="w-3 h-3 text-[#888888] hover:text-white cursor-pointer shrink-0" onClick={onCopy} />}
       </div>
     </div>
   );
@@ -708,35 +704,35 @@ function EditUserDialog({ user, token, open, onOpenChange, onSaved }: {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg bg-[#141414] border-[#2E2E2E] text-white rounded-3xl">
+      <DialogContent className="max-w-lg bg-[#1a1a1a] border-[#2a2a2a] text-white rounded-xl">
         <DialogHeader>
-          <DialogTitle className="text-white flex items-center gap-2"><Pencil className="w-4 h-4 text-[#FF6200]" /> Edit Account &amp; Plan</DialogTitle>
-          <DialogDescription className="text-xs text-[#888898]">Modify account parameters, tier, or reset login password</DialogDescription>
+          <DialogTitle className="text-white flex items-center gap-2"><Pencil className="w-4 h-4 text-[#faff69]" /> Edit Account &amp; Plan</DialogTitle>
+          <DialogDescription className="text-xs text-[#888888]">Modify account parameters, tier, or reset login password</DialogDescription>
         </DialogHeader>
         <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
           <div>
-            <Label className="text-xs text-[#888898]">Name</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
+            <Label className="text-xs text-[#888888]">Name</Label>
+            <input value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]" />
           </div>
           <div>
-            <Label className="text-xs text-[#888898]">Email / Login ID</Label>
-            <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
+            <Label className="text-xs text-[#888888]">Email / Login ID</Label>
+            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs text-[#888898]">Plan Tier</Label>
+              <Label className="text-xs text-[#888888]">Plan Tier</Label>
               <Select value={plan} onValueChange={setPlan}>
-                <SelectTrigger className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#2E2E2E] text-white">
+                <SelectTrigger className="bg-[#121212] border-[#2a2a2a] text-white text-xs rounded-md"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a] text-white">
                   {PLAN_OPTIONS.map((p) => <SelectItem key={p.id} value={p.id}>{p.name} {p.price > 0 && `(₹${p.price})`}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label className="text-xs text-[#888898]">Account Role</Label>
+              <Label className="text-xs text-[#888888]">Account Role</Label>
               <Select value={role} onValueChange={setRole}>
-                <SelectTrigger className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#2E2E2E] text-white">
+                <SelectTrigger className="bg-[#121212] border-[#2a2a2a] text-white text-xs rounded-md"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a] text-white">
                   <SelectItem value="user">User (Individual)</SelectItem>
                   <SelectItem value="student">Student (Institutional)</SelectItem>
                   <SelectItem value="org_admin">Org Admin</SelectItem>
@@ -745,15 +741,15 @@ function EditUserDialog({ user, token, open, onOpenChange, onSaved }: {
             </div>
           </div>
           <div>
-            <Label className="text-xs text-[#888898]">Reset Password (leave blank to keep)</Label>
-            <Input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="text" placeholder="New password" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
+            <Label className="text-xs text-[#888888]">Reset Password (leave blank to keep)</Label>
+            <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="text" placeholder="New password" className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]" />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="bg-[#0D0D0D] border-[#2E2E2E] text-white rounded-full text-xs">Cancel</Button>
-          <Button onClick={save} disabled={saving} className="gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white rounded-full text-xs font-bold">
+          <button onClick={() => onOpenChange(false)} className="h-9 px-4 bg-[#121212] border border-[#2a2a2a] text-white rounded-md text-xs font-semibold">Cancel</button>
+          <button onClick={save} disabled={saving} className="h-9 px-4 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] rounded-md text-xs font-semibold inline-flex items-center">
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Save Changes
-          </Button>
+          </button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -761,7 +757,7 @@ function EditUserDialog({ user, token, open, onOpenChange, onSaved }: {
 }
 
 // ============================================================
-// FINANCE SECTION (REALTIME DATABASE LEDGER)
+// FINANCE SECTION
 // ============================================================
 export function FinanceSection({ token, stats }: { token: string; stats: AdminStats | null }) {
   const [data, setData] = useState<any>(null);
@@ -787,15 +783,15 @@ export function FinanceSection({ token, stats }: { token: string; stats: AdminSt
 
   useEffect(() => { load(); }, [load]);
 
-  if (loading || !data) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#FF6200]" /></div>;
+  if (loading || !data) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#faff69]" /></div>;
 
   return (
     <div className="space-y-4 text-left font-sans">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#888898] font-mono">Financial analytics — real-time revenue ledger and transactions</p>
+        <p className="text-xs text-[#888888] font-mono">Financial analytics — real-time revenue ledger and transactions</p>
         <Select value={range} onValueChange={setRange}>
-          <SelectTrigger className="w-[120px] bg-[#141414] border-[#2E2E2E] text-white h-8 text-xs rounded-xl"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-[#141414] border-[#2E2E2E] text-white">
+          <SelectTrigger className="w-[120px] bg-[#1a1a1a] border-[#2a2a2a] text-white h-8 text-xs rounded-md"><SelectValue /></SelectTrigger>
+          <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a] text-white">
             <SelectItem value="7d">Last 7 days</SelectItem>
             <SelectItem value="30d">Last 30 days</SelectItem>
             <SelectItem value="90d">Last 90 days</SelectItem>
@@ -813,36 +809,36 @@ export function FinanceSection({ token, stats }: { token: string; stats: AdminSt
       </div>
 
       {/* Transactions table */}
-      <Card className="bg-[#141414] border-[#2E2E2E] rounded-2xl overflow-hidden">
-        <div className="p-4 border-b border-[#2E2E2E]">
+      <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl overflow-hidden">
+        <div className="p-4 border-b border-[#2a2a2a]">
           <p className="text-xs font-bold text-white uppercase tracking-wider">Real Transaction History</p>
         </div>
-        <div className="max-h-96 overflow-y-auto divide-y divide-[#2E2E2E]">
+        <div className="max-h-96 overflow-y-auto divide-y divide-[#2a2a2a]">
           {(data.transactions || []).length === 0 ? (
-            <p className="text-center text-xs text-[#888898] py-8 font-mono">No transaction logs recorded yet.</p>
+            <p className="text-center text-xs text-[#888888] py-8 font-mono">No transaction logs recorded yet.</p>
           ) : data.transactions.map((t: any) => (
-            <div key={t.id} className="flex items-center gap-3 p-3.5 hover:bg-[#1A1A1A] transition-colors">
-              <div className="w-8 h-8 rounded-full bg-emerald-950/40 border border-emerald-800/40 text-emerald-400 flex items-center justify-center">
+            <div key={t.id} className="flex items-center gap-3 p-3.5 hover:bg-[#242424] transition-colors">
+              <div className="w-8 h-8 rounded-full bg-[#121212] border border-[#2a2a2a] text-[#22c55e] flex items-center justify-center">
                 <ArrowUpCircle className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-white truncate">{t.email}</p>
-                <p className="text-[10px] text-[#888898] font-mono">{planLabel(t.plan)} · {t.method || "online"} · {new Date(t.createdAt).toLocaleString()}</p>
+                <p className="text-[10px] text-[#888888] font-mono">{planLabel(t.plan)} · {t.method || "online"} · {new Date(t.createdAt).toLocaleString()}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold text-emerald-400 font-mono">₹{t.amount.toLocaleString("en-IN")}</p>
-                <Badge className="text-[9px] border-0 bg-emerald-900/50 text-emerald-300 font-mono">{t.status}</Badge>
+                <p className="text-sm font-bold text-[#22c55e] font-mono">₹{t.amount.toLocaleString("en-IN")}</p>
+                <span className="text-[9px] bg-[#121212] text-[#888888] px-2 py-0.5 rounded-full font-mono border border-[#2a2a2a]">{t.status}</span>
               </div>
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
 
 // ============================================================
-// TRAFFIC & ANALYTICS SECTION (REALTIME PAGEVIEWS)
+// TRAFFIC & ANALYTICS SECTION
 // ============================================================
 export function TrafficSection({ token, stats }: { token: string; stats: AdminStats | null }) {
   const [data, setData] = useState<any>(null);
@@ -868,15 +864,15 @@ export function TrafficSection({ token, stats }: { token: string; stats: AdminSt
 
   useEffect(() => { load(); }, [load]);
 
-  if (loading || !data) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#FF6200]" /></div>;
+  if (loading || !data) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#faff69]" /></div>;
 
   return (
     <div className="space-y-4 text-left font-sans">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#888898] font-mono">Real visitor traffic, page views, and conversion funnel</p>
+        <p className="text-xs text-[#888888] font-mono">Real visitor traffic, page views, and conversion funnel</p>
         <Select value={range} onValueChange={setRange}>
-          <SelectTrigger className="w-[120px] bg-[#141414] border-[#2E2E2E] text-white h-8 text-xs rounded-xl"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-[#141414] border-[#2E2E2E] text-white">
+          <SelectTrigger className="w-[120px] bg-[#1a1a1a] border-[#2a2a2a] text-white h-8 text-xs rounded-md"><SelectValue /></SelectTrigger>
+          <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a] text-white">
             <SelectItem value="7d">Last 7 days</SelectItem>
             <SelectItem value="30d">Last 30 days</SelectItem>
             <SelectItem value="90d">Last 90 days</SelectItem>
@@ -892,20 +888,20 @@ export function TrafficSection({ token, stats }: { token: string; stats: AdminSt
         <StatCard icon={DollarSign} label="Conversion" value={`${(data.funnel?.conversionRate || 0).toFixed(1)}%`} sub={`${data.funnel?.paid || 0} paid`} color="amber" />
       </div>
 
-      <Card className="p-5 bg-[#141414] border-[#2E2E2E] rounded-2xl">
-        <p className="text-xs font-bold text-white mb-3 flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-[#FF6200]" /> Top Visited Pages</p>
+      <div className="p-6 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
+        <p className="text-xs font-bold text-white mb-3 flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-[#faff69]" /> Top Visited Pages</p>
         <div className="space-y-2 max-h-72 overflow-y-auto">
           {(data.topPages || []).length === 0 ? (
-            <p className="text-center text-xs text-[#888898] py-6 font-mono">No page views recorded yet.</p>
+            <p className="text-center text-xs text-[#888888] py-6 font-mono">No page views recorded yet.</p>
           ) : data.topPages.map((p: any, i: number) => (
-            <div key={p.path} className="flex items-center gap-2 p-2 rounded-xl bg-[#0D0D0D] border border-[#2E2E2E]">
-              <span className="text-[10px] text-[#888898] font-mono w-4">{i + 1}</span>
+            <div key={p.path} className="flex items-center gap-2 p-2.5 rounded-md bg-[#121212] border border-[#2a2a2a]">
+              <span className="text-[10px] text-[#888888] font-mono w-4">{i + 1}</span>
               <span className="text-xs text-white flex-1 truncate font-mono">{p.path}</span>
-              <span className="text-xs text-[#FF6200] font-bold font-mono">{p.views} views</span>
+              <span className="text-xs text-[#faff69] font-bold font-mono">{p.views} views</span>
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
@@ -966,38 +962,38 @@ export function SettingsSection({ token }: { token: string }) {
     }
   };
 
-  if (loading || !settings) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#FF6200]" /></div>;
+  if (loading || !settings) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#faff69]" /></div>;
 
   return (
     <div className="space-y-4 max-w-3xl text-left font-sans">
-      <Card className="p-5 bg-[#141414] border-[#2E2E2E] rounded-2xl">
+      <div className="p-6 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-[#FF6200]/10 flex items-center justify-center border border-[#FF6200]/20">
-            <Cpu className="w-5 h-5 text-[#FF6200]" />
+          <div className="w-10 h-10 rounded-lg bg-[#242424] flex items-center justify-center border border-[#2a2a2a]">
+            <Cpu className="w-5 h-5 text-[#faff69]" />
           </div>
           <div>
             <p className="text-sm font-bold text-white">LLMs / AI Model Configuration</p>
-            <p className="text-[11px] text-[#888898] font-mono">Configure platform-wide Multimodal Vision &amp; LLMs settings</p>
+            <p className="text-[11px] text-[#888888] font-mono">Configure platform-wide Multimodal Vision &amp; LLMs settings</p>
           </div>
         </div>
 
         <div className="space-y-4">
           <div>
-            <Label className="text-xs text-[#888898]">Update API Key (leave blank to keep current)</Label>
-            <Input
+            <Label className="text-xs text-[#888888]">Update API Key (leave blank to keep current)</Label>
+            <input
               value={newApiKey}
               onChange={(e) => setNewApiKey(e.target.value)}
               type="password"
               placeholder="sk-or-v1-..."
-              className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl"
+              className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
           </div>
 
-          <Button onClick={save} disabled={saving} className="gap-2 bg-[#FF6200] hover:bg-[#E55700] text-white rounded-full text-xs font-bold shadow-md shadow-[#FF6200]/20">
+          <button onClick={save} disabled={saving} className="h-10 px-5 gap-2 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] rounded-md text-xs font-semibold inline-flex items-center">
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Save Settings
-          </Button>
+          </button>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
@@ -1218,111 +1214,109 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#888898] font-mono">Create college/institution accounts and student logins with full Pro portal access</p>
-        <Button onClick={() => setShowCreate(true)} className="gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white rounded-full font-bold text-xs shadow-md shadow-[#FF6200]/20">
+        <p className="text-xs text-[#888888] font-mono">Create college/institution accounts and student logins with full Pro portal access</p>
+        <button onClick={() => setShowCreate(true)} className="h-9 px-4 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] rounded-md font-semibold text-xs inline-flex items-center">
           <Plus className="w-3.5 h-3.5" /> New Organization / College
-        </Button>
+        </button>
       </div>
 
-      <Card className="p-4 bg-violet-950/20 border-violet-900/40 rounded-2xl">
+      <div className="p-4 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
         <div className="flex items-start gap-3">
-          <GraduationCap className="w-5 h-5 text-violet-400 shrink-0 mt-0.5" />
-          <div className="text-xs text-slate-300 space-y-1">
-            <p className="font-bold text-violet-300">How Student Portal Logins Work:</p>
-            <p>1. Create an Organization (e.g. "IIT Bombay") with a Unique Code (e.g. <code className="text-violet-300">IITBX3</code>).</p>
-            <p>2. Add student accounts — Email defaults to <code className="text-violet-300">studentId@orgcode.edu</code>, Password defaults to <code className="text-violet-300">studentId + uniqueCode</code> (e.g. <code className="text-violet-300">23001IITBX3</code>).</p>
-            <p>3. Students sign in directly at homepage login <code className="text-violet-300">/</code> and get instant access to Dashboard, Editor page, PDF exports, and AI features like a ₹399/mo Pro user.</p>
+          <GraduationCap className="w-5 h-5 text-[#faff69] shrink-0 mt-0.5" />
+          <div className="text-xs text-[#cccccc] space-y-1">
+            <p className="font-bold text-[#faff69]">How Student Portal Logins Work:</p>
+            <p>1. Create an Organization (e.g. &ldquo;IIT Bombay&rdquo;) with a Unique Code (e.g. <code className="text-[#faff69] font-mono">IITBX3</code>).</p>
+            <p>2. Add student accounts — Email defaults to <code className="text-[#faff69] font-mono">studentId@orgcode.edu</code>, Password defaults to <code className="text-[#faff69] font-mono">studentId + uniqueCode</code>.</p>
+            <p>3. Students sign in directly at homepage login <code className="text-[#faff69] font-mono">/</code> and get instant access to Dashboard, Editor page, PDF exports, and AI features.</p>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Orgs list */}
       {loading ? (
-        <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-violet-400" /></div>
+        <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-[#faff69]" /></div>
       ) : orgs.length === 0 ? (
-        <Card className="p-8 bg-[#141414] border-[#2E2E2E] text-center rounded-2xl">
-          <Building2 className="w-10 h-10 text-[#888898] mx-auto mb-3" />
-          <p className="text-xs text-[#888898]">No organizations created yet. Click "New Organization" above to get started.</p>
-        </Card>
+        <div className="p-8 bg-[#1a1a1a] border border-[#2a2a2a] text-center rounded-xl">
+          <Building2 className="w-10 h-10 text-[#888888] mx-auto mb-3" />
+          <p className="text-xs text-[#888888] font-mono">No organizations created yet. Click &ldquo;New Organization&rdquo; above to get started.</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {orgs.map((o) => (
-            <Card key={o.id} className="p-4 bg-[#141414] border-[#2E2E2E] rounded-2xl hover:border-[#FF6200]/40 transition-colors">
+            <div key={o.id} className="p-5 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl hover:border-[#3a3a3a] transition-colors">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-xl bg-violet-950/40 border border-violet-800/40 flex items-center justify-center"><Building2 className="w-5 h-5 text-violet-400" /></div>
+                  <div className="w-10 h-10 rounded-lg bg-[#242424] border border-[#2a2a2a] flex items-center justify-center"><Building2 className="w-5 h-5 text-[#faff69]" /></div>
                   <div>
                     <p className="text-xs font-bold text-white">{o.name}</p>
-                    <p className="text-[10px] text-[#888898] font-mono capitalize">{o.type} · Code: {o.uniqueCode}</p>
+                    <p className="text-[10px] text-[#888888] font-mono capitalize">{o.type} · Code: {o.uniqueCode}</p>
                   </div>
                 </div>
-                <Badge className={`border-0 text-[9px] ${planBadge(o.plan)}`}>{planLabel(o.plan)}</Badge>
+                <span className={`text-[9px] px-2 py-0.5 rounded-md ${planBadge(o.plan)}`}>{planLabel(o.plan)}</span>
               </div>
-              <div className="mb-3 p-2 rounded-xl bg-[#0D0D0D] border border-[#2E2E2E] flex items-center justify-between text-[11px]">
-                <span className="text-[#888898] font-mono truncate">Portal: /portal/{o.uniqueCode}</span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 text-[10px] text-violet-400 hover:text-violet-300 gap-1 p-1"
+              <div className="mb-3 p-2.5 rounded-md bg-[#121212] border border-[#2a2a2a] flex items-center justify-between text-[11px]">
+                <span className="text-[#888888] font-mono truncate">Portal: /portal/{o.uniqueCode}</span>
+                <button
+                  className="h-6 text-[10px] text-[#faff69] hover:underline gap-1 p-1 inline-flex items-center font-mono"
                   onClick={() => window.open(`/portal/${o.uniqueCode}`, "_blank")}
                 >
                   <ExternalLink className="w-3 h-3" /> Open Portal
-                </Button>
+                </button>
               </div>
               <div className="flex gap-2">
-                <Button onClick={() => { setSelectedOrg(o); setShowStudents(true); }} size="sm" className="flex-1 gap-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-full text-xs font-bold">
+                <button onClick={() => { setSelectedOrg(o); setShowStudents(true); }} className="flex-1 h-9 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] rounded-md text-xs font-semibold inline-flex items-center justify-center">
                   <GraduationCap className="w-3.5 h-3.5" /> Manage Students ({o.studentCount || 0})
-                </Button>
-                <Button onClick={() => deleteOrg(o.id)} size="sm" variant="outline" className="bg-[#0D0D0D] border-[#2E2E2E] text-red-400 hover:bg-red-950/30 rounded-full">
+                </button>
+                <button onClick={() => deleteOrg(o.id)} className="h-9 px-3 bg-[#121212] border border-[#2a2a2a] text-red-400 hover:bg-red-950/30 rounded-md inline-flex items-center justify-center">
                   <Trash2 className="w-3.5 h-3.5" />
-                </Button>
+                </button>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}
 
       {/* Create org dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent className="max-w-lg bg-[#141414] border-[#2E2E2E] text-white rounded-3xl">
+        <DialogContent className="max-w-lg bg-[#1a1a1a] border-[#2a2a2a] text-white rounded-xl">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2"><Building2 className="w-4 h-4 text-[#FF6200]" /> Create College / Organization</DialogTitle>
-            <DialogDescription className="text-xs text-[#888898]">Parent entity to issue student credentials</DialogDescription>
+            <DialogTitle className="text-white flex items-center gap-2"><Building2 className="w-4 h-4 text-[#faff69]" /> Create College / Organization</DialogTitle>
+            <DialogDescription className="text-xs text-[#888888]">Parent entity to issue student credentials</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label className="text-xs text-[#888898]">College / Organization Name *</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. IIT Bombay" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
+              <Label className="text-xs text-[#888888]">College / Organization Name *</Label>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. IIT Bombay" className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]" />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-[#888898]">Institutional Contact Email *</Label>
-                <Input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="e.g. placement@iitb.ac.in" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
+                <Label className="text-xs text-[#888888]">Institutional Contact Email *</Label>
+                <input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="e.g. placement@iitb.ac.in" className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]" />
               </div>
               <div>
-                <Label className="text-xs text-[#888898]">Contact Phone Number *</Label>
-                <Input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="e.g. +91 98765 43210" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs text-[#888898]">Institutional Admin Password *</Label>
-                <Input value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} type="password" placeholder="Password for college admin" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
-              </div>
-              <div>
-                <Label className="text-xs text-[#888898]">Purchased Seats Count</Label>
-                <Input value={seats} onChange={(e) => setSeats(e.target.value)} type="number" placeholder="e.g. 300" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl" />
+                <Label className="text-xs text-[#888888]">Contact Phone Number *</Label>
+                <input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="e.g. +91 98765 43210" className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]" />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-[#888898]">Type</Label>
+                <Label className="text-xs text-[#888888]">Institutional Admin Password *</Label>
+                <input value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} type="password" placeholder="Password for college admin" className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]" />
+              </div>
+              <div>
+                <Label className="text-xs text-[#888888]">Purchased Seats Count</Label>
+                <input value={seats} onChange={(e) => setSeats(e.target.value)} type="number" placeholder="e.g. 300" className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-[#888888]">Type</Label>
                 <Select value={type} onValueChange={setType}>
-                  <SelectTrigger className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-[#141414] border-[#2E2E2E] text-white">
+                  <SelectTrigger className="bg-[#121212] border-[#2a2a2a] text-white text-xs rounded-md"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a] text-white">
                     <SelectItem value="college">College</SelectItem>
                     <SelectItem value="university">University</SelectItem>
                     <SelectItem value="institute">Institute</SelectItem>
@@ -1330,16 +1324,16 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
                 </Select>
               </div>
               <div>
-                <Label className="text-xs text-[#888898]">Unique Code (Optional)</Label>
-                <Input value={uniqueCode} onChange={(e) => setUniqueCode(e.target.value)} placeholder="Auto-generated if blank (e.g. IITBX3)" className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl font-mono uppercase" />
+                <Label className="text-xs text-[#888888]">Unique Code (Optional)</Label>
+                <input value={uniqueCode} onChange={(e) => setUniqueCode(e.target.value)} placeholder="Auto-generated if blank (e.g. IITBX3)" className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69] font-mono uppercase" />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreate(false)} className="bg-[#0D0D0D] border-[#2E2E2E] text-white rounded-full text-xs">Cancel</Button>
-            <Button onClick={createOrg} disabled={saving} className="gap-1.5 bg-[#FF6200] hover:bg-[#E55700] text-white rounded-full text-xs font-bold">
+            <button onClick={() => setShowCreate(false)} className="h-9 px-4 bg-[#121212] border border-[#2a2a2a] text-white rounded-md text-xs font-semibold">Cancel</button>
+            <button onClick={createOrg} disabled={saving} className="h-9 px-4 gap-1.5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] rounded-md text-xs font-semibold inline-flex items-center">
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} Create Organization
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1347,40 +1341,40 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
       {/* Manage Students Dialog */}
       {selectedOrg && (
         <Dialog open={showStudents} onOpenChange={setShowStudents}>
-          <DialogContent className="max-w-2xl bg-[#141414] border-[#2E2E2E] text-white rounded-3xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl bg-[#1a1a1a] border-[#2a2a2a] text-white rounded-xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-violet-400" />
+                <GraduationCap className="w-5 h-5 text-[#faff69]" />
                 Issue Student Login Credentials ({selectedOrg.name})
               </DialogTitle>
-              <DialogDescription className="text-xs text-[#888898]">
+              <DialogDescription className="text-xs text-[#888888]">
                 Created student accounts log in directly at homepage and access Dashboard &amp; Editor
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 pt-2">
               {/* Creation Mode Switcher */}
-              <div className="grid grid-cols-3 gap-1 p-1 bg-[#0D0D0D] border border-[#2E2E2E] rounded-full text-xs font-semibold">
+              <div className="grid grid-cols-3 gap-1 p-1 bg-[#121212] border border-[#2a2a2a] rounded-md text-xs font-semibold">
                 <button
                   onClick={() => setCreationMode("single")}
-                  className={`py-1.5 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all ${
-                    creationMode === "single" ? "bg-violet-600 text-white font-bold" : "text-[#888898] hover:text-white"
+                  className={`py-1.5 px-3 rounded-md flex items-center justify-center gap-1.5 transition-all ${
+                    creationMode === "single" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "text-[#888888] hover:text-white"
                   }`}
                 >
                   <User className="w-3.5 h-3.5" /> Single Student
                 </button>
                 <button
                   onClick={() => setCreationMode("bulk_range")}
-                  className={`py-1.5 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all ${
-                    creationMode === "bulk_range" ? "bg-violet-600 text-white font-bold" : "text-[#888898] hover:text-white"
+                  className={`py-1.5 px-3 rounded-md flex items-center justify-center gap-1.5 transition-all ${
+                    creationMode === "bulk_range" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "text-[#888888] hover:text-white"
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" /> Roll No Range
                 </button>
                 <button
                   onClick={() => setCreationMode("bulk_text")}
-                  className={`py-1.5 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all ${
-                    creationMode === "bulk_text" ? "bg-violet-600 text-white font-bold" : "text-[#888898] hover:text-white"
+                  className={`py-1.5 px-3 rounded-md flex items-center justify-center gap-1.5 transition-all ${
+                    creationMode === "bulk_text" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "text-[#888888] hover:text-white"
                   }`}
                 >
                   <FileText className="w-3.5 h-3.5" /> Paste List (CSV)
@@ -1389,107 +1383,107 @@ function OrganizationSection({ token, onCreated }: { token: string; onCreated: (
 
               {/* Mode 1: Single Student */}
               {creationMode === "single" && (
-                <div className="p-3.5 rounded-2xl bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
+                <div className="p-4 rounded-xl bg-[#121212] border border-[#2a2a2a] space-y-3">
                   <p className="text-xs font-bold text-white">Issue Single Student Credential</p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <Input
+                    <input
                       value={studentId}
                       onChange={(e) => setStudentId(e.target.value)}
                       placeholder="Student Roll No (e.g. 23001)"
-                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                      className="bg-[#1a1a1a] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
                     />
-                    <Input
+                    <input
                       value={studentName}
                       onChange={(e) => setStudentName(e.target.value)}
                       placeholder="Full Name"
-                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                      className="bg-[#1a1a1a] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
                     />
-                    <Input
+                    <input
                       value={studentEmail}
                       onChange={(e) => setStudentEmail(e.target.value)}
                       placeholder="Custom Email (Optional)"
-                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                      className="bg-[#1a1a1a] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
                     />
                   </div>
-                  <Button onClick={addStudent} disabled={creatingStudent} className="w-full h-9 text-xs bg-violet-600 hover:bg-violet-700 text-white rounded-full font-bold gap-1.5">
+                  <button onClick={addStudent} disabled={creatingStudent} className="w-full h-9 text-xs bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] rounded-md font-semibold gap-1.5 inline-flex items-center justify-center">
                     {creatingStudent ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-3.5 h-3.5" />} Issue Student Credentials
-                  </Button>
+                  </button>
                 </div>
               )}
 
               {/* Mode 2: Bulk Roll Range */}
               {creationMode === "bulk_range" && (
-                <div className="p-3.5 rounded-2xl bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
+                <div className="p-4 rounded-xl bg-[#121212] border border-[#2a2a2a] space-y-3">
                   <p className="text-xs font-bold text-white">Generate Bulk Accounts by Roll Number Range</p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <Input
+                    <input
                       value={startRoll}
                       onChange={(e) => setStartRoll(e.target.value)}
                       placeholder="Start Roll No (e.g. 23001)"
                       type="number"
-                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                      className="bg-[#1a1a1a] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
                     />
-                    <Input
+                    <input
                       value={endRoll}
                       onChange={(e) => setEndRoll(e.target.value)}
                       placeholder="End Roll No (e.g. 23050)"
                       type="number"
-                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                      className="bg-[#1a1a1a] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
                     />
-                    <Input
+                    <input
                       value={batchPrefix}
                       onChange={(e) => setBatchPrefix(e.target.value)}
                       placeholder="Name Prefix (e.g. Student)"
-                      className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl"
+                      className="bg-[#1a1a1a] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
                     />
                   </div>
-                  <Button onClick={addBulkStudents} disabled={creatingStudent} className="w-full h-9 text-xs bg-violet-600 hover:bg-violet-700 text-white rounded-full font-bold gap-1.5">
+                  <button onClick={addBulkStudents} disabled={creatingStudent} className="w-full h-9 text-xs bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] rounded-md font-semibold gap-1.5 inline-flex items-center justify-center">
                     {creatingStudent ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />} Generate Bulk Student Logins
-                  </Button>
+                  </button>
                 </div>
               )}
 
               {/* Mode 3: Bulk Paste CSV List */}
               {creationMode === "bulk_text" && (
-                <div className="p-3.5 rounded-2xl bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
+                <div className="p-4 rounded-xl bg-[#121212] border border-[#2a2a2a] space-y-3">
                   <p className="text-xs font-bold text-white">Paste Roll Numbers / CSV List (one per line)</p>
                   <Textarea
                     value={bulkText}
                     onChange={(e) => setBulkText(e.target.value)}
                     placeholder={`23001, Rahul Sharma\n23002, Priya Patel\n23003, Amit Kumar`}
                     rows={4}
-                    className="bg-[#141414] border-[#2E2E2E] text-white text-xs rounded-xl font-mono"
+                    className="bg-[#1a1a1a] border-[#2a2a2a] text-white text-xs rounded-md font-mono"
                   />
-                  <Button onClick={addBulkStudents} disabled={creatingStudent} className="w-full h-9 text-xs bg-violet-600 hover:bg-violet-700 text-white rounded-full font-bold gap-1.5">
+                  <button onClick={addBulkStudents} disabled={creatingStudent} className="w-full h-9 text-xs bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] rounded-md font-semibold gap-1.5 inline-flex items-center justify-center">
                     {creatingStudent ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-3.5 h-3.5" />} Issue Bulk Accounts from List
-                  </Button>
+                  </button>
                 </div>
               )}
 
               {/* Single Result */}
               {createdStudentResult && (
-                <div className="p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-800/40 space-y-1.5 text-xs">
-                  <p className="font-bold text-emerald-300">✅ Student Account Successfully Created!</p>
-                  <p className="text-slate-200">Email: <code className="text-emerald-400 font-mono">{createdStudentResult.email}</code></p>
-                  <p className="text-slate-200">Password: <code className="text-emerald-400 font-mono">{createdStudentResult.password}</code></p>
-                  <p className="text-[10px] text-slate-400 pt-1 font-mono">Portal URL: http://localhost:3000/portal/{selectedOrg.uniqueCode}</p>
+                <div className="p-4 rounded-xl bg-[#1a1a1a] border border-[#22c55e]/40 space-y-1.5 text-xs">
+                  <p className="font-bold text-[#22c55e]">✅ Student Account Successfully Created!</p>
+                  <p className="text-[#cccccc]">Email: <code className="text-[#faff69] font-mono">{createdStudentResult.email}</code></p>
+                  <p className="text-[#cccccc]">Password: <code className="text-[#faff69] font-mono">{createdStudentResult.password}</code></p>
+                  <p className="text-[10px] text-[#888888] pt-1 font-mono">Portal URL: http://localhost:3000/portal/{selectedOrg.uniqueCode}</p>
                 </div>
               )}
 
               {/* Bulk Results + CSV Export Button */}
               {createdBulkResults.length > 0 && (
-                <div className="p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-800/40 space-y-3 text-xs">
+                <div className="p-4 rounded-xl bg-[#1a1a1a] border border-[#22c55e]/40 space-y-3 text-xs">
                   <div className="flex items-center justify-between">
-                    <p className="font-bold text-emerald-300">✅ {createdBulkResults.length} Student Credentials Generated!</p>
-                    <Button onClick={downloadRosterCsv} size="sm" className="h-7 text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-1">
+                    <p className="font-bold text-[#22c55e]">✅ {createdBulkResults.length} Student Credentials Generated!</p>
+                    <button onClick={downloadRosterCsv} className="h-7 px-3 text-[10px] bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-bold rounded-md gap-1 inline-flex items-center">
                       <Copy className="w-3 h-3" /> Download Roster CSV
-                    </Button>
+                    </button>
                   </div>
-                  <div className="max-h-40 overflow-y-auto divide-y divide-emerald-900/30 text-[11px] font-mono">
+                  <div className="max-h-40 overflow-y-auto divide-y divide-[#2a2a2a] text-[11px] font-mono">
                     {createdBulkResults.slice(0, 50).map((r, idx) => (
                       <div key={idx} className="py-1.5 flex justify-between">
-                        <span className="text-slate-200">{r.studentId} ({r.name})</span>
-                        <span className="text-emerald-400">Pass: {r.password}</span>
+                        <span className="text-[#cccccc]">{r.studentId} ({r.name})</span>
+                        <span className="text-[#faff69]">Pass: {r.password}</span>
                       </div>
                     ))}
                   </div>

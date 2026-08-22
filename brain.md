@@ -91,13 +91,17 @@
 3. **Email OTP** — 6-digit code sent via Resend from otpprocess@domainexpansion.in
 
 ## Design System
-- Intercom-inspired (DESIGN.md)
-- Canvas: #f5f1ec (cream)
-- Ink: #111111 (charcoal)
-- Accent: teal (#0d9488)
-- Hairline: #d3cec6
-- Font: Inter (Saans substitute)
-- Rounded: 8px buttons, 12px cards, 16px mockups
+- ClickHouse Design System (DESIGN.md)
+- Canvas: #0a0a0a (near-pure black canvas)
+- Primary / Brand Voltage: #faff69 (electric yellow)
+- Primary Active: #e6eb52, Disabled: #3a3a1f
+- Surface Card: #1a1a1a
+- Surface Soft: #121212, Surface Elevated: #242424
+- Hairline: #2a2a2a, Hairline Strong: #3a3a3a
+- Text: #ffffff (headlines/ink), #cccccc (body), #e6e6e6 (body-strong), #888888 (muted)
+- Typography: Inter (700 display w/ negative letter-spacing -1 to -2.5px, 600 title/button, 400 body), JetBrains Mono for code blocks
+- Rounded: 8px (md) buttons & inputs, 12px (lg) cards, pill for badges
+
 
 ## Google OAuth Setup Instructions
 To enable "Login with Google":

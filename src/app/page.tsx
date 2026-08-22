@@ -8,10 +8,6 @@ import { PublicFooter } from "@/components/resume/public-footer";
 import { TemplateCard } from "@/components/resume/template-card";
 import { AuthDialog, type AuthMode } from "@/components/resume/auth-dialogs";
 import { ImportResumeDialog } from "@/components/resume/import-resume-dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   Sparkles,
   FileText,
@@ -19,7 +15,6 @@ import {
   Wand2,
   Check,
   Search,
-  SlidersHorizontal,
   Target,
   Gauge,
   Mail,
@@ -29,8 +24,10 @@ import {
   ChevronDown,
   UserPlus,
   Crown,
-  Smartphone,
-  GraduationCap,
+  ArrowRight,
+  Terminal,
+  Layers,
+  Cpu,
 } from "lucide-react";
 import { TEMPLATES } from "@/lib/resume/types";
 import { useCurrentUser } from "@/lib/resume/use-current-user";
@@ -61,7 +58,7 @@ export default function HomePage() {
 
   // Handle sample load
   const handleTrySample = () => {
-    loadSample(getSampleProfile("software"));
+    loadSample();
     router.push("/editor");
   };
 
@@ -79,99 +76,176 @@ export default function HomePage() {
       if (activeCategory === "entry") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("entry") || tag.toLowerCase().includes("college") || tag.toLowerCase().includes("academic"));
       if (activeCategory === "tech") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("tech") || tag.toLowerCase().includes("developer"));
       if (activeCategory === "creative") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("creative") || tag.toLowerCase().includes("bold"));
-      if (activeCategory === "executive") fontMatches: matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("executive") || tag.tags.includes("Serif"));
+      if (activeCategory === "executive") matchesCategory = t.tags.some((tag) => tag.toLowerCase().includes("executive") || tag.toLowerCase().includes("serif"));
 
       return matchesSearch && matchesCategory;
     });
   }, [search, activeCategory]);
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col font-sans selection:bg-[#FF6200] selection:text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
       {/* Navbar */}
       <PublicNav onLogin={() => setAuthMode("login")} onSignup={() => setAuthMode("signup")} />
 
-      {/* ── Hero Section ── */}
-      <section className="relative pt-16 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#FF6200]/10 rounded-full blur-[160px] pointer-events-none" />
+      {/* ── Hero Section (ClickHouse 7/5 Grid & High Voltage Electric Yellow) ── */}
+      <section className="relative pt-16 pb-20 px-4 sm:px-6 lg:px-8 border-b border-[#2a2a2a]">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Left Column: Headline & Action Signal (7 cols) */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="inline-flex items-center gap-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] px-3.5 py-1.5 rounded-full text-xs font-mono">
+              <span className="w-2 h-2 rounded-full bg-[#faff69]"></span>
+              <span className="text-[#cccccc]">Jinzai Engine</span>
+              <span className="text-[#888888]">/</span>
+              <span className="text-[#faff69] font-semibold">AI Resume Platform</span>
+            </div>
 
-        <div className="max-w-5xl mx-auto text-center space-y-6 relative z-10">
-          <Badge className="bg-[#1A1A1A] border-[#2E2E2E] text-[#FF6200] px-4 py-1.5 rounded-full font-mono text-xs gap-2 inline-flex shadow-lg shadow-[#FF6200]/10">
-            <Sparkles className="w-4 h-4" /> Domain Expansion AI Resume Builder
-          </Badge>
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.05]">
+              The High-Performance <span className="text-[#faff69]">AI Resume Builder</span>
+            </h1>
 
-          <h1 className="font-bricolage text-4xl sm:text-7xl font-bold tracking-tight text-white leading-[1.05]">
-            Transform Your Career Story into <span className="text-gradient-orange">Unstoppable Opportunity</span>
-          </h1>
+            <p className="text-[#cccccc] text-base sm:text-lg max-w-xl leading-relaxed">
+              Jinzai (人材) delivers ultra-fast AI rewriting, ATS compliance scoring, and 78 engineered templates. Build, optimize, and export recruiter-certified vector resumes in seconds.
+            </p>
 
-          <p className="text-[#888898] max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-            <strong className="text-white">Jinzai</strong> (人材) pairs LLMs / AI / GPTs intelligence with 78 ATS-certified templates to craft high-impact resumes, cover letters, and live web profiles in under 3 minutes.
-          </p>
+            {/* CTAs */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <button
+                onClick={handleStartBuilding}
+                className="h-11 px-7 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold text-sm rounded-md transition-colors inline-flex items-center gap-2"
+              >
+                <FileText className="w-4 h-4" /> Start Building Free
+              </button>
 
-          {/* Quick CTAs */}
-          <div className="flex flex-wrap justify-center items-center gap-3 pt-4">
-            <Button onClick={handleStartBuilding} size="lg" className="h-13 px-8 rounded-full bg-[#FF6200] hover:bg-[#E55700] text-white font-bold text-sm gap-2 shadow-xl shadow-[#FF6200]/30 transition-all active:scale-95">
-              <FileText className="w-5 h-5" /> Start Building Free
-            </Button>
-            <ImportResumeDialog trigger={
-              <Button variant="outline" size="lg" className="h-13 px-7 rounded-full border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] hover:border-[#FF6200]/50 text-sm gap-2 transition-all">
-                <Upload className="w-5 h-5 text-[#FF6200]" /> Upload &amp; Auto-Fill
-              </Button>
-            } />
-            <Button onClick={handleTrySample} variant="ghost" size="lg" className="h-13 px-6 text-[#888898] hover:text-white text-sm gap-2">
-              <Wand2 className="w-4 h-4 text-[#FF6200]" /> Try Sample Profile
-            </Button>
+              <ImportResumeDialog
+                trigger={
+                  <button className="h-11 px-6 bg-[#1a1a1a] hover:bg-[#242424] text-white border border-[#2a2a2a] hover:border-[#3a3a3a] text-sm font-semibold rounded-md transition-colors inline-flex items-center gap-2">
+                    <Upload className="w-4 h-4 text-[#faff69]" /> Upload &amp; Parse
+                  </button>
+                }
+              />
+
+              <button
+                onClick={handleTrySample}
+                className="h-11 px-5 text-[#888888] hover:text-white text-sm font-medium transition-colors inline-flex items-center gap-2"
+              >
+                <Wand2 className="w-4 h-4 text-[#faff69]" /> Try Sample
+              </button>
+            </div>
+
+            {user && (
+              <div className="pt-1">
+                <Link href="/dashboard">
+                  <span className="inline-flex items-center gap-2 text-xs font-mono text-[#faff69] bg-[#1a1a1a] border border-[#2a2a2a] px-3 py-1.5 rounded-md hover:border-[#faff69]/40 transition-colors">
+                    Logged in as {user.email} — Open Console →
+                  </span>
+                </Link>
+              </div>
+            )}
           </div>
 
-          {user && (
-            <div className="pt-2">
-              <Link href="/dashboard">
-                <span className="inline-flex items-center gap-2 text-xs font-mono text-[#FF6200] bg-[#FF6200]/10 border border-[#FF6200]/30 px-3 py-1 rounded-full hover:underline">
-                  Logged in as {user.email} — Open My Dashboard →
-                </span>
-              </Link>
+          {/* Right Column: Code Window Card / Product UI Fragment (5 cols) */}
+          <div className="lg:col-span-5">
+            <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-5 shadow-2xl font-mono text-xs text-[#cccccc] space-y-3">
+              {/* Window Bar */}
+              <div className="flex items-center justify-between border-b border-[#2a2a2a] pb-3 text-[#888888]">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]/80"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]/80"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]/80"></span>
+                  <span className="text-[11px] text-[#888888] ml-2">resume-optimizer.sql</span>
+                </div>
+                <span className="text-[10px] text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/30 px-2 py-0.5 rounded">ATS 100%</span>
+              </div>
+
+              {/* Code Content */}
+              <div className="space-y-1 text-[13px] leading-relaxed pt-1">
+                <p><span className="text-[#3b82f6]">SELECT</span> candidate_name, ats_score, target_role</p>
+                <p><span className="text-[#3b82f6]">FROM</span> jinzai_resumes</p>
+                <p><span className="text-[#3b82f6]">WHERE</span> template_id = <span className="text-[#faff69]">&apos;tech-lead-pro&apos;</span></p>
+                <p>&nbsp;&nbsp;<span className="text-[#3b82f6]">AND</span> keyword_match_rate &gt;= <span className="text-[#22c55e]">0.98</span></p>
+                <p><span className="text-[#3b82f6]">OPTIMIZE WITH</span> (ai_action_verbs = <span className="text-[#faff69]">true</span>);</p>
+              </div>
+
+              {/* Metrics Output Banner */}
+              <div className="mt-4 p-3 bg-[#121212] border border-[#2a2a2a] rounded-lg space-y-1.5">
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-[#888888]">Parsed Keywords:</span>
+                  <span className="text-white font-bold">24 / 24 Matched</span>
+                </div>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-[#888888]">Export Format:</span>
+                  <span className="text-[#faff69] font-bold">Vector PDF (ISO A4)</span>
+                </div>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-[#888888]">Engine Status:</span>
+                  <span className="text-[#22c55e]">● Ready in 1.2s</span>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
+        </div>
+
+        {/* ── Stat Callouts Row (ClickHouse Yellow Stat Display Numbers) ── */}
+        <div className="max-w-7xl mx-auto pt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div>
+            <p className="text-4xl sm:text-5xl font-bold tracking-tight text-[#faff69]">78+</p>
+            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1">Recruiter Templates</p>
+          </div>
+          <div>
+            <p className="text-4xl sm:text-5xl font-bold tracking-tight text-[#faff69]">100%</p>
+            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1">ATS Text Extraction</p>
+          </div>
+          <div>
+            <p className="text-4xl sm:text-5xl font-bold tracking-tight text-[#faff69]">&lt; 3m</p>
+            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1">Generation Time</p>
+          </div>
+          <div>
+            <p className="text-4xl sm:text-5xl font-bold tracking-tight text-[#faff69]">50k+</p>
+            <p className="text-xs text-[#888888] uppercase tracking-wider font-semibold mt-1">Resumes Exported</p>
+          </div>
         </div>
       </section>
 
       {/* ── Interactive Templates Gallery ── */}
-      <section id="templates" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full space-y-8">
+      <section id="templates" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <Badge className="bg-[#FF6200]/10 text-[#FF6200] border-[#FF6200]/30 text-xs font-mono mb-2">78 MASTER TEMPLATES</Badge>
-            <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Choose Your Professional Design</h2>
-            <p className="text-sm text-[#888898]">Hover any card to use template immediately or filter by category.</p>
+            <div className="inline-flex items-center gap-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#faff69] px-3 py-1 rounded-full text-xs font-mono mb-3">
+              78 PRODUCTION TEMPLATES
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Choose Your Engineered Layout</h2>
+            <p className="text-sm text-[#cccccc] mt-1">Recruiter-tested typography, layout hierarchy, and instant vector export.</p>
           </div>
 
           {/* Search bar */}
-          <div className="relative w-full md:w-72">
-            <Search className="w-4 h-4 text-[#888898] absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <Input
+          <div className="relative w-full md:w-80">
+            <Search className="w-4 h-4 text-[#888888] absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search templates..."
-              className="pl-10 h-10 bg-[#141414] border-[#2E2E2E] focus:border-[#FF6200] text-white text-xs rounded-full"
+              placeholder="Search templates by role or style..."
+              className="w-full pl-10 pr-4 h-10 bg-[#1a1a1a] border border-[#2a2a2a] focus:border-[#faff69] text-white text-xs rounded-md outline-none transition-colors"
             />
           </div>
         </div>
 
-        {/* Category Filter Pills */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-[#2E2E2E] pb-4">
+        {/* Category Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-[#2a2a2a] pb-4">
           {[
             { id: "all", label: "All 78 Templates" },
-            { id: "ats", label: "100% ATS Friendly" },
-            { id: "entry", label: "College / Freshers" },
-            { id: "tech", label: "Tech / Developers" },
-            { id: "executive", label: "Executive / Senior" },
-            { id: "creative", label: "Creative & Bold" },
+            { id: "ats", label: "100% ATS Optimized" },
+            { id: "tech", label: "Tech & Engineering" },
+            { id: "executive", label: "Executive & Senior" },
+            { id: "entry", label: "Freshers & Academic" },
+            { id: "creative", label: "Design & Creative" },
           ].map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${
+              className={`px-4 py-2 rounded-md text-xs font-semibold transition-all ${
                 activeCategory === cat.id
-                  ? "bg-[#FF6200] text-white font-bold shadow-md shadow-[#FF6200]/20"
-                  : "bg-[#141414] border border-[#2E2E2E] text-[#888898] hover:text-white hover:border-[#FF6200]/40"
+                  ? "bg-[#1a1a1a] text-white border border-[#faff69]"
+                  : "bg-transparent text-[#888888] hover:text-white hover:bg-[#1a1a1a]/60"
               }`}
             >
               {cat.label}
@@ -187,133 +261,143 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── AI Features Strip ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full space-y-10 border-t border-[#2E2E2E] mt-10">
-        <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Everything You Need to Get Hired</h2>
-          <p className="text-sm text-[#888898]">LLMs / AI / GPTs writing assistance, ATS keyword matching, and 78 recruiter-approved templates.</p>
+      {/* ── AI Features (ClickHouse Dark Feature Cards) ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full space-y-12 border-t border-[#2a2a2a]">
+        <div className="text-center space-y-3 max-w-2xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Built for Maximum Recruiter Impact</h2>
+          <p className="text-sm text-[#cccccc]">Precision intelligence modules to rewrite bullets, match target job requirements, and score structure.</p>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { title: "LLMs / AI / GPTs Rewriter", desc: "Transforms basic work bullet points into high-impact quantified achievements with action verbs.", icon: Sparkles },
-            { title: "Resume Quality Score", desc: "Instant A–F rating across quantification, action verbs, formatting, and completeness.", icon: Gauge },
-            { title: "ATS Keyword Matcher", desc: "Paste any target job description to get match scores and missing keyword suggestions.", icon: Target },
-            { title: "Tailored Cover Letters", desc: "Generate role-specific cover letters in formal, modern, or concise tone with one click.", icon: Mail },
+            { title: "LLM Bullet Optimizer", desc: "Quantifies your responsibilities into high-impact metric-backed achievements with strong action verbs.", icon: Sparkles },
+            { title: "Resume Quality Rating", desc: "Real-time automated evaluation across quantification, brevity, formatting, and structural completeness.", icon: Gauge },
+            { title: "Target ATS Matcher", desc: "Upload or paste any job description to discover missing hard keywords and compute similarity indices.", icon: Target },
+            { title: "Role Cover Letters", desc: "Generates tailored cover letters aligned with your resume experience in modern or formal tone with 1 click.", icon: Mail },
           ].map((f) => (
-            <Card key={f.title} className="p-6 rounded-2xl bg-[#141414] border-[#2E2E2E] hover:border-[#FF6200]/40 transition-all duration-300 group">
-              <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] group-hover:border-[#FF6200]/50 flex items-center justify-center mb-4 text-[#FF6200] transition-colors">
+            <div key={f.title} className="p-8 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#3a3a3a] transition-colors group space-y-4">
+              <div className="w-12 h-12 rounded-lg bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69]">
                 <f.icon className="w-6 h-6" />
               </div>
-              <h3 className="font-bricolage text-base font-bold text-white mb-2">{f.title}</h3>
-              <p className="text-xs text-[#888898] leading-relaxed">{f.desc}</p>
-            </Card>
+              <h3 className="text-lg font-semibold text-white tracking-tight">{f.title}</h3>
+              <p className="text-xs text-[#888888] leading-relaxed">{f.desc}</p>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* ── Transparent Pricing ── */}
-      <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full space-y-10 border-t border-[#2E2E2E]">
-        <div className="text-center space-y-2">
-          <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Transparent &amp; Simple Pricing</h2>
-          <p className="text-sm text-[#888898]">Build free. Upgrade when you are ready to download your vector PDF.</p>
+      {/* ── Transparent Pricing (ClickHouse Featured Yellow Tier) ── */}
+      <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full space-y-12 border-t border-[#2a2a2a]">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Simple, Predictable Pricing</h2>
+          <p className="text-sm text-[#cccccc]">Create and edit for free. Upgrade when you are ready to export your ATS-compliant vector PDF.</p>
         </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {[
-            { name: "Single Export Pass", price: "₹99", period: "per export", features: ["1 Resume PDF Export", "Access all 78 templates", "Vector A4 PDF download", "❌ No AI/ATS Tools"], highlight: false },
-            { name: "Pro Plan", price: "₹399", period: "/month", features: ["5 Resume Exports", "LLMs / AI / GPTs Rewriter", "ATS Score & Match Analysis", "AI Cover Letter Generator", "All 78 templates"], highlight: true },
-            { name: "Business Plan", price: "₹999", period: "/month", features: ["50 Resume Exports", "LLMs / AI / GPTs Rewriter", "ATS Score & Match Analysis", "Priority Support", "No contact lock"], highlight: false },
-            { name: "Institution Plan", price: "₹4,999", period: "/month", features: ["300 Student Resumes", "Placement Cell Portal", "All AI & ATS Features", "College Branding"], highlight: false },
+            { name: "Single Export", price: "₹99", period: "/ export", features: ["1 Resume PDF Export", "Access all 78 templates", "Vector A4 PDF download", "❌ No AI rewriting"], highlight: false },
+            { name: "Pro Plan", price: "₹399", period: "/ month", features: ["5 Resume PDF Exports", "LLM Bullet Rewriting", "ATS Keyword Matcher", "Cover Letter Generator", "All 78 templates"], highlight: true },
+            { name: "Business Plan", price: "₹999", period: "/ month", features: ["50 Resume PDF Exports", "Full AI Suite Access", "Priority Vector Processing", "No Contact Lock", "All 78 templates"], highlight: false },
+            { name: "Institution Plan", price: "₹4,999", period: "/ month", features: ["300 Student Portals", "Placement Cell Console", "Bulk Vector Exports", "Institution Domain Setup"], highlight: false },
           ].map((plan) => (
-            <Card key={plan.name} className={`rounded-2xl p-6 bg-[#141414] border flex flex-col justify-between transition-all ${plan.highlight ? "border-[#FF6200] ring-2 ring-[#FF6200]/20 shadow-xl shadow-[#FF6200]/10" : "border-[#2E2E2E]"}`}>
+            <div
+              key={plan.name}
+              className={`rounded-xl p-8 flex flex-col justify-between transition-all ${
+                plan.highlight
+                  ? "bg-[#faff69] text-[#0a0a0a] border border-[#faff69]"
+                  : "bg-[#1a1a1a] text-white border border-[#2a2a2a]"
+              }`}
+            >
               <div>
                 {plan.highlight && (
-                  <Badge className="bg-[#FF6200] text-white text-[9px] font-mono mb-3 px-2 py-0.5 uppercase font-bold">MOST POPULAR</Badge>
+                  <span className="bg-[#0a0a0a] text-[#faff69] text-[10px] font-mono px-2.5 py-0.5 uppercase font-bold rounded-full inline-block mb-3">
+                    RECOMMENDED
+                  </span>
                 )}
-                <p className="font-bricolage font-bold text-lg text-white mb-1">{plan.name}</p>
-                <p className="text-3xl font-bold text-white mb-1">{plan.price}<span className="text-xs font-normal text-[#888898] ml-1">{plan.period}</span></p>
-                <ul className="space-y-2 mt-5 text-xs text-[#888898]">
+                <p className={`text-xl font-bold ${plan.highlight ? "text-[#0a0a0a]" : "text-white"}`}>{plan.name}</p>
+                <p className={`text-4xl font-bold mt-2 ${plan.highlight ? "text-[#0a0a0a]" : "text-white"}`}>
+                  {plan.price}
+                  <span className={`text-xs font-normal ml-1.5 ${plan.highlight ? "text-[#3a3a3a]" : "text-[#888888]"}`}>
+                    {plan.period}
+                  </span>
+                </p>
+
+                <ul className={`space-y-3 mt-6 text-xs ${plan.highlight ? "text-[#1a1a1a]" : "text-[#cccccc]"}`}>
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-[#FF6200]" /> {f}
+                      <Check className={`w-4 h-4 shrink-0 ${plan.highlight ? "text-[#0a0a0a]" : "text-[#faff69]"}`} />
+                      <span>{f}</span>
                     </li>
                   ))}
                 </ul>
               </div>
-              <div className="pt-6">
-                <Button onClick={handleStartBuilding} className={`w-full h-11 rounded-full font-semibold text-sm gap-2 ${plan.highlight ? "bg-[#FF6200] hover:bg-[#E55700] text-white shadow-lg shadow-[#FF6200]/20" : "bg-transparent border border-[#2E2E2E] hover:border-[#FF6200] text-white hover:bg-[#1A1A1A]"}`}>
+
+              <div className="pt-8">
+                <button
+                  onClick={handleStartBuilding}
+                  className={`w-full h-11 rounded-md font-semibold text-sm transition-colors ${
+                    plan.highlight
+                      ? "bg-[#0a0a0a] hover:bg-[#242424] text-white"
+                      : "bg-[#242424] hover:bg-[#3a3a3a] text-white border border-[#2a2a2a]"
+                  }`}
+                >
                   Start Building
-                </Button>
+                </button>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* ── Reviews / Testimonials ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full space-y-8 border-t border-[#2E2E2E]">
-        <div className="text-center space-y-2">
-          <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Loved by Job Seekers</h2>
-          <p className="text-sm text-[#888898]">Real success stories from professionals who landed offers using Jinzai.</p>
+      {/* ── Testimonials ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full space-y-10 border-t border-[#2a2a2a]">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Approved by Engineers &amp; Leaders</h2>
+          <p className="text-sm text-[#cccccc]">Job seekers across top tier technology companies trust Jinzai.</p>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { name: "Rahul Verma", role: "Software Engineer at Google", quote: "I got 3 interview calls within a week of using Jinzai. The AI rewriter highlighted my achievements with exact metrics.", avatar: "R" },
-            { name: "Ananya Krishnan", role: "Product Manager at Swiggy", quote: "The ATS keyword matcher helped me optimize my resume for exactly what recruiters were looking for. Landed my PM role!", avatar: "A" },
-            { name: "Vikram Singh", role: "Data Scientist at Amazon", quote: "78 master templates meant I could find the perfect design. The PDF export passed Taleo ATS without a hitch.", avatar: "V" },
+            { name: "Rahul Verma", role: "Software Engineer at Google", quote: "I received 3 interview calls within a week of deploying my resume with Jinzai. The AI bullet optimizer was decisive.", avatar: "R" },
+            { name: "Ananya Krishnan", role: "Product Lead at Swiggy", quote: "The ATS keyword comparison allowed me to tailor my CV for competitive leadership roles in minutes.", avatar: "A" },
+            { name: "Vikram Singh", role: "Staff Data Scientist at Amazon", quote: "78 master templates allowed me to pick a crisp, high-density format that passed Taleo ATS instantly.", avatar: "V" },
           ].map((t) => (
-            <Card key={t.name} className="p-6 rounded-2xl bg-[#141414] border-[#2E2E2E] space-y-3">
+            <div key={t.name} className="p-8 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#FF6200] flex items-center justify-center font-bold text-white shrink-0">
+                <div className="w-10 h-10 rounded-md bg-[#242424] border border-[#2a2a2a] text-[#faff69] flex items-center justify-center font-bold text-sm shrink-0">
                   {t.avatar}
                 </div>
                 <div>
                   <p className="text-sm font-bold text-white">{t.name}</p>
-                  <p className="text-xs text-[#888898]">{t.role}</p>
+                  <p className="text-xs text-[#888888]">{t.role}</p>
                 </div>
               </div>
-              <div className="flex gap-1 text-amber-400">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
-                ))}
-              </div>
-              <p className="text-xs text-[#888898] leading-relaxed italic">"{t.quote}"</p>
-            </Card>
+              <p className="text-xs text-[#cccccc] leading-relaxed italic">&ldquo;{t.quote}&rdquo;</p>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* ── FAQ Section ── */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full space-y-6 border-t border-[#2E2E2E]">
-        <div className="text-center space-y-2">
-          <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Frequently Asked Questions</h2>
-          <p className="text-sm text-[#888898]">Everything you need to know about Jinzai.</p>
-        </div>
-        <div className="space-y-3">
-          {[
-            { q: "Is Jinzai free to start?", a: "Yes! You can browse all 78 templates and create your resume for free. Upgrade when you are ready to download your vector PDF." },
-            { q: "How does the LLMs / AI / GPTs scanning & writing work?", a: "Our AI scans raw resume text or uploaded files (.pdf, .docx, .json, .md, .txt), parses all information, and populates all prebuilt sections automatically." },
-            { q: "Are the exported PDFs 100% ATS friendly?", a: "Yes! All PDF exports use selectable vector text layers. ATS scanners (Taleo, Greenhouse, Workday) extract 100% of all text cleanly." },
-            { q: "Can I import my existing resume?", a: "Yes! Simply click 'Upload & Auto-Fill', choose your file, and AI will parse all sections into structured editor fields." },
-          ].map((faq, i) => (
-            <details key={i} className="group rounded-2xl bg-[#141414] border border-[#2E2E2E] p-5">
-              <summary className="cursor-pointer text-sm font-bold text-white flex items-center justify-between gap-2 list-none">
-                {faq.q}
-                <ChevronDown className="w-4 h-4 text-[#888898] group-open:rotate-180 transition-transform shrink-0" />
-              </summary>
-              <p className="text-xs text-[#888898] leading-relaxed mt-3 pt-3 border-t border-[#2E2E2E]">{faq.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+      {/* ── ClickHouse Signature Full-Bleed Yellow CTA Band (cta-band-yellow) ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <div className="rounded-xl bg-[#faff69] text-[#0a0a0a] p-10 sm:p-16 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="space-y-2 text-left">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0a0a0a]">
+              Build Your High-Impact Resume Today
+            </h2>
+            <p className="text-sm sm:text-base text-[#1a1a1a] max-w-xl">
+              Access 78 templates, AI bullet optimization, and ATS verification. Get hired faster.
+            </p>
+          </div>
 
-      {/* ── Final CTA ── */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full mb-10">
-        <div className="rounded-3xl bg-gradient-to-r from-[#FF6200]/20 via-[#141414] to-[#FF8C42]/10 border border-[#FF6200]/30 p-10 sm:p-14 text-center space-y-4">
-          <h2 className="font-bricolage text-3xl sm:text-4xl font-bold text-white">Ready to Land Your Next Job Offer?</h2>
-          <p className="text-sm text-[#888898] max-w-md mx-auto">Create a recruiter-approved ATS resume in under 3 minutes.</p>
-          <Button size="lg" onClick={handleStartBuilding} className="h-12 px-8 rounded-full bg-[#FF6200] hover:bg-[#E55700] text-white font-bold text-sm gap-2 shadow-xl shadow-[#FF6200]/30">
-            <UserPlus className="w-4 h-4" /> Start Building Free
-          </Button>
+          <div className="shrink-0 flex items-center gap-3">
+            <button
+              onClick={handleStartBuilding}
+              className="h-12 px-8 bg-[#0a0a0a] hover:bg-[#242424] text-white font-semibold text-sm rounded-md transition-colors inline-flex items-center gap-2"
+            >
+              <UserPlus className="w-4 h-4" /> Get Started Free
+            </button>
+          </div>
         </div>
       </section>
 

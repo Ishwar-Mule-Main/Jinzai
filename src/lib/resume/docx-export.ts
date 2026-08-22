@@ -116,7 +116,18 @@ export function resumeToDocHtml(data: ResumeData, accentColor: string): string {
   for (const cs of data.customSections.filter((s) => s.items.length > 0)) {
     sections.push(`
       <p style="font-size: 11pt; font-weight: bold; color: ${accentColor}; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin: 16px 0 8px;">${escapeHtml(cs.title)}</p>
-      <ul style="font-size: 10pt; margin: 0; padding-left: 20px;">${cs.items.map((it) => `<li style="margin-bottom: 2px;">${escapeHtml(it)}</li>`).join("")}</ul>
+      <ul style="font-size: 10pt; margin: 0; padding-left: 20px;">
+        ${cs.items
+          .map((rawIt) => {
+            if (typeof rawIt === "string") {
+              return `<li style="margin-bottom: 2px;">${escapeHtml(rawIt)}</li>`;
+            }
+            const header = [rawIt.title, rawIt.subtitle, rawIt.date].filter(Boolean).join(" &middot; ");
+            const desc = rawIt.description ? `<p style="margin: 2px 0 0; font-size: 9.5pt; color: #444;">${escapeHtml(rawIt.description)}</p>` : "";
+            return `<li style="margin-bottom: 4px;"><strong>${escapeHtml(header)}</strong>${desc}</li>`;
+          })
+          .join("")}
+      </ul>
     `);
   }
 

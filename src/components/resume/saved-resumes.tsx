@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useResumeStore } from "@/lib/resume/store";
 import { TEMPLATES, type ResumeData } from "@/lib/resume/types";
-import { emptyResume } from "@/lib/resume/sample-data";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { FolderOpen, Trash2, FileText, Loader2, Upload, Download, Clock, Copy } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,8 +36,6 @@ function timeAgo(iso: string): string {
   if (days < 30) return `${days}d ago`;
   return new Date(iso).toLocaleDateString();
 }
-
-// ---------- Saved Resumes dialog ----------
 
 export function SavedResumesDialog() {
   const [open, setOpen] = useState(false);
@@ -139,23 +134,25 @@ export function SavedResumesDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <FolderOpen className="w-3.5 h-3.5" /> My Resumes
-        </Button>
+        <button className="h-9 px-3 gap-1.5 text-xs text-[#cccccc] hover:text-white bg-[#1a1a1a] hover:bg-[#242424] border border-[#2a2a2a] rounded-md font-semibold inline-flex items-center transition-colors">
+          <FolderOpen className="w-3.5 h-3.5 text-[#faff69]" /> My Resumes
+        </button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-[#1a1a1a] border border-[#2a2a2a] text-white p-6 rounded-xl font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
         <DialogHeader>
-          <DialogTitle>Saved Resumes</DialogTitle>
-          <DialogDescription>Load or delete resumes you've saved to this browser session.</DialogDescription>
+          <DialogTitle className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+            <FolderOpen className="w-5 h-5 text-[#faff69]" /> Saved Resumes
+          </DialogTitle>
+          <DialogDescription className="text-xs text-[#888888]">Load, duplicate, or delete your saved draft resumes.</DialogDescription>
         </DialogHeader>
         {loading ? (
           <div className="flex items-center justify-center py-10">
-            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            <Loader2 className="w-5 h-5 animate-spin text-[#faff69]" />
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-10 text-sm text-muted-foreground">
-            <FileText className="w-8 h-8 mx-auto mb-2 opacity-40" />
-            No saved resumes yet. Save one from the editor to see it here.
+          <div className="text-center py-10 text-xs text-[#888888]">
+            <FileText className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#faff69]" />
+            No saved resumes yet. Save one from the editor to view it here.
           </div>
         ) : (
           <ul className="space-y-2">
@@ -164,12 +161,12 @@ export function SavedResumesDialog() {
               return (
                 <li
                   key={r.id}
-                  className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/40 transition-colors group"
+                  className="flex items-center gap-3 rounded-lg border border-[#2a2a2a] bg-[#121212] p-3 hover:border-[#3a3a3a] transition-colors group"
                 >
-                  <div className="w-9 h-12 rounded shrink-0 border" style={{ background: r.accentColor }} />
+                  <div className="w-8 h-10 rounded shrink-0 border border-[#2a2a2a]" style={{ background: r.accentColor }} />
                   <button onClick={() => openResume(r)} className="flex-1 text-left min-w-0">
-                    <p className="text-sm font-medium truncate group-hover:text-teal-700 dark:group-hover:text-teal-300">{r.title}</p>
-                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-0.5">
+                    <p className="text-xs font-bold text-white truncate group-hover:text-[#faff69] transition-colors">{r.title}</p>
+                    <div className="flex items-center gap-2 text-[10px] text-[#888888] font-mono mt-0.5">
                       <span>{tpl?.name || r.template}</span>
                       <span>·</span>
                       <span className="flex items-center gap-1">
@@ -177,27 +174,23 @@ export function SavedResumesDialog() {
                       </span>
                     </div>
                   </button>
-                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8"
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      className="h-8 w-8 rounded-md bg-[#1a1a1a] hover:bg-[#242424] text-[#cccccc] flex items-center justify-center transition-colors"
                       onClick={() => duplicate(r)}
                       disabled={duplicatingId === r.id}
                       title="Duplicate"
                     >
                       {duplicatingId === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Copy className="w-3.5 h-3.5" />}
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
+                    </button>
+                    <button
+                      className="h-8 w-8 rounded-md bg-[#1a1a1a] hover:bg-[#242424] text-red-400 hover:text-red-300 flex items-center justify-center transition-colors"
                       onClick={() => remove(r.id)}
                       disabled={deletingId === r.id}
                       title="Delete"
                     >
                       {deletingId === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                    </Button>
+                    </button>
                   </div>
                 </li>
               );
@@ -208,8 +201,6 @@ export function SavedResumesDialog() {
     </Dialog>
   );
 }
-
-// ---------- Import / Export JSON ----------
 
 export function ImportExportJson() {
   const data = useResumeStore((s) => s.data);
@@ -268,16 +259,14 @@ export function ImportExportJson() {
 
   return (
     <div className="flex gap-2">
-      <Button variant="outline" size="sm" onClick={exportJson} className="gap-1.5">
-        <Download className="w-3.5 h-3.5" /> Export JSON
-      </Button>
+      <button onClick={exportJson} className="h-9 px-3 bg-[#1a1a1a] hover:bg-[#242424] border border-[#2a2a2a] text-[#cccccc] hover:text-white rounded-md text-xs font-semibold gap-1.5 inline-flex items-center transition-colors">
+        <Download className="w-3.5 h-3.5 text-[#faff69]" /> Export JSON
+      </button>
       <label>
         <input type="file" accept="application/json,.json" onChange={importJson} className="hidden" />
-        <Button variant="outline" size="sm" asChild className="gap-1.5 cursor-pointer">
-          <span>
-            <Upload className="w-3.5 h-3.5" /> Import
-          </span>
-        </Button>
+        <span className="h-9 px-3 bg-[#1a1a1a] hover:bg-[#242424] border border-[#2a2a2a] text-[#cccccc] hover:text-white rounded-md text-xs font-semibold gap-1.5 inline-flex items-center transition-colors cursor-pointer">
+          <Upload className="w-3.5 h-3.5 text-[#faff69]" /> Import
+        </span>
       </label>
     </div>
   );

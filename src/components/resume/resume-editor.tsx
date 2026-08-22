@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useResumeStore } from "@/lib/resume/store";
-import { TEMPLATES, FONT_OPTIONS, FONT_SIZE_OPTIONS, ACCENT_PRESETS } from "@/lib/resume/types";
+import { TEMPLATES, FONT_OPTIONS, FONT_SIZE_OPTIONS, ACCENT_PRESETS, type WorkExperience } from "@/lib/resume/types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -31,7 +31,6 @@ import {
   Upload,
   X,
   Sparkles,
-  Loader2,
   ImageIcon,
   User,
   AlignLeft,
@@ -40,21 +39,24 @@ import {
   FolderGit2,
   Award,
   Languages as LanguagesIcon,
-  Layers,
   Lock,
-  Wand2,
   LayoutGrid,
-  Palette,
   Type,
   Check,
   FileText,
   SlidersHorizontal,
   FolderPlus,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SortableList, SortableItem } from "./sortable";
 import { SkillSuggestions } from "./skill-suggestions";
 import { TemplateCard } from "./template-card";
+import { FormattedTextarea } from "./formatted-textarea";
+import { normalizeCustomItem } from "@/lib/resume/template-helpers";
 
 function PhotoUploader() {
   const data = useResumeStore((s) => s.data);
@@ -77,22 +79,22 @@ function PhotoUploader() {
 
   return (
     <div className="flex items-center gap-3 mb-4">
-      <div className="w-16 h-16 rounded-2xl overflow-hidden border border-[#2E2E2E] bg-[#141414] flex items-center justify-center shrink-0">
+      <div className="w-16 h-16 rounded-lg overflow-hidden border border-[#2a2a2a] bg-[#121212] flex items-center justify-center shrink-0">
         {data.personalInfo.photo ? (
           <img src={data.personalInfo.photo} alt="profile" className="w-full h-full object-cover" />
         ) : (
-          <ImageIcon className="w-6 h-6 text-[#888898]" />
+          <ImageIcon className="w-6 h-6 text-[#888888]" />
         )}
       </div>
       <div className="flex flex-col gap-1.5">
         <input ref={fileRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
-        <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} className="h-8 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full">
-          <Upload className="w-3.5 h-3.5 text-[#FF6200]" /> Upload Photo
-        </Button>
+        <button type="button" onClick={() => fileRef.current?.click()} className="h-8 px-3 text-xs border border-[#2a2a2a] bg-[#1a1a1a] text-white hover:bg-[#242424] gap-1.5 rounded-md inline-flex items-center font-semibold transition-colors">
+          <Upload className="w-3.5 h-3.5 text-[#faff69]" /> Upload Photo
+        </button>
         {data.personalInfo.photo && (
-          <Button type="button" variant="ghost" size="sm" onClick={() => updatePersonal({ photo: "" })} className="h-7 text-[11px] text-red-400 hover:text-red-300">
+          <button type="button" onClick={() => updatePersonal({ photo: "" })} className="h-7 text-[11px] text-[#ef4444] hover:underline inline-flex items-center">
             <X className="w-3.5 h-3.5 mr-1" /> Remove
-          </Button>
+          </button>
         )}
       </div>
     </div>
@@ -109,18 +111,18 @@ function ItemActions({ onRemove, onUp, onDown, upDisabled, downDisabled }: {
   return (
     <div className="flex gap-1">
       {onUp && (
-        <Button type="button" size="icon" variant="ghost" onClick={onUp} disabled={upDisabled} className="h-7 w-7 text-[#888898] hover:text-white">
+        <button type="button" onClick={onUp} disabled={upDisabled} className="h-7 w-7 flex items-center justify-center text-[#888888] hover:text-white disabled:opacity-30">
           <ChevronUp className="w-3.5 h-3.5" />
-        </Button>
+        </button>
       )}
       {onDown && (
-        <Button type="button" size="icon" variant="ghost" onClick={onDown} disabled={downDisabled} className="h-7 w-7 text-[#888898] hover:text-white">
+        <button type="button" onClick={onDown} disabled={downDisabled} className="h-7 w-7 flex items-center justify-center text-[#888888] hover:text-white disabled:opacity-30">
           <ChevronDown className="w-3.5 h-3.5" />
-        </Button>
+        </button>
       )}
-      <Button type="button" size="icon" variant="ghost" onClick={onRemove} className="h-7 w-7 text-red-400 hover:text-red-300">
+      <button type="button" onClick={onRemove} className="h-7 w-7 flex items-center justify-center text-[#ef4444] hover:text-red-300">
         <Trash2 className="w-3.5 h-3.5" />
-      </Button>
+      </button>
     </div>
   );
 }
@@ -140,31 +142,31 @@ function DesignTabContent() {
   const currentTemplateObj = TEMPLATES.find((t) => t.id === template) || TEMPLATES[0];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* 1. Template Design Picker */}
-      <div className="p-4 rounded-2xl bg-[#141414] border border-[#2E2E2E] space-y-3">
+      <div className="p-4 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-xs font-mono text-[#9A9AAB]">ACTIVE TEMPLATE DESIGN</Label>
-          <Badge className="bg-[#FF6200]/10 text-[#FF6200] border-[#FF6200]/30 text-[9px] font-mono">
+          <Label className="text-xs font-mono text-[#888888]">ACTIVE TEMPLATE DESIGN</Label>
+          <span className="bg-[#242424] text-[#faff69] border border-[#2a2a2a] text-[9px] font-mono px-2 py-0.5 rounded-full font-bold">
             78 TEMPLATES
-          </Badge>
+          </span>
         </div>
-        <div className="flex items-center justify-between p-3 rounded-xl bg-[#0D0D0D] border border-[#2E2E2E]">
+        <div className="flex items-center justify-between p-3 rounded-lg bg-[#121212] border border-[#2a2a2a]">
           <div>
             <p className="text-xs font-bold text-white">{currentTemplateObj.name}</p>
-            <p className="text-[10px] text-[#888898] font-mono">{currentTemplateObj.tags.join(" • ")}</p>
+            <p className="text-[10px] text-[#888888] font-mono">{currentTemplateObj.tags.join(" • ")}</p>
           </div>
 
           <Dialog>
             <DialogTrigger asChild>
-              <Button size="sm" className="h-8 px-3 text-xs bg-[#FF6200] hover:bg-[#E55700] text-white font-bold rounded-full gap-1.5 shadow-md shadow-[#FF6200]/20">
+              <button className="h-8 px-3 text-xs bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold rounded-md gap-1.5 inline-flex items-center transition-colors">
                 <LayoutGrid className="w-3.5 h-3.5" /> Change Design
-              </Button>
+              </button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl sm:max-w-5xl w-[95vw] bg-[#141414] border-[#2E2E2E] text-white max-h-[85vh] overflow-y-auto p-6 sm:p-8 rounded-3xl">
+            <DialogContent className="max-w-4xl sm:max-w-5xl w-[95vw] bg-[#1a1a1a] border-[#2a2a2a] text-white max-h-[85vh] overflow-y-auto p-6 sm:p-8 rounded-xl">
               <DialogHeader>
-                <DialogTitle className="font-bricolage text-xl font-bold text-white">Choose from 78 Master Templates</DialogTitle>
-                <DialogDescription className="text-xs text-[#888898]">
+                <DialogTitle className="text-xl font-bold text-white tracking-tight">Choose from 78 Master Layouts</DialogTitle>
+                <DialogDescription className="text-xs text-[#888888]">
                   Select any design layout — your resume content stays 100% intact with instant real-time adaptation.
                 </DialogDescription>
               </DialogHeader>
@@ -179,15 +181,15 @@ function DesignTabContent() {
       </div>
 
       {/* 2. Color Palette & Custom Hex Picker */}
-      <div className="p-4 rounded-2xl bg-[#141414] border border-[#2E2E2E] space-y-3">
-        <Label className="text-xs font-mono text-[#9A9AAB]">ACCENT COLOR PALETTE</Label>
+      <div className="p-4 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] space-y-3">
+        <Label className="text-xs font-mono text-[#888888]">ACCENT COLOR PALETTE</Label>
         <div className="flex flex-wrap items-center gap-2">
           {ACCENT_PRESETS.map((hex) => (
             <button
               key={hex}
               onClick={() => setAccentColor(hex)}
               className={`w-7 h-7 rounded-full border flex items-center justify-center transition-all ${
-                accentColor === hex ? "ring-2 ring-[#FF6200] ring-offset-2 ring-offset-[#141414] border-white scale-110" : "border-transparent opacity-80 hover:opacity-100"
+                accentColor === hex ? "ring-2 ring-[#faff69] ring-offset-2 ring-offset-[#1a1a1a] border-white scale-110" : "border-transparent opacity-80 hover:opacity-100"
               }`}
               style={{ backgroundColor: hex }}
             >
@@ -195,30 +197,30 @@ function DesignTabContent() {
             </button>
           ))}
           <div className="flex items-center gap-1.5 ml-auto">
-            <span className="text-[10px] font-mono text-[#888898]">Custom Hex:</span>
+            <span className="text-[10px] font-mono text-[#888888]">Custom Hex:</span>
             <input
               type="color"
               value={accentColor}
               onChange={(e) => setAccentColor(e.target.value)}
-              className="w-8 h-8 rounded-xl border border-[#2E2E2E] bg-transparent cursor-pointer"
+              className="w-8 h-8 rounded-md border border-[#2a2a2a] bg-transparent cursor-pointer"
             />
           </div>
         </div>
       </div>
 
       {/* 3. Typography & Font Size Controls */}
-      <div className="p-4 rounded-2xl bg-[#141414] border border-[#2E2E2E] space-y-4">
+      <div className="p-4 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] space-y-4">
         <div className="space-y-1.5">
-          <Label className="text-xs font-mono text-[#9A9AAB] flex items-center gap-1.5">
-            <Type className="w-3.5 h-3.5 text-[#FF6200]" /> FONT FAMILY SELECTION
+          <Label className="text-xs font-mono text-[#888888] flex items-center gap-1.5">
+            <Type className="w-3.5 h-3.5 text-[#faff69]" /> FONT FAMILY SELECTION
           </Label>
           <select
             value={fontFamily}
             onChange={(e) => setFontFamily(e.target.value)}
-            className="w-full h-10 bg-[#0D0D0D] border border-[#2E2E2E] rounded-xl text-xs text-white px-3 focus:border-[#FF6200] focus:outline-none"
+            className="w-full h-10 bg-[#121212] border border-[#2a2a2a] rounded-md text-xs text-white px-3 focus:border-[#faff69] focus:outline-none"
           >
             {FONT_OPTIONS.map((f) => (
-              <option key={f.id} value={f.id} className="bg-[#141414] text-white">
+              <option key={f.id} value={f.id} className="bg-[#1a1a1a] text-white">
                 {f.label}
               </option>
             ))}
@@ -226,14 +228,14 @@ function DesignTabContent() {
         </div>
 
         <div className="space-y-1.5">
-          <Label className="text-xs font-mono text-[#9A9AAB]">FONT SIZE SCALE ADJUSTMENT</Label>
-          <div className="grid grid-cols-5 gap-1.5 bg-[#0D0D0D] p-1.5 rounded-xl border border-[#2E2E2E]">
+          <Label className="text-xs font-mono text-[#888888]">FONT SIZE SCALE</Label>
+          <div className="grid grid-cols-5 gap-1.5 bg-[#121212] p-1.5 rounded-md border border-[#2a2a2a]">
             {FONT_SIZE_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
                 onClick={() => setFontSize(opt.id)}
-                className={`h-8 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                  fontSize === opt.id ? "bg-[#FF6200] text-white shadow-md shadow-[#FF6200]/20" : "text-[#888898] hover:text-white"
+                className={`h-8 rounded text-[10px] font-bold uppercase transition-all ${
+                  fontSize === opt.id ? "bg-[#faff69] text-[#0a0a0a]" : "text-[#888888] hover:text-white"
                 }`}
               >
                 {opt.label}
@@ -241,6 +243,100 @@ function DesignTabContent() {
             ))}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- SECTION POSITION / ORDER CONTROLS ----------
+function SectionPositionControls({
+  sectionKey,
+  allowColumnPlacement = true,
+}: {
+  sectionKey: string;
+  allowColumnPlacement?: boolean;
+}) {
+  const data = useResumeStore((s) => s.data);
+  const moveSectionOrder = useResumeStore((s) => s.moveSectionOrder);
+  const setSectionPlacement = useResumeStore((s) => s.setSectionPlacement);
+
+  const currentPlacement = data.sectionPlacements?.[sectionKey] || "main";
+
+  return (
+    <div
+      className="flex items-center justify-between gap-2 px-2.5 py-1.5 mb-3 bg-[#161616] border border-[#2a2a2a] rounded-lg text-xs select-none"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#888888] uppercase tracking-wider">
+        <span>Position &amp; Order:</span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        {/* Reorder Shift Up/Down buttons - Icons only */}
+        <div className="flex items-center gap-0.5 bg-[#121212] border border-[#2a2a2a] rounded p-0.5" title="Move section Up / Down in preview sequence">
+          <button
+            type="button"
+            onClick={() => {
+              moveSectionOrder(sectionKey, -1);
+              toast.info("Shifted section upward in preview layout");
+            }}
+            className="w-6 h-6 rounded flex items-center justify-center text-[#888888] hover:text-[#faff69] hover:bg-[#242424] transition-colors"
+            title="Shift Up / Top"
+            aria-label="Shift Up"
+          >
+            <ArrowUp className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              moveSectionOrder(sectionKey, 1);
+              toast.info("Shifted section downward in preview layout");
+            }}
+            className="w-6 h-6 rounded flex items-center justify-center text-[#888888] hover:text-[#faff69] hover:bg-[#242424] transition-colors"
+            title="Shift Down / Bottom"
+            aria-label="Shift Down"
+          >
+            <ArrowDown className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Sidebar vs Main column toggle buttons - Icons only */}
+        {allowColumnPlacement && (
+          <div className="flex items-center gap-0.5 bg-[#121212] border border-[#2a2a2a] rounded p-0.5" title="Shift section to Left (Sidebar) vs Right (Main) column">
+            <button
+              type="button"
+              onClick={() => {
+                setSectionPlacement(sectionKey, "sidebar");
+                toast.info("Shifted section to Left Sidebar column");
+              }}
+              className={`w-6 h-6 rounded flex items-center justify-center transition-all ${
+                currentPlacement === "sidebar" || currentPlacement === "left"
+                  ? "bg-[#faff69] text-[#0a0a0a] shadow-xs"
+                  : "text-[#888888] hover:text-white hover:bg-[#242424]"
+              }`}
+              title="Shift to Left Column (Sidebar)"
+              aria-label="Shift to Left Column"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSectionPlacement(sectionKey, "main");
+                toast.info("Shifted section to Right / Main column");
+              }}
+              className={`w-6 h-6 rounded flex items-center justify-center transition-all ${
+                currentPlacement === "main" || currentPlacement === "right"
+                  ? "bg-[#faff69] text-[#0a0a0a] shadow-xs"
+                  : "text-[#888888] hover:text-white hover:bg-[#242424]"
+              }`}
+              title="Shift to Right Column (Main)"
+              aria-label="Shift to Right Column"
+            >
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -259,84 +355,84 @@ function PersonalInfoEditor() {
     <div className="space-y-4">
       {tpl?.hasPhoto && <PhotoUploader />}
       {contactLocked && (
-        <div className="flex items-center gap-2 p-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-xs text-amber-300">
-          <Lock className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+        <div className="flex items-center gap-2 p-2.5 rounded-md border border-[#faff69]/30 bg-[#1a1a1a] text-xs text-[#faff69]">
+          <Lock className="w-3.5 h-3.5 shrink-0 text-[#faff69]" />
           <span>Contact details are locked on your active plan.</span>
         </div>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <Label className="text-xs text-[#9A9AAB]">Full Name</Label>
-          <Input
+          <Label className="text-xs text-[#888888]">Full Name</Label>
+          <input
             value={p.fullName}
             onChange={(e) => updatePersonal({ fullName: e.target.value })}
             placeholder="John Doe"
-            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+            className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
           />
         </div>
         <div>
-          <Label className="text-xs text-[#9A9AAB]">Job Title / Tagline</Label>
-          <Input
+          <Label className="text-xs text-[#888888]">Job Title / Tagline</Label>
+          <input
             value={p.jobTitle}
             onChange={(e) => updatePersonal({ jobTitle: e.target.value })}
             placeholder="Senior Software Engineer"
-            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+            className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
           />
         </div>
         <div>
-          <Label className="text-xs text-[#9A9AAB]">Email</Label>
-          <Input
+          <Label className="text-xs text-[#888888]">Email</Label>
+          <input
             value={p.email}
             disabled={contactLocked}
             onChange={(e) => updatePersonal({ email: e.target.value })}
             placeholder="john@example.com"
-            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+            className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69] disabled:opacity-50"
           />
         </div>
         <div>
-          <Label className="text-xs text-[#9A9AAB]">Phone</Label>
-          <Input
+          <Label className="text-xs text-[#888888]">Phone</Label>
+          <input
             value={p.phone}
             disabled={contactLocked}
             onChange={(e) => updatePersonal({ phone: e.target.value })}
             placeholder="+91 98765 43210"
-            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+            className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69] disabled:opacity-50"
           />
         </div>
         <div>
-          <Label className="text-xs text-[#9A9AAB]">Location</Label>
-          <Input
+          <Label className="text-xs text-[#888888]">Location</Label>
+          <input
             value={p.location}
             onChange={(e) => updatePersonal({ location: e.target.value })}
             placeholder="Bengaluru, India"
-            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+            className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
           />
         </div>
         <div>
-          <Label className="text-xs text-[#9A9AAB]">LinkedIn URL</Label>
-          <Input
+          <Label className="text-xs text-[#888888]">LinkedIn URL</Label>
+          <input
             value={p.linkedin}
             onChange={(e) => updatePersonal({ linkedin: e.target.value })}
             placeholder="linkedin.com/in/johndoe"
-            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+            className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
           />
         </div>
         <div>
-          <Label className="text-xs text-[#9A9AAB]">GitHub URL</Label>
-          <Input
+          <Label className="text-xs text-[#888888]">GitHub URL</Label>
+          <input
             value={p.github}
             onChange={(e) => updatePersonal({ github: e.target.value })}
             placeholder="github.com/johndoe"
-            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+            className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
           />
         </div>
         <div>
-          <Label className="text-xs text-[#9A9AAB]">Portfolio Website</Label>
-          <Input
+          <Label className="text-xs text-[#888888]">Portfolio Website</Label>
+          <input
             value={p.website}
             onChange={(e) => updatePersonal({ website: e.target.value })}
             placeholder="johndoe.dev"
-            className="bg-[#0D0D0D] border-[#2E2E2E] text-white text-xs rounded-xl focus-visible:ring-[#FF6200]"
+            className="w-full bg-[#121212] border border-[#2a2a2a] text-white text-xs rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
           />
         </div>
       </div>
@@ -351,13 +447,17 @@ function SummaryEditor() {
 
   return (
     <div className="space-y-3">
-      <Textarea
-        value={data.summary}
-        onChange={(e) => setSummary(e.target.value)}
-        rows={5}
-        placeholder="Brief 2-4 sentence overview of your background, core strengths, and career achievements..."
-        className="bg-[#0D0D0D] border-[#2E2E2E] text-xs text-white focus-visible:ring-[#FF6200] rounded-xl p-3"
-      />
+      <SectionPositionControls sectionKey="summary" allowColumnPlacement={true} />
+      <div className="space-y-1.5">
+        <Label className="text-xs text-[#888888]">Professional Summary (Supports Bold, Italic &amp; Metrics)</Label>
+        <FormattedTextarea
+          value={data.summary}
+          onChange={setSummary}
+          rows={4}
+          placeholder="Brief 2-4 sentence overview of your background, core strengths, and career achievements..."
+          label="Summary"
+        />
+      </div>
     </div>
   );
 }
@@ -372,12 +472,13 @@ function ExperienceEditor() {
 
   return (
     <div className="space-y-4">
-      <SortableList
+      <SectionPositionControls sectionKey="experience" allowColumnPlacement={true} />
+      <SortableList<WorkExperience>
         items={data.experience}
         onChange={(next) => useResumeStore.getState().updateData((d) => ({ ...d, experience: next }))}
-        renderItem={(exp, index) => (
+        renderItem={(exp: WorkExperience, index: number) => (
           <SortableItem id={exp.id}>
-            <div className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+            <div className="p-3.5 rounded-lg border border-[#2a2a2a] bg-[#121212] space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-bold text-xs text-white truncate">
                   {exp.position || "Position"} {exp.company ? `@ ${exp.company}` : ""}
@@ -392,30 +493,30 @@ function ExperienceEditor() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <Input
+                <input
                   value={exp.company}
                   onChange={(e) => updateExperience(exp.id, { company: e.target.value })}
                   placeholder="Company Name"
-                  className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
                 />
-                <Input
+                <input
                   value={exp.position}
                   onChange={(e) => updateExperience(exp.id, { position: e.target.value })}
                   placeholder="Job Title"
-                  className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
                 />
-                <Input
+                <input
                   value={exp.startDate}
                   onChange={(e) => updateExperience(exp.id, { startDate: e.target.value })}
                   placeholder="Start Date (e.g. 2022-01)"
-                  className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
                 />
-                <Input
+                <input
                   value={exp.endDate}
                   disabled={exp.current}
                   onChange={(e) => updateExperience(exp.id, { endDate: e.target.value })}
                   placeholder="End Date (e.g. Present)"
-                  className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69] disabled:opacity-50"
                 />
               </div>
 
@@ -424,63 +525,74 @@ function ExperienceEditor() {
                   checked={exp.current}
                   onCheckedChange={(c) => updateExperience(exp.id, { current: Boolean(c) })}
                   id={`curr-${exp.id}`}
-                  className="border-[#FF6200] data-[state=checked]:bg-[#FF6200]"
+                  className="border-[#faff69] data-[state=checked]:bg-[#faff69] data-[state=checked]:text-[#0a0a0a]"
                 />
-                <label htmlFor={`curr-${exp.id}`} className="text-xs text-[#9A9AAB]">
+                <label htmlFor={`curr-${exp.id}`} className="text-xs text-[#888888]">
                   I currently work here
                 </label>
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs text-[#9A9AAB]">Key Achievements &amp; Bullet Points</Label>
+                <Label className="text-xs text-[#888888]">Role Overview / Description</Label>
+                <FormattedTextarea
+                  value={exp.description || ""}
+                  onChange={(v) => updateExperience(exp.id, { description: v })}
+                  placeholder="Overview of your core responsibilities and team scope..."
+                  rows={2}
+                  label="Role Overview"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs text-[#888888]">Key Achievements &amp; Bullet Points (Bold key metrics!)</Label>
                 {exp.achievements.map((ach, i) => (
-                  <div key={i} className="flex gap-2 items-center">
-                    <Input
-                      value={ach}
-                      onChange={(e) => {
-                        const next = [...exp.achievements];
-                        next[i] = e.target.value;
-                        updateExperience(exp.id, { achievements: next });
-                      }}
-                      className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
-                    />
-                    <Button
+                  <div key={i} className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <FormattedTextarea
+                        value={ach}
+                        onChange={(v) => {
+                          const next = [...exp.achievements];
+                          next[i] = v;
+                          updateExperience(exp.id, { achievements: next });
+                        }}
+                        placeholder="Action verb + quantified metric + outcome..."
+                        rows={2}
+                        minHeight="54px"
+                        label={`Bullet #${i + 1}`}
+                      />
+                    </div>
+                    <button
                       type="button"
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-red-400 hover:text-red-300 shrink-0"
+                      className="h-8 w-8 text-red-400 hover:text-red-300 shrink-0 flex items-center justify-center rounded hover:bg-[#1a1a1a] mt-1"
                       onClick={() => {
                         const next = exp.achievements.filter((_, idx) => idx !== i);
                         updateExperience(exp.id, { achievements: next });
                       }}
                     >
                       <X className="w-3.5 h-3.5" />
-                    </Button>
+                    </button>
                   </div>
                 ))}
-                <Button
+                <button
                   type="button"
-                  variant="outline"
-                  size="sm"
                   onClick={() => updateExperience(exp.id, { achievements: [...exp.achievements, ""] })}
-                  className="h-8 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] rounded-full gap-1"
+                  className="h-8 px-3 text-xs border border-[#2a2a2a] bg-[#1a1a1a] text-white hover:bg-[#242424] rounded-md gap-1 inline-flex items-center font-semibold transition-colors"
                 >
-                  <Plus className="w-3.5 h-3.5 text-[#FF6200]" /> Add Bullet Point
-                </Button>
+                  <Plus className="w-3.5 h-3.5 text-[#faff69]" /> Add Bullet Point
+                </button>
               </div>
             </div>
           </SortableItem>
         )}
       />
 
-      <Button
+      <button
         type="button"
-        variant="outline"
         onClick={addExperience}
-        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+        className="w-full h-10 text-xs border border-[#2a2a2a] bg-[#1a1a1a] text-white hover:bg-[#242424] gap-1.5 rounded-md inline-flex items-center justify-center font-semibold transition-colors"
       >
-        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Work Experience
-      </Button>
+        <Plus className="w-4 h-4 text-[#faff69]" /> Add Work Experience
+      </button>
     </div>
   );
 }
@@ -494,8 +606,9 @@ function EducationEditor() {
 
   return (
     <div className="space-y-4">
+      <SectionPositionControls sectionKey="education" allowColumnPlacement={true} />
       {data.education.map((edu) => (
-        <div key={edu.id} className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+        <div key={edu.id} className="p-3.5 rounded-lg border border-[#2a2a2a] bg-[#121212] space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="font-bold text-xs text-white truncate">
               {edu.degree || "Degree"} {edu.institution ? `@ ${edu.institution}` : ""}
@@ -504,54 +617,64 @@ function EducationEditor() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <Input
+            <input
               value={edu.institution}
               onChange={(e) => updateEducation(edu.id, { institution: e.target.value })}
               placeholder="University / Institution"
-              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
-            <Input
+            <input
               value={edu.degree}
               onChange={(e) => updateEducation(edu.id, { degree: e.target.value })}
               placeholder="Degree (e.g. B.Tech)"
-              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
-            <Input
+            <input
               value={edu.field}
               onChange={(e) => updateEducation(edu.id, { field: e.target.value })}
               placeholder="Field of Study / Major"
-              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
-            <Input
+            <input
               value={edu.gpa}
               onChange={(e) => updateEducation(edu.id, { gpa: e.target.value })}
               placeholder="GPA / Percentage"
-              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
-            <Input
+            <input
               value={edu.startDate}
               onChange={(e) => updateEducation(edu.id, { startDate: e.target.value })}
               placeholder="Start Date (2018-08)"
-              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
-            <Input
+            <input
               value={edu.endDate}
               onChange={(e) => updateEducation(edu.id, { endDate: e.target.value })}
               placeholder="End Date (2022-05)"
-              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs text-[#888888]">Education Details &amp; Honors</Label>
+            <FormattedTextarea
+              value={edu.description || ""}
+              onChange={(v) => updateEducation(edu.id, { description: v })}
+              placeholder="Academic achievements, thesis, coursework, or honors..."
+              rows={2}
+              label="Education Details"
             />
           </div>
         </div>
       ))}
 
-      <Button
+      <button
         type="button"
-        variant="outline"
         onClick={addEducation}
-        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+        className="w-full h-10 text-xs border border-[#2a2a2a] bg-[#1a1a1a] text-white hover:bg-[#242424] gap-1.5 rounded-md inline-flex items-center justify-center font-semibold transition-colors"
       >
-        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Education Entry
-      </Button>
+        <Plus className="w-4 h-4 text-[#faff69]" /> Add Education Entry
+      </button>
     </div>
   );
 }
@@ -565,14 +688,15 @@ function SkillsEditor() {
 
   return (
     <div className="space-y-4">
+      <SectionPositionControls sectionKey="skills" allowColumnPlacement={true} />
       {data.skills.map((cat) => (
-        <div key={cat.id} className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+        <div key={cat.id} className="p-3.5 rounded-lg border border-[#2a2a2a] bg-[#121212] space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <Input
+            <input
               value={cat.category}
               onChange={(e) => updateSkillCategory(cat.id, { category: e.target.value })}
               placeholder="Category Name (e.g. Programming Languages)"
-              className="bg-[#141414] border-[#2E2E2E] text-xs font-bold text-white rounded-xl"
+              className="flex-1 bg-[#1a1a1a] border border-[#2a2a2a] text-xs font-bold text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
             <ItemActions onRemove={() => removeSkillCategory(cat.id)} />
           </div>
@@ -589,7 +713,7 @@ function SkillsEditor() {
 
           <div className="flex flex-wrap gap-1.5 pt-1">
             {cat.items.map((skill, i) => (
-              <Badge key={i} className="bg-[#FF6200]/10 text-[#FF6200] border-[#FF6200]/30 text-xs gap-1 py-1 px-2.5">
+              <span key={i} className="bg-[#1a1a1a] text-[#faff69] border border-[#2a2a2a] text-xs gap-1 py-1 px-2.5 rounded-md inline-flex items-center font-mono">
                 {skill}
                 <button
                   type="button"
@@ -601,20 +725,19 @@ function SkillsEditor() {
                 >
                   <X className="w-3 h-3" />
                 </button>
-              </Badge>
+              </span>
             ))}
           </div>
         </div>
       ))}
 
-      <Button
+      <button
         type="button"
-        variant="outline"
         onClick={addSkillCategory}
-        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+        className="w-full h-10 text-xs border border-[#2a2a2a] bg-[#1a1a1a] text-white hover:bg-[#242424] gap-1.5 rounded-md inline-flex items-center justify-center font-semibold transition-colors"
       >
-        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Skill Category
-      </Button>
+        <Plus className="w-4 h-4 text-[#faff69]" /> Add Skill Category
+      </button>
     </div>
   );
 }
@@ -628,46 +751,49 @@ function ProjectsEditor() {
 
   return (
     <div className="space-y-4">
+      <SectionPositionControls sectionKey="projects" allowColumnPlacement={true} />
       {data.projects.map((proj) => (
-        <div key={proj.id} className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+        <div key={proj.id} className="p-3.5 rounded-lg border border-[#2a2a2a] bg-[#121212] space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="font-bold text-xs text-white truncate">{proj.name || "Project Title"}</span>
             <ItemActions onRemove={() => removeProject(proj.id)} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <Input
+            <input
               value={proj.name}
               onChange={(e) => updateProject(proj.id, { name: e.target.value })}
               placeholder="Project Name"
-              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
-            <Input
+            <input
               value={proj.link}
               onChange={(e) => updateProject(proj.id, { link: e.target.value })}
               placeholder="Project Link / GitHub"
-              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
           </div>
 
-          <Textarea
-            value={proj.description}
-            onChange={(e) => updateProject(proj.id, { description: e.target.value })}
-            rows={3}
-            placeholder="Project details & key features..."
-            className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl p-2.5"
-          />
+          <div className="space-y-1.5">
+            <Label className="text-xs text-[#888888]">Project Description &amp; Highlights</Label>
+            <FormattedTextarea
+              value={proj.description}
+              onChange={(v) => updateProject(proj.id, { description: v })}
+              rows={3}
+              placeholder="Project details, key features, and quantified results..."
+              label="Project Scope"
+            />
+          </div>
         </div>
       ))}
 
-      <Button
+      <button
         type="button"
-        variant="outline"
         onClick={addProject}
-        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+        className="w-full h-10 text-xs border border-[#2a2a2a] bg-[#1a1a1a] text-white hover:bg-[#242424] gap-1.5 rounded-md inline-flex items-center justify-center font-semibold transition-colors"
       >
-        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Project Entry
-      </Button>
+        <Plus className="w-4 h-4 text-[#faff69]" /> Add Project Entry
+      </button>
     </div>
   );
 }
@@ -681,44 +807,44 @@ function CertificationsEditor() {
 
   return (
     <div className="space-y-4">
+      <SectionPositionControls sectionKey="certifications" allowColumnPlacement={true} />
       {data.certifications.map((cert) => (
-        <div key={cert.id} className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+        <div key={cert.id} className="p-3.5 rounded-lg border border-[#2a2a2a] bg-[#121212] space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="font-bold text-xs text-white truncate">{cert.name || "Certification"}</span>
             <ItemActions onRemove={() => removeCertification(cert.id)} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            <Input
+            <input
               value={cert.name}
               onChange={(e) => updateCertification(cert.id, { name: e.target.value })}
               placeholder="Certification Name"
-              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
-            <Input
+            <input
               value={cert.issuer}
               onChange={(e) => updateCertification(cert.id, { issuer: e.target.value })}
               placeholder="Issuer (e.g. AWS)"
-              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
-            <Input
+            <input
               value={cert.date}
               onChange={(e) => updateCertification(cert.id, { date: e.target.value })}
               placeholder="Date (e.g. 2023-05)"
-              className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
           </div>
         </div>
       ))}
 
-      <Button
+      <button
         type="button"
-        variant="outline"
         onClick={addCertification}
-        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+        className="w-full h-10 text-xs border border-[#2a2a2a] bg-[#1a1a1a] text-white hover:bg-[#242424] gap-1.5 rounded-md inline-flex items-center justify-center font-semibold transition-colors"
       >
-        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Certification Entry
-      </Button>
+        <Plus className="w-4 h-4 text-[#faff69]" /> Add Certification Entry
+      </button>
     </div>
   );
 }
@@ -732,32 +858,32 @@ function LanguagesEditor() {
 
   return (
     <div className="space-y-4">
+      <SectionPositionControls sectionKey="languages" allowColumnPlacement={true} />
       {data.languages.map((lang) => (
-        <div key={lang.id} className="p-3 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] flex items-center gap-2">
-          <Input
+        <div key={lang.id} className="p-3 rounded-lg border border-[#2a2a2a] bg-[#121212] flex items-center gap-2">
+          <input
             value={lang.name}
             onChange={(e) => updateLanguage(lang.id, { name: e.target.value })}
             placeholder="Language (e.g. English)"
-            className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            className="flex-1 bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
           />
-          <Input
+          <input
             value={lang.proficiency}
             onChange={(e) => updateLanguage(lang.id, { proficiency: e.target.value })}
             placeholder="Proficiency (e.g. Native / Fluent)"
-            className="bg-[#141414] border-[#2E2E2E] text-xs text-white rounded-xl"
+            className="flex-1 bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
           />
           <ItemActions onRemove={() => removeLanguage(lang.id)} />
         </div>
       ))}
 
-      <Button
+      <button
         type="button"
-        variant="outline"
         onClick={addLanguage}
-        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+        className="w-full h-10 text-xs border border-[#2a2a2a] bg-[#1a1a1a] text-white hover:bg-[#242424] gap-1.5 rounded-md inline-flex items-center justify-center font-semibold transition-colors"
       >
-        <Plus className="w-4 h-4 text-[#FF6200]" /> Add Language
-      </Button>
+        <Plus className="w-4 h-4 text-[#faff69]" /> Add Language
+      </button>
     </div>
   );
 }
@@ -771,145 +897,181 @@ function CustomSectionsEditor() {
 
   return (
     <div className="space-y-4">
+      <SectionPositionControls sectionKey="custom" allowColumnPlacement={true} />
+
       {data.customSections?.map((sec) => (
-        <div key={sec.id} className="p-3.5 rounded-xl border border-[#2E2E2E] bg-[#0D0D0D] space-y-3">
+        <div key={sec.id} className="p-3.5 rounded-lg border border-[#2a2a2a] bg-[#121212] space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <Input
+            <input
               value={sec.title}
               onChange={(e) => updateCustomSection(sec.id, { title: e.target.value })}
               placeholder="Custom Section Header (e.g. Publications / Volunteer / Awards)"
-              className="bg-[#141414] border-[#2E2E2E] text-xs font-bold text-white rounded-xl"
+              className="flex-1 bg-[#1a1a1a] border border-[#2a2a2a] text-xs font-bold text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
             />
             <ItemActions onRemove={() => removeCustomSection(sec.id)} />
           </div>
 
-          <div className="space-y-2">
-            {sec.items?.map((item, i) => (
-              <div key={item.id || i} className="p-2.5 rounded-xl bg-[#141414] border border-[#2E2E2E] space-y-2">
-                <div className="flex justify-between items-center gap-2">
-                  <Input
-                    value={item.title}
-                    onChange={(e) => {
+          <div className="space-y-3">
+            {sec.items?.map((rawItem, i) => {
+              const item = normalizeCustomItem(rawItem);
+              return (
+                <div key={item.id || i} className="p-3 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] space-y-2.5">
+                  <div className="flex justify-between items-center gap-2">
+                    <input
+                      value={item.title}
+                      onChange={(e) => {
+                        const next = [...sec.items];
+                        next[i] = { ...item, title: e.target.value };
+                        updateCustomSection(sec.id, { items: next });
+                      }}
+                      placeholder="Item Title (e.g. Award Name / Publication Title)"
+                      className="flex-1 bg-[#121212] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
+                    />
+                    <button
+                      type="button"
+                      className="h-7 w-7 text-red-400 hover:text-red-300 shrink-0 flex items-center justify-center rounded hover:bg-[#242424]"
+                      onClick={() => {
+                        const next = sec.items.filter((_, idx) => idx !== i);
+                        updateCustomSection(sec.id, { items: next });
+                      }}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      value={item.subtitle || ""}
+                      onChange={(e) => {
+                        const next = [...sec.items];
+                        next[i] = { ...item, subtitle: e.target.value };
+                        updateCustomSection(sec.id, { items: next });
+                      }}
+                      placeholder="Subtitle / Organization (Optional)"
+                      className="w-full bg-[#121212] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
+                    />
+                    <input
+                      value={item.date || ""}
+                      onChange={(e) => {
+                        const next = [...sec.items];
+                        next[i] = { ...item, date: e.target.value };
+                        updateCustomSection(sec.id, { items: next });
+                      }}
+                      placeholder="Date / Year (e.g. 2024)"
+                      className="w-full bg-[#121212] border border-[#2a2a2a] text-xs text-white rounded-md h-9 px-3 outline-none focus:border-[#faff69]"
+                    />
+                  </div>
+
+                  <FormattedTextarea
+                    value={item.description || ""}
+                    onChange={(v) => {
                       const next = [...sec.items];
-                      next[i] = { ...next[i], title: e.target.value };
+                      next[i] = { ...item, description: v };
                       updateCustomSection(sec.id, { items: next });
                     }}
-                    placeholder="Item Title (e.g. Award Name / Publication)"
-                    className="bg-[#0D0D0D] border-[#2E2E2E] text-xs text-white rounded-xl"
+                    placeholder="Details, abstract, or bullet points..."
+                    rows={2}
+                    label="Description"
                   />
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7 text-red-400 hover:text-red-300 shrink-0"
-                    onClick={() => {
-                      const next = sec.items.filter((_, idx) => idx !== i);
-                      updateCustomSection(sec.id, { items: next });
-                    }}
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </Button>
                 </div>
+              );
+            })}
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    value={item.subtitle || ""}
-                    onChange={(e) => {
-                      const next = [...sec.items];
-                      next[i] = { ...next[i], subtitle: e.target.value };
-                      updateCustomSection(sec.id, { items: next });
-                    }}
-                    placeholder="Subtitle / Publisher (Optional)"
-                    className="bg-[#0D0D0D] border-[#2E2E2E] text-xs text-white rounded-xl"
-                  />
-                  <Input
-                    value={item.date || ""}
-                    onChange={(e) => {
-                      const next = [...sec.items];
-                      next[i] = { ...next[i], date: e.target.value };
-                      updateCustomSection(sec.id, { items: next });
-                    }}
-                    placeholder="Date / Year (Optional)"
-                    className="bg-[#0D0D0D] border-[#2E2E2E] text-xs text-white rounded-xl"
-                  />
-                </div>
-
-                <Textarea
-                  value={item.description || ""}
-                  onChange={(e) => {
-                    const next = [...sec.items];
-                    next[i] = { ...next[i], description: e.target.value };
-                    updateCustomSection(sec.id, { items: next });
-                  }}
-                  rows={2}
-                  placeholder="Details, abstract, or bullet points..."
-                  className="bg-[#0D0D0D] border-[#2E2E2E] text-xs text-white rounded-xl p-2.5 resize-none"
-                />
-              </div>
-            ))}
-
-            <Button
+            <button
               type="button"
-              variant="outline"
-              size="sm"
               onClick={() => {
                 const newItem = { id: `item-${Date.now()}`, title: "", subtitle: "", date: "", description: "" };
                 updateCustomSection(sec.id, { items: [...(sec.items || []), newItem] });
               }}
-              className="h-8 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] rounded-full gap-1"
+              className="h-8 px-3 text-xs border border-[#2a2a2a] bg-[#1a1a1a] text-white hover:bg-[#242424] rounded-md gap-1 inline-flex items-center font-semibold transition-colors"
             >
-              <Plus className="w-3.5 h-3.5 text-[#FF6200]" /> Add Custom Item
-            </Button>
+              <Plus className="w-3.5 h-3.5 text-[#faff69]" /> Add Custom Item
+            </button>
           </div>
         </div>
       ))}
 
-      <Button
+      <button
         type="button"
-        variant="outline"
         onClick={addCustomSection}
-        className="w-full h-10 text-xs border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#1A1A1A] gap-1.5 rounded-full"
+        className="w-full h-10 text-xs border border-[#2a2a2a] bg-[#1a1a1a] text-white hover:bg-[#242424] gap-1.5 rounded-md inline-flex items-center justify-center font-semibold transition-colors"
       >
-        <Plus className="w-4 h-4 text-[#FF6200]" /> Add New Custom Section
-      </Button>
+        <Plus className="w-4 h-4 text-[#faff69]" /> Add New Custom Section
+      </button>
     </div>
   );
 }
 
 // ---------- MAIN CONTAINER WITH TABS ----------
-export function ResumeEditor() {
+export function ResumeEditor({
+  activeSection,
+  highlightedSection,
+}: {
+  activeSection?: string | null;
+  highlightedSection?: string | null;
+} = {}) {
   const [editorTab, setEditorTab] = useState<"content" | "design">("content");
+  const [openSections, setOpenSections] = useState<string[]>([
+    "personal",
+    "summary",
+    "experience",
+    "skills",
+  ]);
+
+  // Expand section if activeSection changes
+  useEffect(() => {
+    if (activeSection) {
+      setEditorTab("content");
+      setOpenSections((prev) =>
+        prev.includes(activeSection) ? prev : [...prev, activeSection]
+      );
+    }
+  }, [activeSection]);
+
+  const isSecHighlighted = (id: string) => highlightedSection === id;
 
   return (
     <div className="space-y-4 text-left">
-      
       {/* Top Tab Switcher: Content vs Design */}
-      <div className="grid grid-cols-2 gap-1 p-1 bg-[#141414] border border-[#2E2E2E] rounded-full text-xs font-semibold">
+      <div className="grid grid-cols-2 gap-1 p-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded-md text-xs font-semibold">
         <button
           onClick={() => setEditorTab("content")}
-          className={`py-2 px-3 rounded-full flex items-center justify-center gap-2 transition-all ${
-            editorTab === "content" ? "bg-[#FF6200] text-white shadow-md shadow-[#FF6200]/20 font-bold" : "text-[#888898] hover:text-white"
+          className={`py-2 px-3 rounded-md flex items-center justify-center gap-2 transition-all ${
+            editorTab === "content" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "text-[#888888] hover:text-white"
           }`}
         >
           <FileText className="w-3.5 h-3.5" /> 1. Resume Content
         </button>
         <button
           onClick={() => setEditorTab("design")}
-          className={`py-2 px-3 rounded-full flex items-center justify-center gap-2 transition-all ${
-            editorTab === "design" ? "bg-[#FF6200] text-white shadow-md shadow-[#FF6200]/20 font-bold" : "text-[#888898] hover:text-white"
+          className={`py-2 px-3 rounded-md flex items-center justify-center gap-2 transition-all ${
+            editorTab === "design" ? "bg-[#faff69] text-[#0a0a0a] font-bold" : "text-[#888888] hover:text-white"
           }`}
         >
           <SlidersHorizontal className="w-3.5 h-3.5" /> 2. Design &amp; Fonts
         </button>
       </div>
 
-      {/* TAB 1: CONTENT EDITOR (9 FULL SECTIONS) */}
+      {/* TAB 1: CONTENT EDITOR */}
       {editorTab === "content" && (
-        <Accordion type="multiple" defaultValue={["personal", "summary", "experience", "skills"]} className="space-y-3">
-          <AccordionItem value="personal" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+        <Accordion
+          type="multiple"
+          value={openSections}
+          onValueChange={setOpenSections}
+          className="space-y-3"
+        >
+          <AccordionItem
+            id="editor-section-personal"
+            value="personal"
+            className={`border bg-[#1a1a1a] rounded-xl px-4 py-1 transition-all duration-300 ${
+              isSecHighlighted("personal")
+                ? "border-[#faff69] ring-2 ring-[#faff69]/60 shadow-[0_0_20px_rgba(250,255,105,0.25)]"
+                : "border-[#2a2a2a]"
+            }`}
+          >
             <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
               <span className="flex items-center gap-2">
-                <User className="w-4 h-4 text-[#FF6200]" /> Personal Information
+                <User className="w-4 h-4 text-[#faff69]" /> Personal Information
               </span>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-4">
@@ -917,10 +1079,18 @@ export function ResumeEditor() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="summary" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+          <AccordionItem
+            id="editor-section-summary"
+            value="summary"
+            className={`border bg-[#1a1a1a] rounded-xl px-4 py-1 transition-all duration-300 ${
+              isSecHighlighted("summary")
+                ? "border-[#faff69] ring-2 ring-[#faff69]/60 shadow-[0_0_20px_rgba(250,255,105,0.25)]"
+                : "border-[#2a2a2a]"
+            }`}
+          >
             <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
               <span className="flex items-center gap-2">
-                <AlignLeft className="w-4 h-4 text-[#FF6200]" /> Professional Summary
+                <AlignLeft className="w-4 h-4 text-[#faff69]" /> Professional Summary
               </span>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-4">
@@ -928,10 +1098,18 @@ export function ResumeEditor() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="experience" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+          <AccordionItem
+            id="editor-section-experience"
+            value="experience"
+            className={`border bg-[#1a1a1a] rounded-xl px-4 py-1 transition-all duration-300 ${
+              isSecHighlighted("experience")
+                ? "border-[#faff69] ring-2 ring-[#faff69]/60 shadow-[0_0_20px_rgba(250,255,105,0.25)]"
+                : "border-[#2a2a2a]"
+            }`}
+          >
             <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
               <span className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-[#FF6200]" /> Work Experience
+                <Briefcase className="w-4 h-4 text-[#faff69]" /> Work Experience
               </span>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-4">
@@ -939,10 +1117,18 @@ export function ResumeEditor() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="education" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+          <AccordionItem
+            id="editor-section-education"
+            value="education"
+            className={`border bg-[#1a1a1a] rounded-xl px-4 py-1 transition-all duration-300 ${
+              isSecHighlighted("education")
+                ? "border-[#faff69] ring-2 ring-[#faff69]/60 shadow-[0_0_20px_rgba(250,255,105,0.25)]"
+                : "border-[#2a2a2a]"
+            }`}
+          >
             <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
               <span className="flex items-center gap-2">
-                <GraduationCap className="w-4 h-4 text-[#FF6200]" /> Education &amp; Credentials
+                <GraduationCap className="w-4 h-4 text-[#faff69]" /> Education &amp; Credentials
               </span>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-4">
@@ -950,10 +1136,18 @@ export function ResumeEditor() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="skills" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+          <AccordionItem
+            id="editor-section-skills"
+            value="skills"
+            className={`border bg-[#1a1a1a] rounded-xl px-4 py-1 transition-all duration-300 ${
+              isSecHighlighted("skills")
+                ? "border-[#faff69] ring-2 ring-[#faff69]/60 shadow-[0_0_20px_rgba(250,255,105,0.25)]"
+                : "border-[#2a2a2a]"
+            }`}
+          >
             <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
               <span className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#FF6200]" /> Technical &amp; Core Skills
+                <Sparkles className="w-4 h-4 text-[#faff69]" /> Technical &amp; Core Skills
               </span>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-4">
@@ -961,10 +1155,18 @@ export function ResumeEditor() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="projects" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+          <AccordionItem
+            id="editor-section-projects"
+            value="projects"
+            className={`border bg-[#1a1a1a] rounded-xl px-4 py-1 transition-all duration-300 ${
+              isSecHighlighted("projects")
+                ? "border-[#faff69] ring-2 ring-[#faff69]/60 shadow-[0_0_20px_rgba(250,255,105,0.25)]"
+                : "border-[#2a2a2a]"
+            }`}
+          >
             <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
               <span className="flex items-center gap-2">
-                <FolderGit2 className="w-4 h-4 text-[#FF6200]" /> Featured Projects
+                <FolderGit2 className="w-4 h-4 text-[#faff69]" /> Featured Projects
               </span>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-4">
@@ -972,10 +1174,18 @@ export function ResumeEditor() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="certifications" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+          <AccordionItem
+            id="editor-section-certifications"
+            value="certifications"
+            className={`border bg-[#1a1a1a] rounded-xl px-4 py-1 transition-all duration-300 ${
+              isSecHighlighted("certifications")
+                ? "border-[#faff69] ring-2 ring-[#faff69]/60 shadow-[0_0_20px_rgba(250,255,105,0.25)]"
+                : "border-[#2a2a2a]"
+            }`}
+          >
             <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
               <span className="flex items-center gap-2">
-                <Award className="w-4 h-4 text-[#FF6200]" /> Certifications &amp; Licenses
+                <Award className="w-4 h-4 text-[#faff69]" /> Certifications &amp; Licenses
               </span>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-4">
@@ -983,10 +1193,18 @@ export function ResumeEditor() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="languages" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+          <AccordionItem
+            id="editor-section-languages"
+            value="languages"
+            className={`border bg-[#1a1a1a] rounded-xl px-4 py-1 transition-all duration-300 ${
+              isSecHighlighted("languages")
+                ? "border-[#faff69] ring-2 ring-[#faff69]/60 shadow-[0_0_20px_rgba(250,255,105,0.25)]"
+                : "border-[#2a2a2a]"
+            }`}
+          >
             <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
               <span className="flex items-center gap-2">
-                <LanguagesIcon className="w-4 h-4 text-[#FF6200]" /> Languages
+                <LanguagesIcon className="w-4 h-4 text-[#faff69]" /> Languages
               </span>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-4">
@@ -994,10 +1212,18 @@ export function ResumeEditor() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="custom" className="border border-[#2E2E2E] bg-[#141414] rounded-2xl px-4 py-1">
+          <AccordionItem
+            id="editor-section-custom"
+            value="custom"
+            className={`border bg-[#1a1a1a] rounded-xl px-4 py-1 transition-all duration-300 ${
+              isSecHighlighted("custom")
+                ? "border-[#faff69] ring-2 ring-[#faff69]/60 shadow-[0_0_20px_rgba(250,255,105,0.25)]"
+                : "border-[#2a2a2a]"
+            }`}
+          >
             <AccordionTrigger className="hover:no-underline text-xs font-bold text-white py-3">
               <span className="flex items-center gap-2">
-                <FolderPlus className="w-4 h-4 text-[#FF6200]" /> Custom Sections (Volunteer, Awards, etc.)
+                <FolderPlus className="w-4 h-4 text-[#faff69]" /> Custom Sections (Volunteer, Awards, etc.)
               </span>
             </AccordionTrigger>
             <AccordionContent className="pt-2 pb-4">

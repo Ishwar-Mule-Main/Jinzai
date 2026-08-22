@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,8 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Download, FileText, CheckCircle2, Loader2, Eye, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { ResumeRenderer } from "./resume-renderer";
@@ -31,13 +29,15 @@ export function PdfPreviewDialog({
   font: string;
   template: string;
 }) {
+  const previewRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
+    if (!previewRef.current) return;
     setDownloading(true);
     try {
       toast.info("Generating high-precision vector ATS PDF...");
-      await downloadPdfDirectly(data, font, template);
+      await downloadPdfDirectly(previewRef.current, data.personalInfo.fullName || "Resume");
       toast.success("Resume PDF downloaded successfully!");
       onOpenChange(false);
     } catch {
@@ -49,66 +49,65 @@ export function PdfPreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl sm:max-w-5xl w-[95vw] max-h-[92vh] flex flex-col bg-[#141414] border border-[#2E2E2E] text-white p-6 sm:p-8">
+      <DialogContent className="max-w-4xl sm:max-w-5xl w-[95vw] max-h-[92vh] flex flex-col bg-[#1a1a1a] border border-[#2a2a2a] text-white p-6 sm:p-8 rounded-xl font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
         <DialogHeader className="space-y-1.5 shrink-0">
-          <DialogTitle className="flex items-center gap-2.5 text-xl sm:text-2xl font-bold text-white">
-            <div className="w-9 h-9 rounded-xl bg-[#FF6200]/10 border border-[#FF6200]/30 flex items-center justify-center">
-              <Eye className="w-5 h-5 text-[#FF6200]" />
+          <DialogTitle className="flex items-center gap-2.5 text-xl sm:text-2xl font-bold text-white tracking-tight">
+            <div className="w-8 h-8 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69]">
+              <Eye className="w-4 h-4" />
             </div>
             PDF Export Preview
           </DialogTitle>
-          <DialogDescription className="text-[#888898] text-xs sm:text-sm">
-            Review how your resume will look when downloaded. Click <strong className="text-white">Export / Download Now</strong> to save the vector PDF.
+          <DialogDescription className="text-[#888888] text-xs">
+            Review how your resume will render when downloaded. Click <strong className="text-white">Download PDF</strong> to save vector document.
           </DialogDescription>
         </DialogHeader>
 
         {/* Status Pills */}
-        <div className="flex flex-wrap items-center gap-2 py-2 border-b border-[#2E2E2E] shrink-0">
-          <Badge className="bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/30 gap-1 text-[11px]">
+        <div className="flex flex-wrap items-center gap-2 py-2 border-b border-[#2a2a2a] shrink-0 font-mono text-[11px]">
+          <span className="bg-[#121212] text-[#22c55e] border border-[#2a2a2a] px-2.5 py-1 rounded-md inline-flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5" /> 100% ATS Vector Compliant
-          </Badge>
-          <Badge className="bg-[#1A1A1A] text-[#888898] border border-[#2E2E2E] gap-1 text-[11px] font-mono">
-            <FileText className="w-3.5 h-3.5 text-[#FF6200]" /> A4 Standard Format
-          </Badge>
-          <Badge className="bg-[#FF6200]/10 text-[#FF6200] border border-[#FF6200]/30 gap-1 text-[11px]">
+          </span>
+          <span className="bg-[#121212] text-[#cccccc] border border-[#2a2a2a] px-2.5 py-1 rounded-md inline-flex items-center gap-1.5">
+            <FileText className="w-3.5 h-3.5 text-[#faff69]" /> A4 Standard Format
+          </span>
+          <span className="bg-[#121212] text-[#faff69] border border-[#2a2a2a] px-2.5 py-1 rounded-md inline-flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" /> High Precision Render
-          </Badge>
+          </span>
         </div>
 
         {/* Live A4 Preview Container */}
-        <div className="flex-1 overflow-y-auto min-h-[380px] max-h-[550px] my-3 p-4 bg-[#0A0A0B] rounded-2xl border border-[#2E2E2E] flex justify-center items-start">
-          <div className="bg-white text-black shadow-2xl rounded-sm overflow-hidden w-full max-w-[700px] border border-gray-300 transform scale-[0.90] origin-top transition-all">
-            <ResumeRenderer data={data} accent={accent} font={font} template={template} />
+        <div className="flex-1 overflow-y-auto min-h-[380px] max-h-[550px] my-3 p-4 bg-[#0a0a0a] rounded-xl border border-[#2a2a2a] flex justify-center items-start">
+          <div ref={previewRef} className="bg-white text-black shadow-2xl rounded-sm overflow-hidden w-full max-w-[700px] border border-gray-300 transform scale-[0.90] origin-top transition-all">
+            <ResumeRenderer data={data} accent={accent} font={font} template={template as any} />
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between gap-3 pt-3 border-t border-[#2E2E2E] shrink-0">
-          <Button
-            variant="outline"
+        <div className="flex items-center justify-between gap-3 pt-3 border-t border-[#2a2a2a] shrink-0">
+          <button
             onClick={() => onOpenChange(false)}
-            className="h-11 px-5 border-[#2E2E2E] bg-[#141414] text-white hover:bg-[#222222] rounded-full text-xs font-semibold"
+            className="h-10 px-5 border border-[#2a2a2a] bg-[#121212] hover:bg-[#242424] text-white rounded-md text-xs font-semibold transition-colors"
           >
             Cancel
-          </Button>
+          </button>
 
-          <Button
+          <button
             onClick={handleDownload}
             disabled={downloading}
-            className="h-11 px-8 gap-2 bg-[#FF6200] hover:bg-[#E55700] text-white font-bold rounded-full shadow-xl shadow-[#FF6200]/30 hover:shadow-[#FF6200]/50 text-sm transition-all duration-300"
+            className="h-10 px-6 gap-2 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold rounded-md text-xs transition-colors inline-flex items-center justify-center disabled:opacity-50"
           >
             {downloading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Generating Vector PDF...
+                Generating Vector PDF…
               </>
             ) : (
               <>
                 <Download className="w-4 h-4" />
-                Export / Download Now →
+                Download PDF Now
               </>
             )}
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

@@ -58,7 +58,15 @@ export function resumeToText(data: ResumeData): string {
   for (const cs of data.customSections) {
     if (cs.items.length) {
       parts.push(`\n${cs.title.toUpperCase()}`);
-      for (const it of cs.items) parts.push(`- ${it}`);
+      for (const it of cs.items) {
+        if (typeof it === "string") {
+          parts.push(`- ${it}`);
+        } else {
+          const line = [it.title, it.subtitle, it.date].filter(Boolean).join(" · ");
+          parts.push(`- ${line}`);
+          if (it.description) parts.push(`  ${it.description}`);
+        }
+      }
     }
   }
 

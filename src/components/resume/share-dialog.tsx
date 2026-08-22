@@ -10,14 +10,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Share2, Copy, Check, Loader2, Link2, Link2Off, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 export function ShareDialog() {
   const savedId = useResumeStore((s) => s.savedId);
-  const title = useResumeStore((s) => s.title);
   const [open, setOpen] = useState(false);
   const [shared, setShared] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
@@ -84,37 +81,36 @@ export function ShareDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <Share2 className="w-3.5 h-3.5" /> Share
-        </Button>
+        <button className="h-9 px-3 gap-1.5 text-xs text-[#cccccc] hover:text-white bg-[#1a1a1a] hover:bg-[#242424] border border-[#2a2a2a] rounded-md font-semibold inline-flex items-center transition-colors">
+          <Share2 className="w-3.5 h-3.5 text-[#faff69]" /> Share
+        </button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-[#1a1a1a] border border-[#2a2a2a] text-white p-6 rounded-xl font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Share2 className="w-5 h-5 text-teal-600" /> Share Resume
+          <DialogTitle className="flex items-center gap-2 text-lg font-bold text-white tracking-tight">
+            <Share2 className="w-5 h-5 text-[#faff69]" /> Share Public Resume Link
           </DialogTitle>
-          <DialogDescription>
-            Generate a public read-only link that anyone can view and download as PDF.
+          <DialogDescription className="text-xs text-[#888888]">
+            Generate a secure web link that recruiters or hiring managers can view.
           </DialogDescription>
         </DialogHeader>
 
         {!savedId ? (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 p-4 text-center">
-            <p className="text-sm text-amber-800 dark:text-amber-200 mb-1">Save your resume first</p>
-            <p className="text-xs text-muted-foreground">You need to save before you can share a public link.</p>
+          <div className="rounded-lg border border-[#2a2a2a] bg-[#121212] p-4 text-center">
+            <p className="text-xs text-white mb-1 font-semibold">Save your resume first</p>
+            <p className="text-[11px] text-[#888888]">You need to save your resume before generating a public link.</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Status badge */}
-            <div className={`rounded-xl border p-4 ${shared ? "border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-900" : "border-muted bg-muted/30"}`}>
+            <div className={`rounded-xl border p-4 ${shared ? "border-[#faff69]/40 bg-[#121212]" : "border-[#2a2a2a] bg-[#121212]"}`}>
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${shared ? "bg-emerald-500" : "bg-muted-foreground/30"}`}>
-                  {shared ? <Link2 className="w-5 h-5 text-white" /> : <Link2Off className="w-5 h-5 text-white" />}
+                <div className={`w-9 h-9 rounded-md flex items-center justify-center ${shared ? "bg-[#242424] text-[#faff69]" : "bg-[#1a1a1a] text-[#888888]"}`}>
+                  {shared ? <Link2 className="w-4 h-4" /> : <Link2Off className="w-4 h-4" />}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold">{shared ? "Link is active" : "Sharing is off"}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {shared ? "Anyone with the link can view your resume." : "Generate a link to share your resume."}
+                  <p className="text-xs font-bold text-white">{shared ? "Link is Active" : "Sharing is Disabled"}</p>
+                  <p className="text-[11px] text-[#888888]">
+                    {shared ? "Anyone with the link can view your live resume." : "Generate a public link to share with recruiters."}
                   </p>
                 </div>
               </div>
@@ -123,42 +119,42 @@ export function ShareDialog() {
             {/* Share URL */}
             {shared && shareUrl && (
               <div className="space-y-2">
-                <label className="text-xs font-medium">Public link</label>
+                <label className="text-xs font-mono text-[#888888]">Public Link URL</label>
                 <div className="flex gap-2">
-                  <Input value={shareUrl} readOnly className="text-xs font-mono" />
-                  <Button size="sm" variant="outline" onClick={copy} className="shrink-0 gap-1.5">
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  <input value={shareUrl} readOnly className="flex-1 h-9 px-3 text-xs font-mono bg-[#121212] border border-[#2a2a2a] text-white rounded-md outline-none" />
+                  <button onClick={copy} className="h-9 px-3 bg-[#242424] hover:bg-[#3a3a3a] border border-[#2a2a2a] text-white rounded-md text-xs font-semibold shrink-0 inline-flex items-center gap-1.5 transition-colors">
+                    {copied ? <Check className="w-3.5 h-3.5 text-[#22c55e]" /> : <Copy className="w-3.5 h-3.5" />}
                     {copied ? "Copied" : "Copy"}
-                  </Button>
+                  </button>
                 </div>
-                <a href={shareUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-teal-600 dark:text-teal-400 hover:underline">
-                  <ExternalLink className="w-3 h-3" /> Open in new tab
+                <a href={shareUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-[#faff69] hover:underline font-mono">
+                  <ExternalLink className="w-3 h-3" /> Preview link in new tab
                 </a>
               </div>
             )}
 
             {/* Toggle button */}
-            <Button
+            <button
               onClick={toggle}
               disabled={loading}
-              variant={shared ? "outline" : "default"}
-              className={`w-full gap-1.5 ${!shared ? "bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700" : ""}`}
+              className={`w-full h-10 gap-1.5 rounded-md font-semibold text-xs transition-colors inline-flex items-center justify-center ${
+                shared
+                  ? "bg-[#121212] hover:bg-[#242424] border border-[#2a2a2a] text-white"
+                  : "bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a]"
+              }`}
             >
               {loading ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : shared ? (
-                <Link2Off className="w-3.5 h-3.5" />
+                <>
+                  <Link2Off className="w-3.5 h-3.5" /> Disable Public Link
+                </>
               ) : (
-                <Link2 className="w-3.5 h-3.5" />
+                <>
+                  <Link2 className="w-3.5 h-3.5" /> Enable Public Link
+                </>
               )}
-              {loading ? "Updating…" : shared ? "Disable sharing" : "Enable sharing"}
-            </Button>
-
-            {shared && (
-              <p className="text-[11px] text-muted-foreground text-center">
-                Changes to your saved resume automatically update the shared link.
-              </p>
-            )}
+            </button>
           </div>
         )}
       </DialogContent>

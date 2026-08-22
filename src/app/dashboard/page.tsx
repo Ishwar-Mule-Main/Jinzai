@@ -12,10 +12,6 @@ import { PricingDialog } from "@/components/resume/pricing-dialog";
 import { ImportResumeDialog } from "@/components/resume/import-resume-dialog";
 import { SupportDialog } from "@/components/resume/support-dialog";
 import { TemplateThumbnail } from "@/components/resume/template-thumbnail";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
   Plus,
   Upload,
@@ -30,14 +26,11 @@ import {
   Trash2,
   Sparkles,
   Loader2,
-  User,
   Clock,
   FolderOpen,
-  CheckCircle,
   ArrowRight,
   HelpCircle,
-  FileText,
-  MessageCircle,
+  GraduationCap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PublicFooter } from "@/components/resume/public-footer";
@@ -56,11 +49,11 @@ function relativeTime(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "just now";
-  if (mins < 60) return `${mins} minute${mins === 1 ? "" : "s"} ago`;
+  if (mins < 60) return `${mins}m ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days} day${days === 1 ? "" : "s"} ago`;
+  if (days < 30) return `${days}d ago`;
   return new Date(dateStr).toLocaleDateString();
 }
 
@@ -100,164 +93,167 @@ export default function DashboardPage() {
     fetchResumes();
   }, [fetchResumes]);
 
-  const planConfig = user ? getPlanConfig(user.plan) : getPlanConfig("free");
-  const canCreate = user ? canCreateResume(user.plan, user.resumeCount) : true;
-  const remaining = user ? remainingResumes(user.plan, user.resumeCount) : 1;
-
   const handleCreateNew = () => {
-    if (user && !canCreate) {
-      toast.error("You've reached your resume limit. Upgrade your plan to create more.");
+    if (user && !canCreateResume(user.plan, resumes.length)) {
+      toast.error(`Your ${getPlanConfig(user.plan).name} plan allows up to ${getPlanConfig(user.plan).maxResumes} resume(s). Please upgrade!`);
       return;
     }
     clearAll();
-    setContactLocked(false);
-    setTemplate("modern");
-    setView("editor");
     router.push("/editor");
   };
 
   const handleLoadSample = () => {
     loadSample();
-    setContactLocked(false);
-    setView("editor");
     router.push("/editor");
   };
 
   const handleEditResume = async (id: string) => {
     setActionLoading(id);
     try {
-      const res = await fetch(`/api/resumes?id=${id}`);
+      const res = await fetch(`/api/resumes/${id}`);
       if (!res.ok) throw new Error("Failed");
-      const data = await res.json();
-      if (data.content) {
-        try { setData(JSON.parse(data.content)); } catch { /* ignore */ }
-      }
-      setTemplate(data.template || "modern");
-      if (data.accentColor) setAccentColor(data.accentColor);
-      if (data.fontFamily) setFontFamily(data.fontFamily);
-      setContactLocked(!!data.contactLocked);
+      const json = await res.json();
+      const r = json.resume;
+      setData(r.content);
+      setTemplate(r.template as any);
+      setAccentColor(r.accentColor);
+      setFontFamily(r.fontFamily);
+      setContactLocked(r.contactLocked);
       setView("editor");
       router.push("/editor");
     } catch {
-      toast.error("Could not open this resume. Please try again.");
+      toast.error("Failed to load resume.");
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleDuplicate = async (item: SavedResumeItem) => {
-    if (user && !canCreate) {
-      toast.error("You've reached your resume limit. Upgrade to make more.");
+  const handleDuplicate = async (r: SavedResumeItem) => {
+    if (user && !canCreateResume(user.plan, resumes.length)) {
+      toast.error(`Your plan limit reached. Upgrade to duplicate!`);
       return;
     }
-    setActionLoading(`dup-${item.id}`);
+    setActionLoading(r.id);
     try {
-      const res = await fetch(`/api/resumes?id=${item.id}`);
-      if (!res.ok) throw new Error("Failed");
-      const orig = await res.json();
-      const newTitle = `${orig.title} (Copy)`;
+      const fetchRes = await fetch(`/api/resumes/${r.id}`);
+      if (!fetchRes.ok) throw new Error("Failed");
+      const { resume } = await fetchRes.json();
+
       const createRes = await fetch("/api/resumes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTitle, template: orig.template, accentColor: orig.accentColor, fontFamily: orig.fontFamily, content: orig.content }),
+        body: JSON.stringify({
+          title: `${resume.title} (Copy)`,
+          template: resume.template,
+          accentColor: resume.accentColor,
+          fontFamily: resume.fontFamily,
+          content: resume.content,
+        }),
       });
-      if (!createRes.ok) throw new Error("Failed");
-      toast.success(`"${newTitle}" created as a copy!`);
-      await fetchResumes();
-      await refresh();
+      if (!createRes.ok) throw new Error("Failed to copy");
+      toast.success("Resume duplicated successfully!");
+      fetchResumes();
     } catch {
-      toast.error("Could not duplicate this resume. Please try again.");
+      toast.error("Failed to duplicate resume.");
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Are you sure you want to permanently delete "${title}"?`)) return;
-    setActionLoading(`del-${id}`);
+    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
+    setActionLoading(id);
     try {
-      const res = await fetch(`/api/resumes?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/resumes/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed");
       toast.success("Resume deleted.");
-      await fetchResumes();
-      await refresh();
+      setResumes((prev) => prev.filter((r) => r.id !== id));
     } catch {
-      toast.error("Could not delete this resume. Please try again.");
+      toast.error("Failed to delete resume.");
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleShareLink = (id: string) => {
-    const url = `${window.location.origin}/share/${id}`;
-    navigator.clipboard.writeText(url);
-    toast.success("Share link copied! Send it to anyone to show your resume.");
+    const shareUrl = `${window.location.origin}/share/${id}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast.success("Share link copied to clipboard!");
   };
 
-  const filteredResumes = resumes.filter(
-    (r) => r.title.toLowerCase().includes(query.toLowerCase()) || r.template.toLowerCase().includes(query.toLowerCase())
+  const filteredResumes = resumes.filter((r) =>
+    r.title.toLowerCase().includes(query.toLowerCase())
   );
 
+  const planConfig = getPlanConfig(user?.plan || "free");
+  const remaining = user ? remainingResumes(user.plan, resumes.length) : 0;
   const isFirstTime = !loadingResumes && resumes.length === 0;
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col font-sans selection:bg-[#FF6200] selection:text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
+      {/* ── Top Bar ── */}
+      <header className="sticky top-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-[#2a2a2a]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+          <div className="flex items-center gap-6">
+            <Link href="/">
+              <BrandMark showParent />
+            </Link>
+            <nav className="hidden md:flex items-center gap-5 text-sm">
+              <Link href="/dashboard" className="text-[#faff69] font-medium border-b border-[#faff69] pb-0.5">
+                Dashboard
+              </Link>
+              <Link href="/templates" className="text-[#cccccc] hover:text-[#faff69] transition-colors font-medium">
+                Templates
+              </Link>
+              <Link href="/pricing" className="text-[#cccccc] hover:text-[#faff69] transition-colors font-medium">
+                Pricing
+              </Link>
+              <Link href="/editor" className="text-[#cccccc] hover:text-[#faff69] transition-colors font-medium">
+                Editor
+              </Link>
+            </nav>
+          </div>
 
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-40 bg-[#0D0D0D]/90 backdrop-blur-xl border-b border-[#2E2E2E]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <BrandMark showParent />
-          </Link>
+          <div className="flex items-center gap-3">
+            <PricingDialog
+              currentPlan={user?.plan || "free"}
+              onSubscribed={refresh}
+              trigger={
+                <button className="h-9 px-3.5 bg-[#1a1a1a] hover:bg-[#242424] text-white border border-[#2a2a2a] text-xs font-semibold rounded-md transition-colors inline-flex items-center gap-1.5">
+                  <Crown className="w-3.5 h-3.5 text-[#faff69]" />
+                  <span className="font-mono">{planConfig.name}</span>
+                </button>
+              }
+            />
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <SupportDialog />
-            {user && (
-              <PricingDialog
-                currentPlan={user.plan}
-                onSubscribed={refresh}
-                trigger={
-                  <Button size="sm" className="h-9 px-3 sm:px-4 rounded-full bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold gap-1.5 shadow-md shadow-[#FF6200]/20 text-xs">
-                    <Crown className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">{user.plan === "free" ? "Upgrade" : planConfig.name}</span>
-                  </Button>
-                }
-              />
-            )}
-            {user && (
-              <div className="hidden md:flex items-center gap-2 bg-[#141414] border border-[#2E2E2E] px-3 py-1.5 rounded-full text-xs">
-                <User className="w-3.5 h-3.5 text-[#FF6200]" />
-                <span className="text-white truncate max-w-[140px]">{user.email}</span>
-              </div>
-            )}
-            <LogoutButton onLogout={refresh} />
+            <LogoutButton />
           </div>
         </div>
       </header>
 
       {/* ── Main Content ── */}
-      {/* Extra bottom padding on mobile so content isn't hidden behind sticky bar */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-10 pb-28 sm:pb-10">
-
-        {/* ── Free Account Purchase Notice Banner ── */}
-        {user?.plan === "free" && (
-          <div className="rounded-2xl bg-gradient-to-r from-[#FF6200]/20 via-[#141414] to-[#141414] border-2 border-[#FF6200]/50 p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
-            <div className="space-y-1.5 text-center md:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF6200]/20 border border-[#FF6200]/40 text-[#FF6200] text-xs font-bold">
-                <Crown className="w-3.5 h-3.5" /> FREE ACCOUNT NOTICE
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full space-y-10">
+        {/* ── Free Plan Upgrade Banner ── */}
+        {(!user || user.plan === "free") && (
+          <div className="rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="bg-[#faff69] text-[#0a0a0a] text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase">
+                  FREE PLAN ACTIVE
+                </span>
+                <span className="text-xs text-[#888888]">· Vector exports locked</span>
               </div>
-              <h3 className="text-lg font-bold text-white">Purchase a Plan to Download PDF &amp; Unlock All Premium Features</h3>
-              <p className="text-xs text-[#888898]">
-                Free accounts can build and preview resumes. Activate a plan starting at just ₹99 to download high-precision ATS PDFs &amp; unlock 78 premium templates.
+              <p className="text-xs text-[#cccccc]">
+                Free accounts can build and preview resumes. Upgrade starting at just ₹99 to download high-precision ATS PDFs &amp; unlock 78 premium layouts.
               </p>
             </div>
             <PricingDialog
               currentPlan="free"
               onSubscribed={refresh}
               trigger={
-                <Button className="h-11 px-6 bg-[#FF6200] hover:bg-[#E55700] text-white font-bold rounded-full gap-2 shadow-lg shadow-[#FF6200]/30 shrink-0">
-                  <Crown className="w-4 h-4" /> Purchase Plan &amp; Download PDF
-                </Button>
+                <button className="h-10 px-5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold text-xs rounded-md transition-colors inline-flex items-center gap-1.5 shrink-0">
+                  <Crown className="w-4 h-4" /> Upgrade Plan
+                </button>
               }
             />
           </div>
@@ -265,140 +261,109 @@ export default function DashboardPage() {
 
         {/* ── Institutional Student Placement Cell Banner ── */}
         {user?.role === "student" && (
-          <div className="rounded-2xl bg-gradient-to-r from-violet-950/40 via-[#141414] to-[#141414] border-2 border-violet-600/40 p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+          <div className="rounded-xl bg-[#1a1a1a] border border-[#faff69] p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3 text-left">
-              <div className="w-10 h-10 rounded-2xl bg-violet-600/10 border border-violet-500/30 flex items-center justify-center shrink-0">
-                <GraduationCap className="w-5 h-5 text-violet-400" />
+              <div className="w-10 h-10 rounded-lg bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69] shrink-0">
+                <GraduationCap className="w-5 h-5" />
               </div>
               <div>
-                <Badge className="bg-violet-900/50 text-violet-300 border-0 text-[10px] uppercase font-mono mb-0.5">
-                  Campus Placement Cell Student Portal
-                </Badge>
-                <h4 className="text-sm font-bold text-white">
-                  {user.organization?.name || "College Placement Cell"} Student Roster
+                <span className="text-[10px] font-mono text-[#faff69] bg-[#242424] px-2 py-0.5 rounded-full uppercase font-bold">
+                  CAMPUS PLACEMENT ROSTER
+                </span>
+                <h4 className="text-sm font-bold text-white mt-0.5">
+                  {user.organization?.name || "College Placement Cell"} Portal
                 </h4>
-                <p className="text-xs text-[#888898]">
-                  Full ₹399/mo Pro features unlocked — 78 templates, vector PDF downloads &amp; AI ATS tools.
+                <p className="text-xs text-[#888888]">
+                  Full Pro features unlocked — 78 templates, vector PDF downloads &amp; AI ATS tools.
                 </p>
               </div>
             </div>
             <Link href="/editor">
-              <Button className="bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-full text-xs h-9 px-5 gap-1.5 shadow-md shrink-0">
+              <button className="h-9 px-5 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] text-xs font-semibold rounded-md transition-colors inline-flex items-center gap-1.5 shrink-0">
                 <Edit3 className="w-3.5 h-3.5" /> Launch AI Editor →
-              </Button>
+              </button>
             </Link>
           </div>
         )}
 
         {/* ── Welcome Banner ── */}
-        <section className="relative rounded-3xl bg-[#141414] border border-[#2E2E2E] p-6 sm:p-8 overflow-hidden shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="absolute top-0 right-0 w-72 sm:w-96 h-72 sm:h-96 bg-[#FF6200]/10 rounded-full blur-[120px] pointer-events-none" />
-          <div className="relative z-10 space-y-3">
-            <Badge className="bg-[#FF6200] text-white text-[10px] uppercase font-semibold">
+        <section className="rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-3">
+            <span className="bg-[#242424] border border-[#2a2a2a] text-[#faff69] text-[10px] font-mono px-3 py-1 rounded-full uppercase font-semibold">
               {planConfig.name}
-            </Badge>
-            <h1 className="font-bricolage text-2xl sm:text-4xl font-bold text-white leading-tight">
-              Hey{user?.email ? `, ${user.email.split("@")[0]}` : ""}! 👋 Ready to build your resume?
+            </span>
+            <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight leading-tight">
+              Welcome{user?.email ? `, ${user.email.split("@")[0]}` : ""} 👋
             </h1>
-            <p className="text-sm text-[#888898] max-w-lg">
+            <p className="text-sm text-[#cccccc] max-w-lg">
               You have <strong className="text-white">{resumes.length} resume{resumes.length !== 1 ? "s" : ""}</strong> saved.
               {remaining !== Infinity && remaining > 0 && (
-                <> You can create <strong className="text-[#FF6200]">{remaining} more</strong> on your current plan.</>
+                <> You can create <strong className="text-[#faff69]">{remaining} more</strong> on your current tier.</>
               )}
               {remaining === Infinity && (
-                <> Your plan lets you create <strong className="text-[#FF6200]">unlimited</strong> resumes.</>
+                <> Your plan permits <strong className="text-[#faff69]">unlimited</strong> resumes.</>
               )}
             </p>
           </div>
 
-          {/* Prominent Go to Editor Button */}
-          <Link href="/editor" className="relative z-10 shrink-0 w-full md:w-auto">
-            <Button className="w-full md:w-auto h-12 px-8 bg-[#FF6200] hover:bg-[#E55700] text-white font-bold rounded-full shadow-xl shadow-[#FF6200]/30 hover:shadow-[#FF6200]/50 text-sm gap-2 transition-all">
+          <Link href="/editor" className="shrink-0 w-full md:w-auto">
+            <button className="w-full md:w-auto h-11 px-6 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold text-sm rounded-md transition-colors inline-flex items-center justify-center gap-2">
               <Edit3 className="w-4 h-4" /> Go to Editor →
-            </Button>
+            </button>
           </Link>
         </section>
 
-        {/* ── How It Works (shown only when user has 0 resumes) ── */}
-        {isFirstTime && (
-          <section className="space-y-4">
-            <div className="text-center space-y-1">
-              <h2 className="font-bricolage text-xl sm:text-2xl font-bold text-white">Here's how it works — 3 simple steps</h2>
-              <p className="text-sm text-[#888898]">No experience needed. Just fill in your details and download.</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                { step: "1", icon: "🎨", title: "Pick a Design", desc: "Choose from 70+ beautiful resume styles. Don't worry — you can change it anytime." },
-                { step: "2", icon: "✏️", title: "Fill Your Details", desc: "Add your name, work experience, education, and skills. Our AI can even help write better descriptions." },
-                { step: "3", icon: "📄", title: "Download & Apply", desc: "Download your resume as a PDF and start applying to jobs right away." },
-              ].map((s) => (
-                <div key={s.step} className="relative p-5 rounded-2xl bg-[#141414] border border-[#2E2E2E] flex flex-col gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#FF6200] flex items-center justify-center text-white text-sm font-bold shrink-0">
-                      {s.step}
-                    </div>
-                    <span className="text-2xl">{s.icon}</span>
-                  </div>
-                  <h3 className="font-bricolage font-bold text-white text-base">{s.title}</h3>
-                  <p className="text-sm text-[#888898] leading-relaxed">{s.desc}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* ── Action Cards ── */}
-        <section className="space-y-3">
-          <h2 className="font-bricolage text-lg sm:text-xl font-bold text-white">What would you like to do?</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-
+        <section className="space-y-4">
+          <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {/* Card 1 — Start New */}
             <button
               onClick={handleCreateNew}
-              className="text-left p-5 sm:p-6 bg-[#141414] border-2 border-[#FF6200]/40 hover:border-[#FF6200] rounded-2xl cursor-pointer transition-all duration-300 group hover:-translate-y-1 shadow-lg hover:shadow-[#FF6200]/10 focus:outline-none focus:ring-2 focus:ring-[#FF6200]"
+              className="text-left p-6 bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#3a3a3a] rounded-xl cursor-pointer transition-all group"
             >
-              <div className="w-12 h-12 rounded-2xl bg-[#FF6200]/10 border border-[#FF6200]/30 group-hover:bg-[#FF6200] flex items-center justify-center text-[#FF6200] group-hover:text-white mb-4 transition-all">
-                <Plus className="w-6 h-6" />
+              <div className="w-10 h-10 rounded-lg bg-[#242424] border border-[#2a2a2a] group-hover:bg-[#faff69] group-hover:text-[#0a0a0a] flex items-center justify-center text-[#faff69] mb-4 transition-colors">
+                <Plus className="w-5 h-5" />
               </div>
-              <h3 className="font-bricolage text-base sm:text-lg font-bold text-white mb-1">✏️ Start a New Resume</h3>
-              <p className="text-sm text-[#888898]">Pick a design and fill in your details. Takes about 5 minutes.</p>
-              <div className="mt-4 flex items-center gap-1 text-[#FF6200] text-sm font-semibold">
-                Start now <ArrowRight className="w-4 h-4" />
+              <h3 className="text-base font-bold text-white mb-1">Start New Resume</h3>
+              <p className="text-xs text-[#888888]">Pick an engineered layout and input your experience in minutes.</p>
+              <div className="mt-4 flex items-center gap-1 text-[#faff69] text-xs font-semibold">
+                Start now <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </button>
 
             {/* Card 2 — Upload Old Resume */}
-            <div className="p-5 sm:p-6 bg-[#141414] border border-[#2E2E2E] hover:border-[#FF6200]/50 rounded-2xl transition-all duration-300 group hover:-translate-y-1 shadow-lg flex flex-col justify-between">
+            <div className="p-6 bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#3a3a3a] rounded-xl transition-all flex flex-col justify-between group">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#1A1A1A] border border-[#2E2E2E] group-hover:border-[#FF6200]/50 flex items-center justify-center text-[#FF6200] mb-4 transition-all">
-                  <Upload className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-lg bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69] mb-4">
+                  <Upload className="w-5 h-5" />
                 </div>
-                <h3 className="font-bricolage text-base sm:text-lg font-bold text-white mb-1">📄 Upload Your Old Resume</h3>
-                <p className="text-sm text-[#888898] mb-4">
-                  Already have a resume? Upload it (PDF, Word, or text) and our AI will read it and fill everything in for you automatically.
+                <h3 className="text-base font-bold text-white mb-1">Upload &amp; Auto-Parse</h3>
+                <p className="text-xs text-[#888888] mb-4">
+                  Import an existing PDF, Word, or Markdown file to auto-populate all sections with AI parsing.
                 </p>
               </div>
               <ImportResumeDialog trigger={
-                <Button className="w-full h-10 rounded-xl bg-[#1A1A1A] hover:bg-[#FF6200] border border-[#2E2E2E] hover:border-[#FF6200] text-white text-sm font-semibold gap-2 transition-all">
-                  <Sparkles className="w-4 h-4" /> Upload & Auto-Fill
-                </Button>
+                <button className="w-full h-10 rounded-md bg-[#242424] hover:bg-[#3a3a3a] border border-[#2a2a2a] text-white text-xs font-semibold transition-colors inline-flex items-center justify-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#faff69]" /> Upload File
+                </button>
               } />
             </div>
 
             {/* Card 3 — See Example */}
             <button
               onClick={handleLoadSample}
-              className="text-left p-5 sm:p-6 bg-[#141414] border border-[#2E2E2E] hover:border-[#FF6200]/50 rounded-2xl cursor-pointer transition-all duration-300 group hover:-translate-y-1 shadow-lg focus:outline-none focus:ring-2 focus:ring-[#FF6200]"
+              className="text-left p-6 bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#3a3a3a] rounded-xl cursor-pointer transition-all group"
             >
-              <div className="w-12 h-12 rounded-2xl bg-[#1A1A1A] border border-[#2E2E2E] group-hover:border-[#FF6200]/50 flex items-center justify-center text-[#FF6200] mb-4 transition-all">
-                <Wand2 className="w-6 h-6" />
+              <div className="w-10 h-10 rounded-lg bg-[#242424] border border-[#2a2a2a] flex items-center justify-center text-[#faff69] mb-4">
+                <Wand2 className="w-5 h-5" />
               </div>
-              <h3 className="font-bricolage text-base sm:text-lg font-bold text-white mb-1">👀 See an Example</h3>
-              <p className="text-sm text-[#888898]">
-                Not sure where to start? Load a ready-made example resume and explore how everything works.
+              <h3 className="text-base font-bold text-white mb-1">Load Sample Profile</h3>
+              <p className="text-xs text-[#888888]">
+                Explore how engineered ATS templates and bullet point optimizers look with filled data.
               </p>
-              <div className="mt-4 flex items-center gap-1 text-[#888898] group-hover:text-[#FF6200] text-sm font-semibold transition-colors">
-                Load example <ArrowRight className="w-4 h-4" />
+              <div className="mt-4 flex items-center gap-1 text-[#888888] group-hover:text-[#faff69] text-xs font-semibold transition-colors">
+                Load sample <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </button>
           </div>
@@ -408,33 +373,33 @@ export default function DashboardPage() {
         <section className="space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="font-bricolage text-xl sm:text-2xl font-bold text-white">My Saved Resumes</h2>
-              <p className="text-sm text-[#888898]">Click "Open & Edit" to continue working on a resume, or "Share" to send it to employers.</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">My Saved Resumes</h2>
+              <p className="text-xs text-[#888888]">Click "Open &amp; Edit" to resume drafting or "Share" for web profiles.</p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {/* Search */}
-              <div className="relative flex-1 sm:w-56">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#888898]" />
-                <Input
+              <div className="relative flex-1 sm:w-60">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#888888]" />
+                <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search by name..."
-                  className="pl-9 h-9 text-sm bg-[#141414] border-[#2E2E2E] focus:border-[#FF6200] text-white rounded-full"
+                  placeholder="Search by title..."
+                  className="w-full pl-9 pr-3 h-9 text-xs bg-[#1a1a1a] border border-[#2a2a2a] focus:border-[#faff69] text-white rounded-md outline-none transition-colors"
                 />
               </div>
               {/* View toggle */}
-              <div className="flex items-center bg-[#141414] border border-[#2E2E2E] p-1 rounded-full shrink-0">
+              <div className="flex items-center bg-[#1a1a1a] border border-[#2a2a2a] p-0.5 rounded-md shrink-0">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-1.5 rounded-full transition-colors ${viewMode === "grid" ? "bg-[#FF6200] text-white" : "text-[#888898] hover:text-white"}`}
+                  className={`p-1.5 rounded transition-colors ${viewMode === "grid" ? "bg-[#242424] text-[#faff69]" : "text-[#888888] hover:text-white"}`}
                   title="Grid view"
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-1.5 rounded-full transition-colors ${viewMode === "list" ? "bg-[#FF6200] text-white" : "text-[#888898] hover:text-white"}`}
+                  className={`p-1.5 rounded transition-colors ${viewMode === "list" ? "bg-[#242424] text-[#faff69]" : "text-[#888888] hover:text-white"}`}
                   title="List view"
                 >
                   <List className="w-4 h-4" />
@@ -445,150 +410,130 @@ export default function DashboardPage() {
 
           {/* Content */}
           {loadingResumes ? (
-            <div className="py-16 text-center text-[#888898]">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#FF6200] mb-3" />
+            <div className="py-16 text-center text-[#888888]">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#faff69] mb-3" />
               <p className="text-sm">Loading your resumes…</p>
             </div>
           ) : filteredResumes.length === 0 ? (
-            <Card className="p-10 sm:p-14 text-center bg-[#141414] border-[#2E2E2E] rounded-2xl space-y-4">
-              <FolderOpen className="w-12 h-12 mx-auto text-[#888898]/40" />
-              <h3 className="font-bricolage text-lg font-bold text-white">
-                {query ? "No resumes match your search." : "You haven't created any resumes yet."}
+            <div className="p-12 text-center bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl space-y-4">
+              <FolderOpen className="w-12 h-12 mx-auto text-[#888888]/40" />
+              <h3 className="text-base font-bold text-white">
+                {query ? "No resumes match your query." : "No saved resumes yet."}
               </h3>
-              <p className="text-sm text-[#888898] max-w-sm mx-auto">
+              <p className="text-xs text-[#888888] max-w-sm mx-auto">
                 {query
-                  ? "Try a different search word, or clear the search to see all your resumes."
-                  : "Click \"Start a New Resume\" above to create your first one. It only takes a few minutes!"}
+                  ? "Try a different search term to find your saved resumes."
+                  : "Click \"Start New Resume\" to generate your first ATS-compliant resume."}
               </p>
               {!query && (
-                <Button
+                <button
                   onClick={handleCreateNew}
-                  className="h-11 px-7 rounded-full bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold gap-2 shadow-lg shadow-[#FF6200]/20"
+                  className="h-10 px-6 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] text-xs font-semibold rounded-md transition-colors inline-flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" /> Create My First Resume
-                </Button>
+                </button>
               )}
-            </Card>
+            </div>
           ) : viewMode === "grid" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredResumes.map((r) => (
-                <Card key={r.id} className="p-4 bg-[#141414] border-[#2E2E2E] hover:border-[#FF6200]/40 rounded-2xl transition-all duration-300 space-y-4 group">
+                <div key={r.id} className="p-5 bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#3a3a3a] rounded-xl transition-all space-y-4 group">
                   {/* Thumbnail */}
-                  <div className="aspect-[3/4] bg-[#0B0B0C] rounded-xl overflow-hidden relative border border-[#2E2E2E] group-hover:border-[#FF6200]/30 transition-colors">
-                    <TemplateThumbnail templateId={r.template} className="w-full h-full object-cover" />
+                  <div className="aspect-[3/4] bg-[#121212] rounded-lg overflow-hidden relative border border-[#2a2a2a]">
+                    <TemplateThumbnail templateId={r.template as any} className="w-full h-full object-cover" />
                   </div>
 
                   {/* Title + time */}
                   <div>
-                    <h3 className="font-bricolage font-bold text-base text-white truncate">{r.title}</h3>
-                    <p className="text-xs text-[#888898] flex items-center gap-1 mt-0.5">
-                      <Clock className="w-3 h-3 text-[#FF6200]" /> Last edited {relativeTime(r.updatedAt)}
+                    <h3 className="font-semibold text-sm text-white truncate">{r.title}</h3>
+                    <p className="text-xs text-[#888888] flex items-center gap-1 mt-1">
+                      <Clock className="w-3.5 h-3.5 text-[#faff69]" /> Edited {relativeTime(r.updatedAt)}
                     </p>
                   </div>
 
                   {/* Actions */}
-                  <div className="pt-2 border-t border-[#2E2E2E] grid grid-cols-2 gap-2">
-                    <Button
+                  <div className="pt-3 border-t border-[#2a2a2a] grid grid-cols-2 gap-2">
+                    <button
                       onClick={() => handleEditResume(r.id)}
                       disabled={actionLoading === r.id}
-                      className="h-9 rounded-xl bg-[#FF6200] hover:bg-[#E55700] text-white text-sm font-semibold gap-1.5"
+                      className="h-9 rounded-md bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] text-xs font-semibold transition-colors inline-flex items-center justify-center gap-1.5"
                     >
                       {actionLoading === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Edit3 className="w-3.5 h-3.5" />}
-                      Open & Edit
-                    </Button>
-                    <Button
+                      Open &amp; Edit
+                    </button>
+                    <button
                       onClick={() => handleShareLink(r.id)}
-                      variant="outline"
-                      className="h-9 rounded-xl border-[#2E2E2E] bg-[#1A1A1A] hover:bg-[#252525] text-white text-sm gap-1.5"
+                      className="h-9 rounded-md border border-[#2a2a2a] bg-[#242424] hover:bg-[#3a3a3a] text-white text-xs font-semibold transition-colors inline-flex items-center justify-center gap-1.5"
                     >
-                      <Share2 className="w-3.5 h-3.5 text-[#FF6200]" /> Share
-                    </Button>
-                    <Button
+                      <Share2 className="w-3.5 h-3.5 text-[#faff69]" /> Share
+                    </button>
+                    <button
                       onClick={() => handleDuplicate(r)}
                       disabled={!!actionLoading}
-                      variant="outline"
-                      className="h-9 rounded-xl border-[#2E2E2E] bg-[#1A1A1A] hover:bg-[#252525] text-white text-sm gap-1.5"
+                      className="h-9 rounded-md border border-[#2a2a2a] bg-[#242424] hover:bg-[#3a3a3a] text-white text-xs font-semibold transition-colors inline-flex items-center justify-center gap-1.5"
                     >
-                      <Copy className="w-3.5 h-3.5 text-[#888898]" /> Duplicate
-                    </Button>
-                    <Button
+                      <Copy className="w-3.5 h-3.5 text-[#888888]" /> Duplicate
+                    </button>
+                    <button
                       onClick={() => handleDelete(r.id, r.title)}
                       disabled={!!actionLoading}
-                      variant="ghost"
-                      className="h-9 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 text-sm gap-1.5"
+                      className="h-9 rounded-md border border-transparent hover:border-[#ef4444]/40 text-[#ef4444] hover:bg-[#ef4444]/10 text-xs font-semibold transition-colors inline-flex items-center justify-center gap-1.5"
                     >
                       <Trash2 className="w-3.5 h-3.5" /> Delete
-                    </Button>
+                    </button>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
           ) : (
             <div className="space-y-3">
               {filteredResumes.map((r) => (
-                <Card key={r.id} className="p-4 bg-[#141414] border-[#2E2E2E] hover:border-[#FF6200]/40 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
+                <div key={r.id} className="p-4 bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#3a3a3a] rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-12 bg-[#0B0B0C] rounded-lg overflow-hidden border border-[#2E2E2E] shrink-0">
-                      <TemplateThumbnail templateId={r.template} className="w-full h-full object-cover" />
+                    <div className="w-10 h-12 bg-[#121212] rounded-md overflow-hidden border border-[#2a2a2a] shrink-0">
+                      <TemplateThumbnail templateId={r.template as any} className="w-full h-full object-cover" />
                     </div>
                     <div>
-                      <h3 className="font-bricolage font-bold text-base text-white">{r.title}</h3>
-                      <p className="text-xs text-[#888898] mt-0.5">Last edited {relativeTime(r.updatedAt)}</p>
+                      <h3 className="font-semibold text-sm text-white">{r.title}</h3>
+                      <p className="text-xs text-[#888888] mt-0.5">Edited {relativeTime(r.updatedAt)}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Button onClick={() => handleEditResume(r.id)} size="sm" disabled={actionLoading === r.id} className="h-9 px-4 rounded-lg bg-[#FF6200] hover:bg-[#E55700] text-white text-sm font-semibold gap-1.5">
-                      <Edit3 className="w-3.5 h-3.5" /> Open & Edit
-                    </Button>
-                    <Button onClick={() => handleShareLink(r.id)} variant="outline" size="sm" className="h-9 px-3 rounded-lg border-[#2E2E2E] bg-[#1A1A1A] text-white text-sm gap-1.5">
-                      <Share2 className="w-3.5 h-3.5 text-[#FF6200]" /> Share
-                    </Button>
-                    <Button onClick={() => handleDuplicate(r)} variant="outline" size="sm" disabled={!!actionLoading} className="h-9 px-3 rounded-lg border-[#2E2E2E] bg-[#1A1A1A] text-white text-sm gap-1.5">
-                      <Copy className="w-3.5 h-3.5 text-[#888898]" /> Duplicate
-                    </Button>
-                    <Button onClick={() => handleDelete(r.id, r.title)} variant="ghost" size="sm" disabled={!!actionLoading} className="h-9 px-2 text-red-400 hover:bg-red-500/10">
+                    <button onClick={() => handleEditResume(r.id)} disabled={actionLoading === r.id} className="h-9 px-4 rounded-md bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] text-xs font-semibold transition-colors inline-flex items-center gap-1.5">
+                      <Edit3 className="w-3.5 h-3.5" /> Open &amp; Edit
+                    </button>
+                    <button onClick={() => handleShareLink(r.id)} className="h-9 px-3 rounded-md border border-[#2a2a2a] bg-[#242424] hover:bg-[#3a3a3a] text-white text-xs font-semibold transition-colors inline-flex items-center gap-1.5">
+                      <Share2 className="w-3.5 h-3.5 text-[#faff69]" /> Share
+                    </button>
+                    <button onClick={() => handleDuplicate(r)} disabled={!!actionLoading} className="h-9 px-3 rounded-md border border-[#2a2a2a] bg-[#242424] hover:bg-[#3a3a3a] text-white text-xs font-semibold transition-colors inline-flex items-center gap-1.5">
+                      <Copy className="w-3.5 h-3.5 text-[#888888]" /> Duplicate
+                    </button>
+                    <button onClick={() => handleDelete(r.id, r.title)} disabled={!!actionLoading} className="h-9 px-2 text-[#ef4444] hover:bg-[#ef4444]/10 rounded-md transition-colors inline-flex items-center">
                       <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
+                    </button>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
           )}
         </section>
 
         {/* ── Help Strip ── */}
-        <section className="rounded-2xl border border-[#2E2E2E] bg-[#141414] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#FF6200]/10 border border-[#FF6200]/20 flex items-center justify-center shrink-0">
-              <HelpCircle className="w-4 h-4 text-[#FF6200]" />
+        <section className="rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-9 h-9 rounded-lg bg-[#242424] border border-[#2a2a2a] flex items-center justify-center shrink-0">
+              <HelpCircle className="w-4 h-4 text-[#faff69]" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">Need help? We're here for you.</p>
-              <p className="text-xs text-[#888898] mt-0.5">
-                Stuck or confused? Click the support button and we'll walk you through everything personally.
+              <p className="text-sm font-semibold text-white">Need assistance with your resume?</p>
+              <p className="text-xs text-[#888888] mt-0.5">
+                Our support team and AI copilot are ready to assist you with layout, quantification, or export issues.
               </p>
             </div>
           </div>
           <SupportDialog />
         </section>
-
       </main>
-
-      {/* ── Mobile Sticky Bottom Bar ── */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0D0D0D]/95 backdrop-blur-xl border-t border-[#2E2E2E] px-4 py-3 flex items-center gap-3">
-        <button
-          onClick={handleCreateNew}
-          className="flex-1 h-12 rounded-2xl bg-[#FF6200] hover:bg-[#E55700] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#FF6200]/30 transition-all active:scale-95"
-        >
-          <Plus className="w-5 h-5" /> New Resume
-        </button>
-        <ImportResumeDialog trigger={
-          <button className="w-12 h-12 rounded-2xl bg-[#141414] border border-[#2E2E2E] text-[#FF6200] flex items-center justify-center shrink-0">
-            <Upload className="w-5 h-5" />
-          </button>
-        } />
-        <SupportDialog />
-      </div>
 
       <PublicFooter />
     </div>

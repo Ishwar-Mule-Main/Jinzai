@@ -308,16 +308,32 @@ export function ensureResumeIds(data: Partial<ResumeData>): ResumeData {
           id: sec.id || uid(),
           title: sec.title || "Custom Section",
           items: Array.isArray(sec.items)
-            ? sec.items.map((it) => ({
-                id: it.id || uid(),
-                title: it.title || "",
-                subtitle: it.subtitle || "",
-                date: it.date || "",
-                description: it.description || "",
-              }))
+            ? sec.items.map((it) =>
+                typeof it === "string"
+                  ? {
+                      id: uid(),
+                      title: it,
+                      subtitle: "",
+                      date: "",
+                      description: "",
+                    }
+                  : {
+                      id: it.id || uid(),
+                      title: it.title || "",
+                      subtitle: it.subtitle || "",
+                      date: it.date || "",
+                      description: it.description || "",
+                    }
+              )
             : [],
         }))
       : [],
+    sectionOrder: Array.isArray(data.sectionOrder)
+      ? data.sectionOrder
+      : ["personal", "summary", "experience", "education", "skills", "projects", "certifications", "languages", "custom"],
+    sectionPlacements: data.sectionPlacements && typeof data.sectionPlacements === "object"
+      ? data.sectionPlacements
+      : {},
   };
 
   return merged;

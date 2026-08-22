@@ -2,13 +2,8 @@
 
 import { useState, useRef } from "react";
 import { useResumeStore } from "@/lib/resume/store";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Upload, Sparkles, FileText, Loader2, Lock, FileUp, Wand2, PenLine, ArrowRight } from "lucide-react";
+import { Upload, Sparkles, Loader2, Lock, FileUp, Wand2, PenLine, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { isPaidPlan } from "@/lib/resume/plans";
-
 import { extractTextFromFile } from "@/lib/resume/text-extract";
 
 interface BuildChoiceProps {
@@ -23,7 +18,7 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
   const [file, setFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const canRewrite = user && (user.plan === "pro_499" || user.plan === "business_1999");
+  const canRewrite = user && (user.plan === "pro_499" || user.plan === "business_1999" || user.plan === "pro_399" || user.plan === "business_999" || user.plan === "institution_4999");
 
   const handleUploadEdit = async () => {
     if (!file) {
@@ -70,7 +65,7 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
 
   const handleUploadRewrite = async () => {
     if (!canRewrite) {
-      toast.error("Upload & Rewrite is available on Pro (₹499) and Business (₹1,999) plans");
+      toast.error("Upload & Rewrite is available on Pro and Business plans");
       return;
     }
     if (!file) {
@@ -126,32 +121,30 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white py-12 px-4 sm:px-6 relative overflow-hidden">
-      {/* Background radial glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#FF6200]/10 rounded-full blur-[140px] pointer-events-none" />
-
+    <div className="min-h-screen bg-[#0a0a0a] text-white py-12 px-4 sm:px-6 relative overflow-hidden font-sans selection:bg-[#faff69] selection:text-[#0a0a0a]">
       <div className="max-w-5xl mx-auto relative z-10">
         <div className="text-center mb-12">
-          <Badge className="bg-[#FF6200]/10 text-[#FF6200] border border-[#FF6200]/20 mb-3 px-3 py-1 text-xs font-mono">
-            人材 · BUILD MODE
-          </Badge>
-          <h1 className="font-bricolage text-3xl sm:text-5xl font-bold tracking-tight mb-4 text-white">
-            How would you like to build your <span className="text-gradient-orange">resume</span>?
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#2a2a2a] bg-[#1a1a1a] text-xs font-mono text-[#888888] mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#faff69]" />
+            WORKSPACE · ONBOARDING
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-4 text-white">
+            Choose your <span className="text-[#faff69]">workflow</span>
           </h1>
-          <p className="text-[#888898] text-sm sm:text-base max-w-xl mx-auto">
-            Choose the option that fits your current starting point. You can customize every detail in our editor.
+          <p className="text-[#888888] text-sm sm:text-base max-w-xl mx-auto">
+            Select an entry point below to begin tailoring your ATS resume.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Upload & Edit */}
-          <div className="p-6 rounded-2xl bg-[#141414] border border-[#2E2E2E] hover:border-[#FF6200]/50 hover:shadow-xl hover:shadow-[#FF6200]/10 transition-all duration-300 flex flex-col group">
-            <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center mb-5 group-hover:border-[#FF6200]/50 transition-colors">
-              <FileUp className="w-6 h-6 text-[#FF6200]" />
+          <div className="p-6 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#3a3a3a] transition-all flex flex-col group">
+            <div className="w-12 h-12 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center mb-5 text-[#faff69]">
+              <FileUp className="w-6 h-6" />
             </div>
-            <h2 className="font-bricolage font-bold text-xl mb-2 text-white">Upload & Edit</h2>
-            <p className="text-xs text-[#888898] leading-relaxed mb-6 flex-1">
-              Already have a resume? Simply upload it to instantly pull your data into our 72 professional templates.
+            <h2 className="font-bold text-lg mb-2 text-white">Upload &amp; Edit</h2>
+            <p className="text-xs text-[#888888] leading-relaxed mb-6 flex-1">
+              Have an existing resume? Upload it to auto-populate the data directly into all 78 templates.
             </p>
             <div className="space-y-3">
               <label className="block">
@@ -164,46 +157,45 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
                 />
                 <div
                   onClick={() => fileRef.current?.click()}
-                  className="border-2 border-dashed border-[#2E2E2E] rounded-xl p-3.5 text-center cursor-pointer hover:border-[#FF6200] hover:bg-[#FF6200]/5 transition-colors"
+                  className="border border-dashed border-[#2a2a2a] bg-[#121212] rounded-md p-3.5 text-center cursor-pointer hover:border-[#faff69] transition-colors"
                 >
                   {file ? (
-                    <p className="text-xs font-medium text-[#FF6200] truncate">{file.name}</p>
+                    <p className="text-xs font-mono font-medium text-[#faff69] truncate">{file.name}</p>
                   ) : (
                     <>
-                      <Upload className="w-4 h-4 mx-auto mb-1 text-[#888898]" />
-                      <p className="text-xs text-[#888898] font-medium">Click to select file</p>
-                      <p className="text-[9px] text-[#888898]/70 mt-0.5 font-mono">PDF, DOCX, MD, TXT</p>
+                      <Upload className="w-4 h-4 mx-auto mb-1 text-[#888888]" />
+                      <p className="text-xs text-[#cccccc] font-medium">Select file</p>
+                      <p className="text-[9px] text-[#888888] mt-0.5 font-mono">PDF, DOCX, TXT</p>
                     </>
                   )}
                 </div>
               </label>
-              <Button
+              <button
                 onClick={handleUploadEdit}
                 disabled={loading === "edit" || !file}
-                className="w-full gap-2 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-xl shadow-lg shadow-[#FF6200]/20"
-                size="sm"
+                className="w-full h-10 gap-2 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold rounded-md text-xs inline-flex items-center justify-center transition-colors disabled:opacity-50"
               >
                 {loading === "edit" ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
                 {loading === "edit" ? "Importing..." : "Upload & Edit"}
-              </Button>
+              </button>
             </div>
           </div>
 
           {/* Upload & Rewrite */}
-          <div className={`p-6 rounded-2xl bg-[#141414] border ${canRewrite ? "border-[#FF6200]/40" : "border-[#2E2E2E] opacity-80"} hover:border-[#FF6200] hover:shadow-xl hover:shadow-[#FF6200]/10 transition-all duration-300 flex flex-col relative group`}>
+          <div className={`p-6 rounded-xl bg-[#1a1a1a] border ${canRewrite ? "border-[#faff69]/40" : "border-[#2a2a2a]"} transition-all flex flex-col relative group`}>
             {!canRewrite && (
               <div className="absolute -top-3 right-4">
-                <Badge className="bg-[#FF6200] text-white border-0 gap-1 text-[9px] font-mono px-2.5 py-0.5 shadow-md">
+                <span className="bg-[#242424] text-[#faff69] border border-[#2a2a2a] text-[9px] font-mono font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
                   <Lock className="w-2.5 h-2.5" /> PRO PLAN
-                </Badge>
+                </span>
               </div>
             )}
-            <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center mb-5 group-hover:border-[#FF6200]/50 transition-colors">
-              <Wand2 className="w-6 h-6 text-[#FF6200]" />
+            <div className="w-12 h-12 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center mb-5 text-[#faff69]">
+              <Wand2 className="w-6 h-6" />
             </div>
-            <h2 className="font-bricolage font-bold text-xl mb-2 text-white">Upload & Rewrite</h2>
-            <p className="text-xs text-[#888898] leading-relaxed mb-6 flex-1">
-              Upload your current resume and let our AI agent rewrite your bullet points for maximum ATS & executive impact.
+            <h2 className="font-bold text-lg mb-2 text-white">Upload &amp; Rewrite</h2>
+            <p className="text-xs text-[#888888] leading-relaxed mb-6 flex-1">
+              Upload your current resume and let AI rewrite your bullet points for high-density ATS scoring.
             </p>
             <div className="space-y-3">
               <label className="block">
@@ -215,65 +207,52 @@ export function BuildChoice({ user, onChooseEditor }: BuildChoiceProps) {
                 />
                 <div
                   onClick={() => fileRef.current?.click()}
-                  className="border-2 border-dashed border-[#2E2E2E] rounded-xl p-3.5 text-center cursor-pointer hover:border-[#FF6200] hover:bg-[#FF6200]/5 transition-colors"
+                  className="border border-dashed border-[#2a2a2a] bg-[#121212] rounded-md p-3.5 text-center cursor-pointer hover:border-[#faff69] transition-colors"
                 >
                   {file ? (
-                    <p className="text-xs font-medium text-[#FF6200] truncate">{file.name}</p>
+                    <p className="text-xs font-mono font-medium text-[#faff69] truncate">{file.name}</p>
                   ) : (
                     <>
-                      <Upload className="w-4 h-4 mx-auto mb-1 text-[#888898]" />
-                      <p className="text-xs text-[#888898] font-medium">Click to select file</p>
-                      <p className="text-[9px] text-[#888898]/70 mt-0.5 font-mono">PDF, DOCX, MD, TXT</p>
+                      <Upload className="w-4 h-4 mx-auto mb-1 text-[#888888]" />
+                      <p className="text-xs text-[#cccccc] font-medium">Select file</p>
+                      <p className="text-[9px] text-[#888888] mt-0.5 font-mono">PDF, DOCX, TXT</p>
                     </>
                   )}
                 </div>
               </label>
-              <Button
+              <button
                 onClick={handleUploadRewrite}
                 disabled={loading === "rewrite" || !file || !canRewrite}
-                className="w-full gap-2 bg-[#FF6200] hover:bg-[#E55700] text-white font-semibold rounded-xl shadow-lg shadow-[#FF6200]/20 disabled:opacity-50"
-                size="sm"
+                className="w-full h-10 gap-2 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold rounded-md text-xs inline-flex items-center justify-center transition-colors disabled:opacity-50"
               >
                 {loading === "rewrite" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {loading === "rewrite" ? "AI Rewriting..." : canRewrite ? "Upload & AI Rewrite" : "Upgrade to Unlock"}
-              </Button>
+                {loading === "rewrite" ? "AI Rewriting..." : canRewrite ? "Upload & Rewrite" : "Upgrade to Unlock"}
+              </button>
               {!canRewrite && (
-                <p className="text-[9px] text-[#FF6200]/90 text-center font-mono">Available on Pro (₹499) & Business (₹1,999)</p>
+                <p className="text-[9px] text-[#888888] text-center font-mono">Available on Pro &amp; Business plans</p>
               )}
             </div>
           </div>
 
           {/* Build from Scratch */}
-          <div className="p-6 rounded-2xl bg-[#141414] border border-[#2E2E2E] hover:border-[#FF6200]/50 hover:shadow-xl hover:shadow-[#FF6200]/10 transition-all duration-300 flex flex-col group">
-            <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center mb-5 group-hover:border-[#FF6200]/50 transition-colors">
-              <PenLine className="w-6 h-6 text-[#FF6200]" />
+          <div className="p-6 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#3a3a3a] transition-all flex flex-col group">
+            <div className="w-12 h-12 rounded-md bg-[#242424] border border-[#2a2a2a] flex items-center justify-center mb-5 text-[#faff69]">
+              <PenLine className="w-6 h-6" />
             </div>
-            <h2 className="font-bricolage font-bold text-xl mb-2 text-white">Build from Scratch</h2>
-            <p className="text-xs text-[#888898] leading-relaxed mb-6 flex-1">
-              Starting from zero? Use our guided editor with AI bullet suggestions and role presets to build a standout CV.
+            <h2 className="font-bold text-lg mb-2 text-white">Start from Scratch</h2>
+            <p className="text-xs text-[#888888] leading-relaxed mb-6 flex-1">
+              Starting fresh? Use the form editor with real-time preview to build a clean CV from the ground up.
             </p>
-            <Button
+            <button
               onClick={handleScratch}
               disabled={loading !== null}
-              variant="outline"
-              className="w-full gap-2 border-[#2E2E2E] text-white hover:bg-[#FF6200] hover:border-[#FF6200] hover:text-white transition-all rounded-xl mt-auto"
-              size="sm"
+              className="w-full h-10 gap-2 border border-[#2a2a2a] bg-[#121212] hover:bg-[#242424] text-white font-semibold rounded-md text-xs inline-flex items-center justify-center transition-colors mt-auto"
             >
               <PenLine className="w-4 h-4" />
-              Start Building
+              <span>Start Blank</span>
               <ArrowRight className="w-4 h-4 ml-auto" />
-            </Button>
+            </button>
           </div>
-        </div>
-
-        {/* Web Profile teaser */}
-        <div className="mt-12 rounded-2xl bg-[#141414] border border-[#2E2E2E] p-6 text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6200]/10 rounded-full blur-2xl pointer-events-none" />
-          <h3 className="font-bricolage font-bold text-xl mb-2 text-white">🌍 Your resume becomes an interactive web profile</h3>
-          <p className="text-xs text-[#888898] max-w-lg mx-auto leading-relaxed">
-            When you export your resume, Jinzai automatically generates a public web link recruiter page that can be shared anywhere.
-          </p>
-          <Badge className="mt-4 bg-[#FF6200]/10 text-[#FF6200] border border-[#FF6200]/30 font-mono text-[10px]">Job Seeker Hub Integrated</Badge>
         </div>
       </div>
     </div>
