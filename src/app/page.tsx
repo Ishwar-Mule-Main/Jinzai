@@ -42,6 +42,7 @@ export default function HomePage() {
   // Template Search & Filter state
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [showAllTemplates, setShowAllTemplates] = useState(false);
 
   const loadSample = useResumeStore((s) => s.loadSample);
   const clearAll = useResumeStore((s) => s.clearAll);
@@ -254,11 +255,46 @@ export default function HomePage() {
         </div>
 
         {/* Uniform Grid of Equal Shape Template Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-2">
-          {filteredTemplates.map(({ t, originalIndex }) => (
-            <TemplateCard key={t.id} id={t} index={originalIndex} user={user} onAuthRequired={() => setAuthMode("signup")} />
-          ))}
-        </div>
+        {(() => {
+          const displayedTemplates =
+            showAllTemplates || search !== "" || activeCategory !== "all"
+              ? filteredTemplates
+              : filteredTemplates.slice(0, 8);
+
+          return (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-2">
+                {displayedTemplates.map(({ t, originalIndex }) => (
+                  <TemplateCard key={t.id} id={t} index={originalIndex} user={user} onAuthRequired={() => setAuthMode("signup")} />
+                ))}
+              </div>
+
+              {/* See More Templates Section */}
+              {filteredTemplates.length > 8 && (
+                <div className="pt-8 text-center space-y-4">
+                  <p className="text-xs font-mono text-[#888888]">
+                    Showing {displayedTemplates.length} of {filteredTemplates.length} templates
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <Link
+                      href="/templates"
+                      className="h-11 px-8 bg-[#faff69] hover:bg-[#e6eb52] text-[#0a0a0a] font-semibold text-sm rounded-md transition-colors inline-flex items-center gap-2 shadow-lg shadow-[#faff69]/10"
+                    >
+                      <span>Explore All 78 Templates</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                    <button
+                      onClick={() => setShowAllTemplates(!showAllTemplates)}
+                      className="h-11 px-6 bg-[#1a1a1a] hover:bg-[#242424] text-white border border-[#2a2a2a] hover:border-[#3a3a3a] text-sm font-semibold rounded-md transition-colors inline-flex items-center gap-2"
+                    >
+                      {showAllTemplates ? "Show Less (8)" : `View More on Page (+${filteredTemplates.length - 8})`}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          );
+        })()}
       </section>
 
       {/* ── AI Features (ClickHouse Dark Feature Cards) ── */}
